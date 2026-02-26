@@ -456,6 +456,33 @@
     .rest-menu button:last-child { border-bottom: none; }
     .rest-menu button:hover { background: #0f2535; }
 
+    /* === INVENTORY & MAGIC ITEMS === */
+    .inventory-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 0; border-bottom: 1px solid #0a1e2a;
+      font-size: 0.8rem; color: #c8dde8;
+    }
+    .inventory-item:last-child { border-bottom: none; }
+    .inv-name { flex: 1; cursor: pointer; }
+    .inv-name:hover { color: #2ab8d0; }
+    .inv-qty { color: #4a7a8a; font-size: 0.75rem; min-width: 28px; text-align: right; }
+    .btn-remove-inv {
+      background: none; border: none; color: #2a4a5a;
+      cursor: pointer; font-size: 0.8rem; padding: 0 2px;
+    }
+    .btn-remove-inv:hover { color: #d05050; }
+    .btn-add-inv {
+      width: 100%; margin-top: 6px;
+      background: #071824; border: 1px dashed #1a3a4a;
+      color: #4a7a8a; border-radius: 4px; padding: 5px;
+      cursor: pointer; font-size: 0.75rem; letter-spacing: 0.05em;
+    }
+    .btn-add-inv:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .collapsible-title {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
+    }
+
     /* === FORMULA DROPDOWN === */
     .formula-dropdown-wrap { position: relative; }
     .formula-dropdown-btn {
@@ -822,6 +849,7 @@
       <div id="attacks-section-wrap"></div>
     </div>
     <div class="panel" id="panel-right">
+      <div id="inventory-wrap"></div>
     </div>
   </div>
   <div id="viewer-clear-zone">
@@ -1450,6 +1478,58 @@
       if (menu) menu.classList.add('hidden');
     }
   });
+  // === INVENTORY ===
+  function toggleInventory() {
+    update(s => s.inventoryOpen = !s.inventoryOpen);
+  }
+  function addInventoryItem() {
+    const name = prompt('Item name:');
+    if (!name) return;
+    const qty = prompt('Quantity (leave blank for 1):', '1');
+    update(s => s.inventory.push({
+      id: String(Date.now()),
+      name: name.trim(),
+      qty: qty ? qty.trim() : '1'
+    }));
+  }
+  function removeInventoryItem(id) {
+    update(s => s.inventory = s.inventory.filter(i => i.id !== id));
+  }
+  function editInventoryItem(id) {
+    const item = state.inventory.find(i => i.id === id);
+    if (!item) return;
+    const name = prompt('Item name:', item.name);
+    if (name === null) return;
+    const qty = prompt('Quantity:', item.qty);
+    update(s => {
+      const i = s.inventory.find(i => i.id === id);
+      if (!i) return;
+      i.name = name.trim();
+      i.qty = (qty ?? item.qty).trim();
+    });
+  }
+  function renderInventory() {
+    const { inventory, inventoryOpen } = state;
+    return `
+      <div>
+        <div class="panel-title collapsible-title" onclick="toggleInventory()">
+          Inventory <span>${inventoryOpen ? '▲' : '▼'}</span>
+        </div>
+        ${inventoryOpen ? `
+          ${inventory.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">Empty</div>' : ''}
+          ${inventory.map(i => `
+            <div class="inventory-item">
+              <span class="inv-name" onclick="editInventoryItem('${i.id}')" title="Click to edit">${i.name}</span>
+              <span class="inv-qty">×${i.qty}</span>
+              <button class="btn-remove-inv" onclick="removeInventoryItem('${i.id}')">✕</button>
+            </div>
+          `).join('')}
+          <button class="btn-add-inv" onclick="addInventoryItem()">+ Add Item</button>
+        ` : ''}
+      </div>
+    `;
+  }
+
   // === CUSTOM ATTACKS ===
   function addAttack() {
     const name = prompt('Attack name (e.g. Sharpshooter Shot):');
@@ -1715,6 +1795,7 @@
     renderActiveSpells();
     renderSlots();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
+    document.getElementById('inventory-wrap').innerHTML = renderInventory();
     applyColWidths();
   }
 
