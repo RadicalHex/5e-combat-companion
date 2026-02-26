@@ -1074,7 +1074,7 @@
     immunities: [],
     resistances: [],
     immResOpen: false,
-    layout: { leftW: 260, rightW: 300 },
+    layout: { leftW: 260, rightW: 360 },
     stats: {
       ac: 15,
       str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
@@ -1146,6 +1146,7 @@
   if (state.attunedOpen === undefined) state.attunedOpen = true;
   if (state.characterName === undefined) state.characterName = 'Character';
   if (state.statusOpen === undefined) state.statusOpen = true;
+  if (state.layout.rightW < 340) state.layout.rightW = 360;
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
