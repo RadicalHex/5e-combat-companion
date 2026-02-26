@@ -1330,8 +1330,8 @@
             ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
           </select>
         </div>
-        <div class="stat-row"><span class="stat-label">Spell Save DC ${state.spellDCOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override (blank to reset)">${getSpellDC()}</span></div>
-        <div class="stat-row"><span class="stat-label">Spell Attack ${state.spellAtkOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override (blank to reset)">+${getSpellAtk()}</span></div>
+        <div class="stat-row"><span class="stat-label">Spell Save DC <span style="font-size:0.6rem;color:#2a6a7a;letter-spacing:0">${state.spellDCOverride !== null ? '✎' : '(auto)'}</span></span><span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override (blank to reset)">${getSpellDC()}</span></div>
+        <div class="stat-row"><span class="stat-label">Spell Attack <span style="font-size:0.6rem;color:#2a6a7a;letter-spacing:0">${state.spellAtkOverride !== null ? '✎' : '(auto)'}</span></span><span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override (blank to reset)">+${getSpellAtk()}</span></div>
       `}
       ${renderSenses()}
 
