@@ -86,7 +86,6 @@
       transition: width 0.3s ease;
     }
     .hp-bar-fill.base  { background: linear-gradient(90deg, #1a6a7a, #2ab8d0); }
-    .hp-bar-fill.form  { background: linear-gradient(90deg, #7a4a00, #d08020); }
     .hp-controls {
       display: flex;
       align-items: center;
@@ -784,7 +783,6 @@
   // === STATE ===
   const DEFAULTS = {
     hp: { current: 560, max: 580, temp: 168 },
-    form: null,
     slots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
     stats: {
       ac: 24,
@@ -837,10 +835,9 @@
   // === HP PANEL ===
   function renderHP() {
     const el = document.getElementById('panel-character');
-    const { hp, form } = state;
+    const { hp } = state;
     const st = state.stats;
     const basePct = Math.max(0, Math.min(100, (hp.current / hp.max) * 100));
-    const formPct = form ? Math.max(0, Math.min(100, (form.current / form.max) * 100)) : 0;
 
     el.innerHTML = `
       <div class="panel-title">Character</div>
@@ -861,19 +858,6 @@
         </div>
       </div>
 
-      <div class="hp-section">
-        <div class="hp-label">Monster Form ${form ? '— ' + form.name : ''}</div>
-        <div class="hp-bar-track"><div class="hp-bar-fill form" style="width:${formPct}%"></div></div>
-        <div class="hp-controls">
-          <span class="hp-display">${form ? form.current + ' / ' + form.max : '— / —'}</span>
-          ${form ? `
-            <button class="btn-sm" onclick="adjustForm(-1)">−</button>
-            <button class="btn-sm" onclick="adjustForm(1)">+</button>
-            <button class="btn-sm" onclick="promptForm()">Set</button>
-            <button class="btn-sm" onclick="clearForm()">Clear</button>
-          ` : `<button class="btn-sm" onclick="setForm()">Set Form</button>`}
-        </div>
-      </div>
 
       <hr class="divider">
       <div class="stat-row"><span class="stat-label">AC</span><span class="stat-value editable-stat" onclick="editStat('ac')" title="Click to edit">${st.ac}</span></div>
@@ -928,23 +912,6 @@
   function promptHP() {
     const val = prompt('Set current HP:', state.hp.current);
     if (val !== null && !isNaN(+val)) update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, +val)));
-  }
-  function setForm() {
-    const name = prompt('Form name (e.g. Ancient Green Dragon):');
-    if (!name) return;
-    const max = prompt('Max HP for this form:');
-    if (!max || isNaN(+max)) return;
-    update(s => s.form = { name, current: +max, max: +max });
-  }
-  function adjustForm(delta) {
-    update(s => { if (s.form) s.form.current = Math.max(0, Math.min(s.form.max, s.form.current + delta)); });
-  }
-  function promptForm() {
-    const val = prompt('Set monster form HP:', state.form.current);
-    if (val !== null && !isNaN(+val)) update(s => { if (s.form) s.form.current = Math.max(0, Math.min(s.form.max, +val)); });
-  }
-  function clearForm() {
-    if (confirm('Clear monster form?')) update(s => s.form = null);
   }
 
   // === EDITABLE STATS ===
