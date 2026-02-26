@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astraeus — Combat Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { zoom: 0.9; }
+    body { overflow-y: auto; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050d14;
+      color: #c8dde8;
+    }
+
+    /* === LAYOUT === */
+    #app {
+      display: grid;
+      grid-template-rows: auto auto;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(180deg, #071824 0%, #050d14 100%);
+      border-bottom: 1px solid #1a3a4a;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      color: #a8d8e8;
+      letter-spacing: 0.1em;
+    }
+    .columns {
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      gap: 1px;
+      background: #0a1a24;
+      align-items: start;
+      position: relative;
+    }
+    .panel {
+      background: #060f18;
+      padding: 16px;
+    }
+    .panel + .panel {
+      border-left: 1px solid #0f2535;
+    }
+    .panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #4a7a8a;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #0f2535;
+    }
+
+    /* === HP BARS === */
+    .hp-section { margin-bottom: 20px; }
+    .hp-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #4a7a8a;
+      margin-bottom: 4px;
+    }
+    .hp-bar-track {
+      height: 10px;
+      background: #0a1e2a;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 6px;
+      border: 1px solid #0f2535;
+    }
+    .hp-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+    .hp-bar-fill.base  { background: linear-gradient(90deg, #1a6a7a, #2ab8d0); }
+    .hp-bar-fill.form  { background: linear-gradient(90deg, #7a4a00, #d08020); }
+    .hp-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .hp-display { font-size: 1.1rem; color: #e8f4f8; min-width: 80px; }
+    .btn-sm {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #8ab8c8;
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-sm:hover { background: #0f2d40; border-color: #2ab8d0; color: #c8dde8; }
+    .temp-hp { font-size: 0.75rem; color: #7ab0c0; margin-top: 2px; }
+
+    .divider { border: none; border-top: 1px solid #0f2535; margin: 16px 0; }
+
+    /* === SAVES === */
+    .saves-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+    }
+    .save-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      padding: 2px 0;
+    }
+    .save-name { color: #4a7a8a; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; }
+    .save-val  { color: #a8d8e8; font-weight: 500; }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      padding: 3px 0;
+      border-bottom: 1px solid #0a1e2a;
+    }
+    .stat-label { color: #4a7a8a; }
+    .stat-value { color: #d4a843; font-weight: 600; }
+
+    /* === PRIMA MATERIA === */
+    .pm-meter-wrap {
+      position: relative;
+      margin: 12px 0;
+    }
+    .pm-meter-track {
+      height: 28px;
+      background: #0a1e2a;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #0f2535;
+    }
+    .pm-meter-fill {
+      height: 100%;
+      border-radius: 14px;
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+    .pm-meter-fill.decay-0  { background: linear-gradient(90deg, #0a4a2a, #20c870); }
+    .pm-meter-fill.decay-5  { background: linear-gradient(90deg, #4a4a00, #c8c020); }
+    .pm-meter-fill.decay-10 { background: linear-gradient(90deg, #4a2200, #d06010); }
+    .pm-meter-fill.decay-12 { background: linear-gradient(90deg, #4a0a0a, #d02020); }
+    .pm-meter-fill.supercritical {
+      background: linear-gradient(90deg, #8a6000, #ffd700);
+      box-shadow: 0 0 12px #ffd70080;
+      animation: pulse-gold 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-gold {
+      from { box-shadow: 0 0 8px #ffd70060; }
+      to   { box-shadow: 0 0 20px #ffd700cc; }
+    }
+    .pm-label-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 0 6px #000;
+      pointer-events: none;
+    }
+    .pm-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .pm-controls input {
+      width: 64px;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #c8dde8;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+    }
+    .decay-indicator {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .decay-0  { background: #0a2a1a; color: #20c870; }
+    .decay-5  { background: #2a2a00; color: #c8c020; }
+    .decay-10 { background: #2a1200; color: #d06010; }
+    .decay-12 { background: #2a0a0a; color: #d02020; }
+    .supercritical-warning {
+      background: #2a1a00;
+      color: #ffd700;
+      border: 1px solid #ffd70060;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      text-align: center;
+      margin-top: 8px;
+      animation: pulse-gold 0.8s ease-in-out infinite alternate;
+    }
+
+    /* === SPELL SLOTS === */
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .slot-group { }
+    .slot-level-label {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .slot-pips { display: flex; gap: 4px; flex-wrap: wrap; }
+    .pip {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid #1a3a4a;
+    }
+    .pip.full  { background: #2ab8d0; box-shadow: 0 0 5px #2ab8d060; }
+    .pip.empty { background: #0a1e2a; }
+    .pip:hover { transform: scale(1.2); }
+    .rest-buttons { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-rest {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #1a3a4a;
+      background: #0a1e2a;
+      color: #8ab8c8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.15s;
+    }
+    .btn-rest:hover { background: #0f2d40; border-color: #2ab8d0; color: #c8dde8; }
+    .btn-rest.long { border-color: #d4a84340; color: #d4a843; }
+    .btn-rest.long:hover { background: #1a1000; border-color: #d4a843; }
+
+    /* === ENEMY PANEL === */
+    .btn-add-enemy {
+      width: 100%;
+      padding: 8px;
+      background: #050d14;
+      border: 1px dashed #1a3a4a;
+      border-radius: 6px;
+      color: #4a7a8a;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: all 0.15s;
+      letter-spacing: 0.05em;
+    }
+    .btn-add-enemy:hover { border-color: #2ab8d0; color: #2ab8d0; background: #071824; }
+
+    .enemy-card {
+      background: #071824;
+      border: 1px solid #0f2535;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .enemy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .enemy-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      color: #c8dde8;
+    }
+    .btn-remove-enemy {
+      background: none;
+      border: none;
+      color: #3a5a6a;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 2px;
+      transition: color 0.15s;
+    }
+    .btn-remove-enemy:hover { color: #d04040; }
+    .enemy-hp-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+    }
+    .enemy-hp-bar-track {
+      flex: 1;
+      height: 6px;
+      background: #0a1e2a;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .enemy-hp-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #7a1a1a, #d04040);
+      transition: width 0.3s ease;
+    }
+    .enemy-hp-text { color: #8ab8c8; min-width: 60px; text-align: right; font-size: 0.75rem; }
+
+    .dissolution-label {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .dissolution-pips { display: flex; gap: 3px; margin-bottom: 6px; }
+    .d-pip {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid #1a3a4a;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .d-pip.active {
+      background: radial-gradient(circle, #40d070, #208040);
+      box-shadow: 0 0 6px #40d07080;
+      border-color: #40d070;
+    }
+    .d-pip.active.high {
+      background: radial-gradient(circle, #d0a020, #806010);
+      box-shadow: 0 0 6px #d0a02080;
+      border-color: #d0a020;
+    }
+    .d-pip.active.danger {
+      background: radial-gradient(circle, #d04040, #801020);
+      box-shadow: 0 0 8px #d0404080;
+      border-color: #d04040;
+    }
+    .d-pip.empty { background: #0a1e2a; }
+    .d-pip:hover { transform: scale(1.2); }
+    .dissolution-count { font-size: 0.72rem; color: #40d070; font-weight: 600; }
+
+    .pulse-btn {
+      width: 100%;
+      padding: 8px;
+      background: #071824;
+      border: 1px solid #204a2a;
+      border-radius: 6px;
+      color: #40d070;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.15s;
+      letter-spacing: 0.05em;
+    }
+    .pulse-btn:hover { background: #0a2a1a; border-color: #40d070; }
+
+    /* === POLISH === */
+    header {
+      box-shadow: 0 2px 20px #2ab8d010;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #2ab8d0, #d4a843, #2ab8d0, transparent);
+      z-index: 100;
+    }
+    .panel::-webkit-scrollbar { width: 4px; }
+    .panel::-webkit-scrollbar-track { background: transparent; }
+    .panel::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+
+    /* Danger flash on enemy card at 0 HP */
+    .enemy-card.dead {
+      border-color: #4a1010;
+      opacity: 0.6;
+    }
+
+    body.supercritical-flash {
+      animation: sc-flash 1s ease-in-out infinite alternate;
+    }
+    @keyframes sc-flash {
+      from { background: #050d14; }
+      to   { background: #0f0800; }
+    }
+
+    /* === STAT BLOCK PANEL (floating) === */
+    #stat-panel {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 680px;
+      height: 860px;
+      display: flex;
+      flex-direction: column;
+      background: #040b12;
+      border: 1px solid #1a3a4a;
+      border-radius: 6px 6px 3px 3px;
+      overflow: hidden;
+      resize: both;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      z-index: 100;
+      min-width: 280px;
+      min-height: 160px;
+    }
+    #stat-panel.minimized {
+      height: 38px !important;
+      resize: horizontal;
+    }
+    #stat-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      height: 38px;
+      background: #071824;
+      border-bottom: 1px solid #1a3a4a;
+      cursor: grab;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    #stat-titlebar:active { cursor: grabbing; }
+    .stat-panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    #stat-minimize-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+      line-height: 1;
+      padding-bottom: 3px;
+    }
+    #stat-minimize-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    #stat-pin-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+      line-height: 1;
+    }
+    #stat-pin-btn:hover,
+    #stat-pin-btn.active { border-color: #2ab8d0; color: #2ab8d0; }
+    #stat-pin-btn.active { background: #071e2a; }
+    #stat-zoom-controls {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 14px;
+      background: #050d14;
+      border-bottom: 1px solid #0a1e2a;
+      flex-shrink: 0;
+    }
+    #stat-zoom-controls.visible { display: flex; }
+    .zoom-label {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      min-width: 36px;
+      text-align: center;
+    }
+    #stat-preview {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 12px;
+      background: #040b12;
+      min-height: 0;
+    }
+    #stat-preview::-webkit-scrollbar { width: 4px; }
+    #stat-preview::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+    #stat-preview img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      display: block;
+    }
+    #stat-preview embed {
+      width: min(700px, 92%);
+      height: 1100px;
+      border: none;
+      display: block;
+    }
+    .stat-preview-hint {
+      font-size: 0.65rem;
+      color: #1a3040;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      text-align: center;
+      transition: color 0.2s;
+    }
+    .stat-preview-hint.drag-over { color: #2ab8d0; }
+    #stat-thumbs {
+      border-top: 1px solid #0a1e2a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      overflow-x: auto;
+      background: #060f18;
+      flex-shrink: 0;
+      height: 110px;
+    }
+    #stat-thumbs::-webkit-scrollbar { height: 3px; }
+    #stat-thumbs::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+    .drop-hint-strip {
+      font-size: 0.65rem;
+      color: #1e3a4a;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      padding: 6px 12px;
+      border: 1px dashed #0f2535;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .drop-hint-strip.drag-over { border-color: #2ab8d0; color: #2ab8d0; background: #071824; }
+    .stat-card {
+      flex-shrink: 0;
+      width: 56px;
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.15s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card-thumb {
+      width: 56px;
+      height: 68px;
+      border-radius: 5px;
+      border: 1px solid #1a3a4a;
+      overflow: hidden;
+      background: #071824;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 3px;
+      transition: border-color 0.15s;
+    }
+    .stat-card.active .stat-card-thumb { border-color: #2ab8d0; box-shadow: 0 0 8px #2ab8d040; }
+    .stat-card:hover .stat-card-thumb { border-color: #2ab8d060; }
+    .stat-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .pdf-icon-thumb { font-size: 1.4rem; opacity: 0.5; }
+    .stat-card-remove {
+      position: absolute;
+      top: 2px; right: 2px;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      border-radius: 50%;
+      width: 15px; height: 15px;
+      font-size: 0.5rem;
+      line-height: 14px;
+      text-align: center;
+      cursor: pointer;
+      opacity: 0.45;
+      transition: opacity 0.15s;
+    }
+    .stat-card:hover .stat-card-remove { opacity: 1; }
+    .stat-card-remove:hover { color: #d04040; border-color: #d04040; }
+    .stat-card-name {
+      font-size: 0.52rem;
+      color: #4a7a8a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 56px;
+    }
+
+    /* === REST DROPDOWN === */
+    .rest-dropdown-wrap {
+      position: relative;
+    }
+    .rest-menu-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #5a8a9a;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .rest-menu-btn:hover { border-color: #2ab8d0; color: #a8d8e8; }
+    .rest-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 4px;
+      min-width: 130px;
+      z-index: 200;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .rest-menu.hidden { display: none; }
+    .rest-menu button {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      color: #a8d8e8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      padding: 8px 14px;
+      text-align: left;
+      cursor: pointer;
+      border-bottom: 1px solid #0f2535;
+      transition: background 0.1s;
+    }
+    .rest-menu button:last-child { border-bottom: none; }
+    .rest-menu button:hover { background: #0f2535; }
+
+    /* === ACTIVE SPELLS === */
+    .active-spell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      background: #0a1a24;
+      margin-bottom: 4px;
+      border: 1px solid #0f2535;
+    }
+    .spell-name { flex: 1; color: #c8dde8; }
+    .conc-badge {
+      font-size: 0.58rem;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: #2a1a3a;
+      color: #b088d8;
+      border: 1px solid #6040a0;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .spell-remove {
+      background: none;
+      border: none;
+      color: #3a5a6a;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0 2px;
+      transition: color 0.15s;
+    }
+    .spell-remove:hover { color: #d04040; }
+    .no-spells {
+      font-size: 0.65rem;
+      color: #1e3a4a;
+      font-style: italic;
+      text-align: center;
+      padding: 6px 0 2px;
+    }
+
+    /* === EDITABLE STATS === */
+    .editable-stat {
+      cursor: pointer;
+      border-bottom: 1px dashed #3a5a6a;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .editable-stat:hover { color: #7ad4e8; border-bottom-color: #7ad4e8; }
+
+    /* === IMMUNITIES & RESISTANCES === */
+    .imm-summary {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 3px 6px;
+      margin-bottom: 6px;
+    }
+    .imm-row-label {
+      font-size: 0.62rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding-top: 2px;
+    }
+    .imm-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+    .imm-tag {
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: 'Inter', sans-serif;
+    }
+    .imm-tag.imm { background: #3a1a1a; color: #e87070; border: 1px solid #7a3030; }
+    .imm-tag.res { background: #1a2a3a; color: #70aae8; border: 1px solid #305070; }
+    .imm-none { font-size: 0.62rem; color: #3a5a6a; font-style: italic; }
+    .imm-picker {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px 8px;
+      background: #0e1e28;
+      border: 1px solid #1e3a4a;
+      border-radius: 4px;
+      padding: 8px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+    .imm-col-head {
+      font-size: 0.6rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #1e3a4a;
+      margin-bottom: 2px;
+    }
+    .imm-check {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.65rem;
+      color: #8ab0bc;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 3px;
+      transition: background 0.1s;
+    }
+    .imm-check:hover { background: #1a3040; }
+    .imm-check input { accent-color: #4a9ab0; cursor: pointer; }
+    .imm-check.active-imm { color: #e87070; }
+    .imm-check.active-res { color: #70aae8; }
+
+    /* === CONDITIONS PANEL === */
+    .cond-section { margin-top: 0; }
+    .cond-add-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .cond-add-row select {
+      flex: 1;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #c8dde8;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      appearance: none;
+      cursor: pointer;
+    }
+    .cond-add-row select:focus { outline: none; border-color: #2ab8d0; }
+    .cond-dur-input {
+      width: 44px;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #c8dde8;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+    }
+    .cond-dur-input:focus { outline: none; border-color: #2ab8d0; }
+    .btn-cond-add {
+      background: #071824;
+      border: 1px solid #1a4a5a;
+      color: #2ab8d0;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-cond-add:hover { background: #0a2535; border-color: #2ab8d0; }
+    .cond-custom-row {
+      display: none;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .cond-custom-row.visible { display: flex; }
+    .cond-list { margin-bottom: 6px; }
+    .cond-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      background: #0a1a24;
+      border: 1px solid #0f2535;
+      margin-bottom: 3px;
+      font-size: 0.72rem;
+    }
+    .cond-name {
+      flex: 1;
+      color: #c8dde8;
+      font-weight: 500;
+    }
+    .cond-dur {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      min-width: 28px;
+      text-align: right;
+    }
+    .cond-dur.permanent { color: #2ab8d0; }
+    .cond-remove {
+      background: none;
+      border: none;
+      color: #3a5a6a;
+      cursor: pointer;
+      font-size: 0.72rem;
+      padding: 0 2px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .cond-remove:hover { color: #d04040; }
+    .no-conds {
+      font-size: 0.65rem;
+      color: #1e3a4a;
+      font-style: italic;
+      text-align: center;
+      padding: 4px 0 2px;
+    }
+    .btn-next-turn {
+      width: 100%;
+      padding: 6px;
+      background: #071824;
+      border: 1px solid #1a4a5a;
+      border-radius: 4px;
+      color: #4a7a8a;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: all 0.15s;
+      margin-top: 2px;
+    }
+    .btn-next-turn:hover { background: #0a2535; border-color: #2ab8d0; color: #2ab8d0; }
+
+    /* === COLUMN DRAG HANDLES === */
+    .col-handle {
+      position: absolute;
+      top: 0;
+      width: 8px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 10;
+      background: transparent;
+      transform: translateX(-50%);
+    }
+    .col-handle::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: #0f2535;
+      transition: background 0.15s;
+    }
+    .col-handle:hover::after,
+    .col-handle.dragging::after { background: #2ab8d0; }
+
+    /* === VIEWER CLEAR ZONE === */
+    #viewer-clear-zone {
+      height: 900px;
+      background: #050d14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0 32px;
+      pointer-events: none;
+    }
+    #viewer-zone-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #0d2030;
+      user-select: none;
+    }
+    #back-to-top-btn {
+      pointer-events: all;
+      background: none;
+      border: 1px solid #0f2535;
+      color: #1e4a5a;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      padding: 5px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #back-to-top-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header id="app-header"></header>
+  <div class="columns">
+    <div class="panel" id="panel-character">
+      <div class="panel-title">Character</div>
+    </div>
+    <div class="panel" id="panel-resources">
+      <div id="pm-section"></div>
+      <hr class="divider">
+      <div id="active-spells-section"></div>
+      <hr class="divider">
+      <div id="slots-section"></div>
+    </div>
+    <div class="panel" id="panel-enemies">
+      <div class="panel-title">Enemies</div>
+    </div>
+  </div>
+  <div id="viewer-clear-zone">
+    <span id="viewer-zone-label">Viewer Space</span>
+    <button id="back-to-top-btn" onclick="scrollToTop()">↑ Back to panels</button>
+  </div>
+  <div id="stat-panel">
+    <div id="stat-titlebar">
+      <span class="stat-panel-title">Stat Block Viewer</span>
+      <button id="stat-scrolldown-btn" onclick="scrollToViewerZone()" title="Scroll to viewer space"
+        style="background:none;border:1px solid #1a3a4a;color:#4a7a8a;width:20px;height:20px;
+               font-size:0.8rem;cursor:pointer;border-radius:3px;display:flex;align-items:center;
+               justify-content:center;transition:border-color 0.15s,color 0.15s;line-height:1;">
+        ⤓
+      </button>
+      <button id="stat-pin-btn" onclick="toggleStatPin()" title="Pin to page">📌</button>
+      <button id="stat-minimize-btn" onclick="toggleStatMinimize()" title="Minimize">—</button>
+    </div>
+    <div id="stat-zoom-controls">
+      <button class="btn-sm" onclick="adjustZoom(-0.25)">−</button>
+      <span class="zoom-label" id="zoom-display">100%</span>
+      <button class="btn-sm" onclick="adjustZoom(0.25)">+</button>
+      <button class="btn-sm" onclick="resetZoom()">Reset</button>
+    </div>
+    <div id="stat-preview">
+      <div class="stat-preview-hint">Drop a stat block image or PDF anywhere</div>
+    </div>
+    <div id="stat-thumbs">
+      <div class="drop-hint-strip">Drop files here</div>
+    </div>
+  </div>
+</div>
+<script>
+  // === STATE ===
+  const DEFAULTS = {
+    hp: { current: 560, max: 580, temp: 168 },
+    form: null,
+    pm: 50,
+    slots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
+    enemies: [],
+    stats: {
+      ac: 24,
+      str: 23, dex: 15, con: 30, int: 30, wis: 30, cha: 18,
+      savStr: 7, savDex: 3, savCon: 20, savInt: 20, savWis: 20, savCha: 5,
+      dc: 27, spellAtk: 19, passPerc: 48,
+      levelLabel: '20 Druid', initiative: 12, speed: 40, codexTier: 'IV', truesight: 120
+    },
+    immunities: [],
+    resistances: [],
+    immResOpen: false,
+    activeSpells: [],
+    conditions: [],
+    layout: { leftW: 260, rightW: 300 }
+  };
+
+  const STORAGE_KEY = 'astraeus_v1';
+
+  function loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULTS));
+    } catch { return JSON.parse(JSON.stringify(DEFAULTS)); }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadState();
+  // Migrate older saved states that lack newer fields
+  if (!state.stats) state.stats = JSON.parse(JSON.stringify(DEFAULTS.stats));
+  if (!state.immunities) state.immunities = [];
+  if (!state.resistances) state.resistances = [];
+  if (state.immResOpen === undefined) state.immResOpen = false;
+  if (state.stats.levelLabel === undefined) state.stats.levelLabel = '20 Druid';
+  if (state.stats.initiative === undefined) state.stats.initiative = 12;
+  if (state.stats.speed === undefined) state.stats.speed = 40;
+  if (state.stats.codexTier === undefined) state.stats.codexTier = 'IV';
+  if (state.stats.truesight === undefined) state.stats.truesight = 120;
+  if (!state.activeSpells) state.activeSpells = [];
+  if (!state.conditions) state.conditions = [];
+  if (!state.layout) state.layout = { leftW: 260, rightW: 300 };
+  function update(mutatorFn) {
+    mutatorFn(state);
+    saveState();
+    render();
+  }
+
+  // === HP PANEL ===
+  function renderHP() {
+    const el = document.getElementById('panel-character');
+    const { hp, form } = state;
+    const st = state.stats;
+    const basePct = Math.max(0, Math.min(100, (hp.current / hp.max) * 100));
+    const formPct = form ? Math.max(0, Math.min(100, (form.current / form.max) * 100)) : 0;
+
+    el.innerHTML = `
+      <div class="panel-title">Character</div>
+
+      <div class="hp-section">
+        <div class="hp-label">Base Form</div>
+        <div class="hp-bar-track"><div class="hp-bar-fill base" style="width:${basePct}%"></div></div>
+        <div class="hp-controls">
+          <span class="hp-display">${hp.current} / ${hp.max}</span>
+          <button class="btn-sm" onclick="adjustHP(-1)">−</button>
+          <button class="btn-sm" onclick="adjustHP(1)">+</button>
+          <button class="btn-sm" onclick="promptHP()">Set</button>
+        </div>
+        <div class="temp-hp">Temp HP: <strong>${hp.temp}</strong>
+          <button class="btn-sm" onclick="adjustTemp(-1)">−</button>
+          <button class="btn-sm" onclick="adjustTemp(1)">+</button>
+          <button class="btn-sm" onclick="promptTemp()">Set</button>
+        </div>
+      </div>
+
+      <div class="hp-section">
+        <div class="hp-label">Monster Form ${form ? '— ' + form.name : ''}</div>
+        <div class="hp-bar-track"><div class="hp-bar-fill form" style="width:${formPct}%"></div></div>
+        <div class="hp-controls">
+          <span class="hp-display">${form ? form.current + ' / ' + form.max : '— / —'}</span>
+          ${form ? `
+            <button class="btn-sm" onclick="adjustForm(-1)">−</button>
+            <button class="btn-sm" onclick="adjustForm(1)">+</button>
+            <button class="btn-sm" onclick="promptForm()">Set</button>
+            <button class="btn-sm" onclick="clearForm()">Clear</button>
+          ` : `<button class="btn-sm" onclick="setForm()">Set Form</button>`}
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="stat-row"><span class="stat-label">AC</span><span class="stat-value editable-stat" onclick="editStat('ac')" title="Click to edit">${st.ac}</span></div>
+      <div class="stat-row"><span class="stat-label">Initiative</span><span class="stat-value editable-stat" onclick="editStat('initiative')" title="Click to edit">+${st.initiative}</span></div>
+      <div class="stat-row"><span class="stat-label">Speed</span><span class="stat-value editable-stat" onclick="editStat('speed')" title="Click to edit">${st.speed} ft.</span></div>
+      <div class="stat-row"><span class="stat-label">Codex Tier</span><span class="stat-value editable-stat" onclick="editStat('codexTier')" title="Click to edit">${st.codexTier}</span></div>
+      <div class="stat-row"><span class="stat-label">Level</span><span class="stat-value editable-stat" onclick="editStat('levelLabel')" title="Click to edit">${st.levelLabel}</span></div>
+
+      <hr class="divider">
+      <div class="panel-title">Ability Scores</div>
+      <div class="saves-grid">
+        ${[['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].map(([name, key]) => {
+          const score = st[key];
+          const mod = Math.floor((score - 10) / 2);
+          const sign = mod >= 0 ? '+' : '';
+          return `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">${score} <span style="color:#5a8a9a;font-weight:400">(${sign}${mod})</span></span></div>`;
+        }).join('')}
+      </div>
+
+      <hr class="divider">
+      <div class="panel-title">Saves</div>
+      <div class="saves-grid">
+        ${[['STR','savStr'],['DEX','savDex'],['CON','savCon'],['INT','savInt'],['WIS','savWis'],['CHA','savCha']].map(([name, key]) =>
+          `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">+${st[key]}</span></div>`
+        ).join('')}
+      </div>
+
+      <hr class="divider">
+      <div class="stat-row"><span class="stat-label">Spell Save DC</span><span class="stat-value editable-stat" onclick="editStat('dc')" title="Click to edit">${st.dc}</span></div>
+      <div class="stat-row"><span class="stat-label">Spell Attack</span><span class="stat-value editable-stat" onclick="editStat('spellAtk')" title="Click to edit">+${st.spellAtk}</span></div>
+      <div class="stat-row"><span class="stat-label">Passive Perception</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
+      <div class="stat-row"><span class="stat-label">Truesight</span><span class="stat-value editable-stat" onclick="editStat('truesight')" title="Click to edit">${st.truesight} ft.</span></div>
+
+      <hr class="divider">
+      ${renderImmRes()}
+
+      <hr class="divider">
+      ${renderConditions()}
+    `;
+  }
+
+  function adjustHP(delta) {
+    update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, s.hp.current + delta)));
+  }
+  function adjustTemp(delta) {
+    update(s => s.hp.temp = Math.max(0, s.hp.temp + delta));
+  }
+  function promptTemp() {
+    const val = prompt('Set Temp HP:', state.hp.temp);
+    if (val !== null && !isNaN(+val)) update(s => s.hp.temp = Math.max(0, +val));
+  }
+  function promptHP() {
+    const val = prompt('Set current HP:', state.hp.current);
+    if (val !== null && !isNaN(+val)) update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, +val)));
+  }
+  function setForm() {
+    const name = prompt('Form name (e.g. Ancient Green Dragon):');
+    if (!name) return;
+    const max = prompt('Max HP for this form:');
+    if (!max || isNaN(+max)) return;
+    update(s => s.form = { name, current: +max, max: +max });
+  }
+  function adjustForm(delta) {
+    update(s => { if (s.form) s.form.current = Math.max(0, Math.min(s.form.max, s.form.current + delta)); });
+  }
+  function promptForm() {
+    const val = prompt('Set monster form HP:', state.form.current);
+    if (val !== null && !isNaN(+val)) update(s => { if (s.form) s.form.current = Math.max(0, Math.min(s.form.max, +val)); });
+  }
+  function clearForm() {
+    if (confirm('Clear monster form?')) update(s => s.form = null);
+  }
+
+  // === EDITABLE STATS ===
+  const STAT_LABELS = {
+    ac: 'AC', str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA',
+    savStr: 'STR Save', savDex: 'DEX Save', savCon: 'CON Save',
+    savInt: 'INT Save', savWis: 'WIS Save', savCha: 'CHA Save',
+    dc: 'Spell Save DC', spellAtk: 'Spell Attack', passPerc: 'Passive Perception',
+    initiative: 'Initiative modifier', speed: 'Speed (ft)',
+    codexTier: 'Codex Tier', truesight: 'Truesight (ft)', levelLabel: 'Level & Class'
+  };
+  const STRING_STAT_KEYS = new Set(['codexTier', 'levelLabel']);
+  function editStat(key) {
+    const label = STAT_LABELS[key] || key;
+    const current = state.stats[key];
+    const val = prompt(`Set ${label}:`, current);
+    if (val === null || val.trim() === '') return;
+    if (STRING_STAT_KEYS.has(key)) {
+      update(s => s.stats[key] = val.trim());
+    } else if (!isNaN(+val)) {
+      update(s => s.stats[key] = +val);
+    }
+  }
+
+  // === IMMUNITIES & RESISTANCES ===
+  const DMG_TYPES = ['Acid','Bludgeoning','Cold','Fire','Force','Lightning','Necrotic','Piercing','Poison','Psychic','Radiant','Slashing','Thunder'];
+
+  function renderImmRes() {
+    const { immunities: imm, resistances: res, immResOpen: open } = state;
+    const immTags = imm.length ? imm.map(t => `<span class="imm-tag imm">${t}</span>`).join('') : '<span class="imm-none">None</span>';
+    const resTags = res.length ? res.map(t => `<span class="imm-tag res">${t}</span>`).join('') : '<span class="imm-none">None</span>';
+    const chevron = open ? '▲' : '▼';
+    return `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleImmResOpen()">
+        <span>Immunities &amp; Resistances</span><span style="font-size:0.7rem;opacity:0.6">${chevron}</span>
+      </div>
+      <div class="imm-summary">
+        <div class="imm-row-label">Immune:</div><div class="imm-tags">${immTags}</div>
+        <div class="imm-row-label">Resist:</div><div class="imm-tags">${resTags}</div>
+      </div>
+      ${open ? `
+      <div class="imm-picker">
+        <div class="imm-col-head">Immunity</div><div class="imm-col-head">Resistance</div>
+        ${DMG_TYPES.map(t => `
+          <label class="imm-check ${imm.includes(t)?'active-imm':''}">
+            <input type="checkbox" ${imm.includes(t)?'checked':''} onchange="toggleImmRes('${t}','imm',this.checked)"> ${t}
+          </label>
+          <label class="imm-check ${res.includes(t)?'active-res':''}">
+            <input type="checkbox" ${res.includes(t)?'checked':''} onchange="toggleImmRes('${t}','res',this.checked)"> ${t}
+          </label>
+        `).join('')}
+      </div>` : ''}
+    `;
+  }
+
+  function toggleImmResOpen() {
+    update(s => s.immResOpen = !s.immResOpen);
+  }
+  function toggleImmRes(type, category, checked) {
+    update(s => {
+      const arr = category === 'imm' ? s.immunities : s.resistances;
+      const idx = arr.indexOf(type);
+      if (checked && idx === -1) arr.push(type);
+      if (!checked && idx !== -1) arr.splice(idx, 1);
+    });
+  }
+
+  // === CONDITIONS ===
+  const CONDITION_NAMES = [
+    'Blinded','Charmed','Deafened','Exhaustion 1','Exhaustion 2','Exhaustion 3',
+    'Exhaustion 4','Exhaustion 5','Exhaustion 6',
+    'Frightened','Grappled','Incapacitated','Invisible',
+    'Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious',
+    'Custom...'
+  ];
+
+  function renderConditions() {
+    const conds = state.conditions;
+    const condListHTML = conds.length === 0
+      ? '<div class="no-conds">No active conditions</div>'
+      : conds.map((c, i) => {
+          const durLabel = c.duration === null
+            ? '<span class="cond-dur permanent">∞</span>'
+            : `<span class="cond-dur">${c.duration}r</span>`;
+          return `
+            <div class="cond-item">
+              <span class="cond-name">${c.name}</span>
+              ${durLabel}
+              <button class="cond-remove" onclick="removeCondition(${i})" title="Remove">✕</button>
+            </div>`;
+        }).join('');
+
+    const optionsHTML = CONDITION_NAMES.map(n =>
+      `<option value="${n}">${n}</option>`
+    ).join('');
+
+    return `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Conditions</span>
+        ${conds.length > 0 ? `<button class="btn-sm" onclick="tickConditions()" title="Advance one round">Next Turn</button>` : ''}
+      </div>
+      <div class="cond-section">
+        <div class="cond-add-row">
+          <select id="cond-select" onchange="onCondSelectChange(this)">
+            <option value="" disabled selected>Add condition…</option>
+            ${optionsHTML}
+          </select>
+          <input class="cond-dur-input" id="cond-dur" type="text" value="∞" title="Rounds (number) or ∞ for permanent" maxlength="4">
+          <button class="btn-cond-add" onclick="addCondition()">Add</button>
+        </div>
+        <div class="cond-custom-row" id="cond-custom-row">
+          <input id="cond-custom-input" type="text" placeholder="Custom condition name…" style="flex:1;background:#0a1e2a;border:1px solid #1a3a4a;color:#c8dde8;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-family:'Inter',sans-serif;width:100%;">
+        </div>
+        <div class="cond-list">${condListHTML}</div>
+        ${conds.length > 0 ? `<button class="btn-next-turn" onclick="tickConditions()">⟳ Next Turn — Tick Durations</button>` : ''}
+      </div>
+    `;
+  }
+
+  function onCondSelectChange(sel) {
+    const customRow = document.getElementById('cond-custom-row');
+    if (customRow) customRow.classList.toggle('visible', sel.value === 'Custom...');
+  }
+
+  function addCondition() {
+    const sel = document.getElementById('cond-select');
+    const durInput = document.getElementById('cond-dur');
+    const customInput = document.getElementById('cond-custom-input');
+    if (!sel || !sel.value) return;
+    const isCustom = sel.value === 'Custom...';
+    const name = isCustom ? (customInput ? customInput.value.trim() : '') : sel.value;
+    if (!name) return;
+    const rawDur = durInput ? durInput.value.trim() : '∞';
+    const duration = (rawDur === '∞' || rawDur === '' || isNaN(+rawDur))
+      ? null
+      : Math.max(1, Math.round(+rawDur));
+    update(s => {
+      if (!s.conditions) s.conditions = [];
+      s.conditions.push({ name, duration });
+    });
+  }
+
+  function removeCondition(idx) {
+    update(s => s.conditions.splice(idx, 1));
+  }
+
+  function tickConditions() {
+    update(s => {
+      if (!s.conditions) return;
+      s.conditions = s.conditions
+        .map(c => c.duration === null ? c : { ...c, duration: c.duration - 1 })
+        .filter(c => c.duration === null || c.duration > 0);
+    });
+  }
+
+  // === PRIMA MATERIA ===
+  function getPMState(pm) {
+    const pct = pm / 100;
+    if (pm >= 100) return { cls: 'supercritical', rate: '⚠ SUPERCRITICAL', label: 'supercritical' };
+    if (pct >= 0.90) return { cls: 'decay-12', rate: '12 PM/hr decay', label: 'decay-12' };
+    if (pct >= 0.75) return { cls: 'decay-10', rate: '10 PM/hr decay', label: 'decay-10' };
+    if (pct >= 0.50) return { cls: 'decay-5',  rate: '5 PM/hr decay',  label: 'decay-5'  };
+    return { cls: 'decay-0', rate: 'No decay', label: 'decay-0' };
+  }
+
+  function renderPM() {
+    const { pm } = state;
+    const pct = Math.min(100, (pm / 100) * 100);
+    const pmState = getPMState(pm);
+
+    document.getElementById('pm-section').innerHTML = `
+      <div class="panel-title">Prima Materia — Tier IV</div>
+      <div class="pm-meter-wrap">
+        <div class="pm-meter-track">
+          <div class="pm-meter-fill ${pmState.cls}" style="width:${pct}%"></div>
+        </div>
+        <div class="pm-label-over">${pm} / 100</div>
+      </div>
+      <div class="pm-controls">
+        <button class="btn-sm" onclick="adjustPM(-1)">−1</button>
+        <button class="btn-sm" onclick="adjustPM(-5)">−5</button>
+        <input id="pm-input" type="number" value="${pm}" min="0" max="100"
+          onchange="setPM(+this.value)" onkeydown="if(event.key==='Enter') setPM(+this.value)">
+        <button class="btn-sm" onclick="adjustPM(5)">+5</button>
+        <button class="btn-sm" onclick="adjustPM(1)">+1</button>
+      </div>
+      <div class="decay-indicator ${pmState.label}">${pmState.rate}</div>
+      ${pm >= 100 ? '<div class="supercritical-warning">⚠ DC 25 WIS SAVE — SUPERCRITICAL EVENT</div>' : ''}
+    `;
+  }
+
+  function adjustPM(delta) {
+    update(s => s.pm = Math.max(0, Math.min(100, s.pm + delta)));
+  }
+  function setPM(val) {
+    if (!isNaN(val)) update(s => s.pm = Math.max(0, Math.min(100, val)));
+  }
+
+  // === SPELL SLOTS ===
+  const SLOT_MAX = [4, 3, 3, 3, 3, 2, 2, 1, 1];
+
+  function renderSlots() {
+    const { slots } = state;
+    const ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+
+    document.getElementById('slots-section').innerHTML = `
+      <div class="panel-title">Spell Slots</div>
+      <div class="slots-grid">
+        ${SLOT_MAX.map((max, i) => `
+          <div class="slot-group">
+            <div class="slot-level-label">${ordinals[i]}</div>
+            <div class="slot-pips">
+              ${Array.from({length: max}, (_, j) => `
+                <div class="pip ${j < slots[i] ? 'full' : 'empty'}"
+                  onclick="toggleSlot(${i}, ${j})"></div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function toggleSlot(level, pipIndex) {
+    update(s => {
+      const cur = s.slots[level];
+      s.slots[level] = pipIndex < cur ? pipIndex : pipIndex + 1;
+    });
+  }
+
+  function shortRest() {
+    if (confirm('Short rest taken. No spell slots recovered for Druid.')) {
+      render();
+    }
+  }
+
+  function longRest() {
+    if (confirm('Long rest? This restores all spell slots and clears monster form.')) {
+      update(s => {
+        s.slots = [...SLOT_MAX];
+        s.form = null;
+      });
+    }
+  }
+
+  // === ENEMY PANEL ===
+  function renderEnemies() {
+    const panel = document.getElementById('panel-enemies');
+    panel.innerHTML = `
+      <div class="panel-title">Enemies — Nigredo 25 ft.</div>
+      <button class="btn-add-enemy" onclick="addEnemy()">+ Add Enemy</button>
+      <div id="enemy-list">
+        ${state.enemies.map(e => renderEnemyCard(e)).join('')}
+      </div>
+      ${state.enemies.length > 0 ? `
+        <button class="pulse-btn" onclick="pulseAll()">
+          ⬡ Nigredo Pulse — +1 Stack All
+        </button>
+      ` : ''}
+    `;
+  }
+
+  function renderEnemyCard(e) {
+    const pips = Array.from({length: 10}, (_, i) => {
+      const active = i < e.dissolution;
+      const cls = active
+        ? (e.dissolution >= 8 ? 'active danger' : e.dissolution >= 5 ? 'active high' : 'active')
+        : 'empty';
+      return `<div class="d-pip ${cls}" onclick="adjustDissolution('${e.id}', ${i})"></div>`;
+    }).join('');
+
+    return `
+      <div class="enemy-card" id="enemy-${e.id}">
+        <div class="enemy-header">
+          <span class="enemy-name">${e.name}</span>
+          <button class="btn-remove-enemy" onclick="removeEnemy('${e.id}')">✕</button>
+        </div>
+        <div class="dissolution-label">Dissolution <span class="dissolution-count">${e.dissolution}/10</span></div>
+        <div class="dissolution-pips">${pips}</div>
+      </div>
+    `;
+  }
+
+  function addEnemy() {
+    const name = prompt('Enemy name:');
+    if (!name) return;
+    update(s => s.enemies.push({
+      id: String(Date.now()),
+      name,
+      dissolution: 0
+    }));
+  }
+
+  function removeEnemy(id) {
+    update(s => s.enemies = s.enemies.filter(e => e.id !== id));
+  }
+
+  function adjustDissolution(id, pipIndex) {
+    update(s => {
+      const e = s.enemies.find(e => e.id === id);
+      if (!e) return;
+      e.dissolution = pipIndex < e.dissolution ? pipIndex : Math.min(10, pipIndex + 1);
+    });
+  }
+
+  function pulseAll() {
+    update(s => s.enemies.forEach(e => e.dissolution = Math.min(10, e.dissolution + 1)));
+  }
+
+  // === STAT BLOCKS ===
+  const statBlocks = new Map(); // id → { name, type, url }
+  let sbNextId = 0;
+  let activeStatId = null;
+
+  function handleFileDrop(e) {
+    e.preventDefault();
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    Array.from(e.dataTransfer.files).forEach(file => {
+      if (!file.type.startsWith('image/') && file.type !== 'application/pdf') return;
+      const url = URL.createObjectURL(file);
+      const id = String(sbNextId++);
+      const name = file.name.replace(/\.[^.]+$/, '');
+      statBlocks.set(id, { name, type: file.type, url });
+      activeStatId = id;
+      renderStatPanel();
+    });
+  }
+
+  let imgZoom = 1.0;
+
+  function adjustZoom(delta) {
+    imgZoom = Math.max(0.25, Math.min(4.0, imgZoom + delta));
+    applyZoom();
+  }
+  function resetZoom() {
+    imgZoom = 1.0;
+    applyZoom();
+  }
+  function applyZoom() {
+    const img = document.querySelector('#stat-preview img');
+    if (img) img.style.width = (imgZoom * 100) + '%';
+    const lbl = document.getElementById('zoom-display');
+    if (lbl) lbl.textContent = Math.round(imgZoom * 100) + '%';
+  }
+
+  function selectStatBlock(id) {
+    activeStatId = id;
+    imgZoom = 1.0;
+    renderStatPanel();
+  }
+
+  function removeStatBlock(id) {
+    const sb = statBlocks.get(id);
+    if (sb) URL.revokeObjectURL(sb.url);
+    statBlocks.delete(id);
+    if (activeStatId === id) activeStatId = statBlocks.size > 0 ? statBlocks.keys().next().value : null;
+    renderStatPanel();
+  }
+
+  function renderStatPanel() {
+    // Preview
+    const preview = document.getElementById('stat-preview');
+    const active = activeStatId ? statBlocks.get(activeStatId) : null;
+    const zoomBar = document.getElementById('stat-zoom-controls');
+    if (active) {
+      if (active.type.startsWith('image/')) {
+        preview.innerHTML = `<img src="${active.url}" alt="${active.name}" style="width:${imgZoom*100}%">`;
+        zoomBar.classList.add('visible');
+      } else {
+        preview.innerHTML = `<embed src="${active.url}" type="application/pdf">`;
+        zoomBar.classList.remove('visible');
+      }
+      document.getElementById('zoom-display').textContent = Math.round(imgZoom * 100) + '%';
+    } else {
+      preview.innerHTML = `<div class="stat-preview-hint">Drop a stat block image or PDF anywhere</div>`;
+      zoomBar.classList.remove('visible');
+    }
+
+    // Thumbnails
+    const thumbs = document.getElementById('stat-thumbs');
+    const cards = Array.from(statBlocks.entries()).map(([id, sb]) => {
+      const thumb = sb.type.startsWith('image/')
+        ? `<img src="${sb.url}" alt="${sb.name}">`
+        : `<span class="pdf-icon-thumb">📄</span>`;
+      const activeCls = id === activeStatId ? ' active' : '';
+      return `
+        <div class="stat-card${activeCls}" onclick="selectStatBlock('${id}')">
+          <div class="stat-card-thumb">
+            ${thumb}
+            <div class="stat-card-remove" onclick="event.stopPropagation(); removeStatBlock('${id}')">✕</div>
+          </div>
+          <div class="stat-card-name">${sb.name}</div>
+        </div>`;
+    }).join('');
+
+    thumbs.innerHTML = cards + `<div class="drop-hint-strip">Drop files here</div>`;
+  }
+
+  // === HEADER ===
+  let restMenuOpen = false;
+  function renderHeader() {
+    document.getElementById('app-header').innerHTML = `
+      <h1>Astraeus</h1>
+      <div class="rest-dropdown-wrap">
+        <button class="rest-menu-btn" onclick="toggleRestMenu()">⚡ Rests ▾</button>
+        <div id="rest-menu" class="rest-menu${restMenuOpen ? '' : ' hidden'}">
+          <button onclick="shortRest()">Short Rest</button>
+          <button onclick="longRest()">Long Rest</button>
+        </div>
+      </div>
+    `;
+  }
+  function toggleRestMenu() {
+    restMenuOpen = !restMenuOpen;
+    const menu = document.getElementById('rest-menu');
+    if (menu) menu.classList.toggle('hidden', !restMenuOpen);
+  }
+  // Close rest menu when clicking outside
+  document.addEventListener('click', e => {
+    if (restMenuOpen && !e.target.closest('.rest-dropdown-wrap')) {
+      restMenuOpen = false;
+      const menu = document.getElementById('rest-menu');
+      if (menu) menu.classList.add('hidden');
+    }
+  });
+  // === ACTIVE SPELLS ===
+  function renderActiveSpells() {
+    const spells = state.activeSpells;
+    document.getElementById('active-spells-section').innerHTML = `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Active Spells</span>
+        <button class="btn-sm" onclick="addActiveSpell()">+</button>
+      </div>
+      ${spells.length === 0 ? '<div class="no-spells">None active</div>' : ''}
+      ${spells.map((sp, i) => `
+        <div class="active-spell">
+          <span class="spell-name">${sp.name}</span>
+          ${sp.concentration ? '<span class="conc-badge">C</span>' : ''}
+          <button class="spell-remove" onclick="removeActiveSpell(${i})" title="End spell">✕</button>
+        </div>
+      `).join('')}
+    `;
+  }
+  function addActiveSpell() {
+    const name = prompt('Spell name:');
+    if (!name || !name.trim()) return;
+    const isConc = confirm(`Is ${name.trim()} a Concentration spell?`);
+    if (isConc) {
+      const existing = state.activeSpells.findIndex(s => s.concentration);
+      if (existing >= 0) {
+        if (!confirm(`Drop ${state.activeSpells[existing].name} and concentrate on ${name.trim()}?`)) return;
+        update(s => {
+          s.activeSpells.splice(existing, 1);
+          s.activeSpells.push({ name: name.trim(), concentration: true });
+        });
+        return;
+      }
+    }
+    update(s => s.activeSpells.push({ name: name.trim(), concentration: isConc }));
+  }
+  function removeActiveSpell(idx) {
+    update(s => s.activeSpells.splice(idx, 1));
+  }
+
+  // === STAT PANEL — FLOATING / DRAG / MINIMIZE ===
+  let statMinimized = false;
+  let statPinned = false;
+  let draggingPanel = false;
+  let dragOffsetX = 0, dragOffsetY = 0;
+  let colDragState = null;
+
+  function toggleStatPin() {
+    const panel = document.getElementById('stat-panel');
+    const rect = panel.getBoundingClientRect();
+    if (!statPinned) {
+      panel.style.position = 'absolute';
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      panel.style.left = (rect.left + window.scrollX) + 'px';
+      panel.style.top  = (rect.top  + window.scrollY) + 'px';
+      statPinned = true;
+    } else {
+      panel.style.position = 'fixed';
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      panel.style.left = rect.left + 'px';
+      panel.style.top  = rect.top  + 'px';
+      statPinned = false;
+    }
+    document.getElementById('stat-pin-btn').classList.toggle('active', statPinned);
+  }
+
+  function toggleStatMinimize() {
+    statMinimized = !statMinimized;
+    const panel = document.getElementById('stat-panel');
+    panel.classList.toggle('minimized', statMinimized);
+    document.getElementById('stat-minimize-btn').textContent = statMinimized ? '□' : '—';
+  }
+
+  document.getElementById('stat-titlebar').addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    draggingPanel = true;
+    const panel = document.getElementById('stat-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    if (statPinned) {
+      panel.style.left = (rect.left + window.scrollX) + 'px';
+      panel.style.top  = (rect.top  + window.scrollY) + 'px';
+    } else {
+      panel.style.left = rect.left + 'px';
+      panel.style.top  = rect.top  + 'px';
+    }
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+    document.body.style.cursor = 'grabbing';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!draggingPanel) return;
+    const panel = document.getElementById('stat-panel');
+    if (statPinned) {
+      panel.style.left = (e.clientX - dragOffsetX + window.scrollX) + 'px';
+      panel.style.top  = (e.clientY - dragOffsetY + window.scrollY) + 'px';
+    } else {
+      panel.style.left = (e.clientX - dragOffsetX) + 'px';
+      panel.style.top  = (e.clientY - dragOffsetY) + 'px';
+    }
+  });
+  document.addEventListener('mousemove', e => {
+    if (!colDragState) return;
+    const cols = document.querySelector('.columns');
+    const totalW = cols.offsetWidth;
+    const dx = e.clientX - colDragState.startX;
+    if (colDragState.side === 'left') {
+      colDragState.currentLeftW = Math.max(180, Math.min(
+        colDragState.startLeftW + dx,
+        totalW - colDragState.startRightW - 200
+      ));
+    } else {
+      colDragState.currentRightW = Math.max(220, Math.min(
+        colDragState.startRightW - dx,
+        totalW - colDragState.startLeftW - 200
+      ));
+    }
+    applyColWidths(colDragState.currentLeftW, colDragState.currentRightW);
+  });
+  document.addEventListener('mouseup', () => {
+    if (colDragState) {
+      const { currentLeftW, currentRightW } = colDragState;
+      document.querySelectorAll('.col-handle').forEach(h => h.classList.remove('dragging'));
+      colDragState = null;
+      update(s => { s.layout.leftW = currentLeftW; s.layout.rightW = currentRightW; });
+    }
+    draggingPanel = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+
+  document.addEventListener('dragover', e => {
+    e.preventDefault();
+    document.querySelector('.drop-hint-strip')?.classList.add('drag-over');
+    document.querySelector('.stat-preview-hint')?.classList.add('drag-over');
+  });
+  document.addEventListener('dragleave', e => {
+    if (!e.relatedTarget || e.relatedTarget === document.documentElement) {
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    }
+  });
+  document.addEventListener('drop', handleFileDrop);
+
+  // === COLUMN DRAG HANDLES ===
+
+  function applyColWidths(leftW, rightW) {
+    leftW = leftW ?? state.layout.leftW;
+    rightW = rightW ?? state.layout.rightW;
+    const cols = document.querySelector('.columns');
+    if (!cols) return;
+    cols.style.gridTemplateColumns = `${leftW}px 1fr ${rightW}px`;
+    const h1 = document.getElementById('col-handle-1');
+    const h2 = document.getElementById('col-handle-2');
+    if (h1) h1.style.left = leftW + 'px';
+    if (h2) h2.style.left = (cols.offsetWidth - rightW) + 'px';
+  }
+
+  function initColHandles() {
+    const cols = document.querySelector('.columns');
+    ['col-handle-1', 'col-handle-2'].forEach(id => {
+      if (!document.getElementById(id)) {
+        const h = document.createElement('div');
+        h.className = 'col-handle';
+        h.id = id;
+        cols.appendChild(h);
+      }
+    });
+    document.getElementById('col-handle-1').onmousedown = e => startColDrag(e, 'left');
+    document.getElementById('col-handle-2').onmousedown = e => startColDrag(e, 'right');
+    applyColWidths();
+  }
+
+  function startColDrag(e, side) {
+    e.preventDefault();
+    e.stopPropagation();
+    colDragState = {
+      side,
+      startX: e.clientX,
+      startLeftW: state.layout.leftW,
+      startRightW: state.layout.rightW,
+      currentLeftW: state.layout.leftW,
+      currentRightW: state.layout.rightW
+    };
+    e.currentTarget.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+  // === VIEWER SCROLL HELPERS ===
+  function scrollToViewerZone() {
+    document.getElementById('viewer-clear-zone').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // === RENDER ===
+  function render() {
+    renderHeader();
+    renderHP();
+    renderPM();
+    renderActiveSpells();
+    renderSlots();
+    renderEnemies();
+    document.body.classList.toggle('supercritical-flash', state.pm >= 100);
+    applyColWidths();
+  }
+
+  render();
+  initColHandles();
+  window.addEventListener('resize', () => applyColWidths());
+</script>
+</body>
+</html>
