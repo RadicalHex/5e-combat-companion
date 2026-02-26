@@ -893,6 +893,7 @@
       <div class="stat-row"><span class="stat-label">AC</span><span class="stat-value editable-stat" onclick="editStat('ac')" title="Click to edit">${st.ac}</span></div>
       <div class="stat-row"><span class="stat-label">Initiative</span><span class="stat-value editable-stat" onclick="editStat('initiative')" title="Click to edit">+${st.initiative}</span></div>
       <div class="stat-row"><span class="stat-label">Speed</span><span class="stat-value editable-stat" onclick="editStat('speed')" title="Click to edit">${st.speed} ft.</span></div>
+      <div class="stat-row"><span class="stat-label">Proficiency</span><span class="stat-value editable-stat" onclick="editProfBonus()" title="Click to edit">+${state.profBonus}</span></div>
       <div class="stat-row"><span class="stat-label">Level</span><span class="stat-value editable-stat" onclick="editStat('levelLabel')" title="Click to edit">${st.levelLabel}</span></div>
 
       <hr class="divider">
@@ -938,6 +939,15 @@
   function promptHP() {
     const val = prompt('Set current HP:', state.hp.current);
     if (val !== null && !isNaN(+val)) update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, +val)));
+  }
+
+  function editProfBonus() {
+    const val = prompt('Proficiency Bonus:', state.profBonus);
+    if (val !== null && !isNaN(+val)) update(s => {
+      s.profBonus = +val;
+      s.spellDCOverride = null;
+      s.spellAtkOverride = null;
+    });
   }
 
   // === EDITABLE STATS ===
