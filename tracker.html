@@ -2072,6 +2072,10 @@
   function increaseAttunementMax() {
     update(s => s.attunementMax++);
   }
+  function decreaseAttunementMax() {
+    const attuned = state.magicItems.filter(i => i.attuned).length;
+    update(s => s.attunementMax = Math.max(attuned, s.attunementMax - 1));
+  }
   function toggleAttunedSection() {
     update(s => s.attunedOpen = !s.attunedOpen);
   }
@@ -2100,7 +2104,10 @@
               </div>
             `).join('')
           }
-          <button class="btn-add-attunement-slot" onclick="increaseAttunementMax()">+ Add Attunement Slot</button>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="btn-add-attunement-slot" onclick="decreaseAttunementMax()">−</button>
+            <button class="btn-add-attunement-slot" onclick="increaseAttunementMax()">+</button>
+          </div>
         ` : ''}
       </div>
     `;
