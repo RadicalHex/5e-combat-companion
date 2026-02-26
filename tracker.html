@@ -212,21 +212,18 @@
       top: 70px;
       width: 680px;
       height: 860px;
+      display: none;
       flex-direction: column;
       background: #040b12;
       border: 1px solid #1a3a4a;
       border-radius: 6px 6px 3px 3px;
       overflow: hidden;
-      resize: both;
       box-shadow: 0 8px 40px rgba(0,0,0,0.7);
       z-index: 100;
       min-width: 280px;
       min-height: 160px;
     }
-    #stat-panel.minimized {
-      height: 38px !important;
-      resize: horizontal;
-    }
+    #stat-panel.open { display: flex; }
     #stat-titlebar {
       display: flex;
       align-items: center;
@@ -247,6 +244,23 @@
       text-transform: uppercase;
       letter-spacing: 0.12em;
     }
+    #stat-close-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+      line-height: 1;
+    }
+    #stat-close-btn:hover { border-color: #c04040; color: #c04040; }
+    #stat-panel.minimized { height: 38px !important; }
     #stat-minimize-btn {
       background: none;
       border: 1px solid #1a3a4a;
@@ -261,27 +275,25 @@
       justify-content: center;
       transition: border-color 0.15s, color 0.15s;
       line-height: 1;
-      padding-bottom: 3px;
+      padding-bottom: 2px;
     }
     #stat-minimize-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
-    #stat-pin-btn {
-      background: none;
-      border: 1px solid #1a3a4a;
-      color: #4a7a8a;
-      width: 20px;
-      height: 20px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      border-radius: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.15s, color 0.15s;
-      line-height: 1;
+    #drag-shield {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 101;
     }
-    #stat-pin-btn:hover,
-    #stat-pin-btn.active { border-color: #2ab8d0; color: #2ab8d0; }
-    #stat-pin-btn.active { background: #071e2a; }
+    #drag-shield.active { display: block; }
+    .panel-resize-handle { position: absolute; z-index: 10; }
+    .panel-resize-n  { top: 0;    left: 12px;  height: 5px; width: calc(100% - 24px); cursor: ns-resize; }
+    .panel-resize-e  { right: 0;  top: 12px;   width: 5px; height: calc(100% - 24px); cursor: ew-resize; }
+    .panel-resize-w  { left: 0;   top: 12px;   width: 5px; height: calc(100% - 24px); cursor: ew-resize; }
+    .panel-resize-s  { bottom: 0; left: 12px;  height: 5px; width: calc(100% - 24px); cursor: ns-resize; }
+    .panel-resize-nw { top: 0;    left: 0;     width: 12px; height: 12px; cursor: nwse-resize; }
+    .panel-resize-ne { top: 0;    right: 0;    width: 12px; height: 12px; cursor: nesw-resize; }
+    .panel-resize-se { right: 0;  bottom: 0;   width: 12px; height: 12px; cursor: nwse-resize; }
+    .panel-resize-sw { left: 0;   bottom: 0;   width: 12px; height: 12px; cursor: nesw-resize; }
     #stat-zoom-controls {
       display: none;
       align-items: center;
@@ -292,6 +304,7 @@
       flex-shrink: 0;
     }
     #stat-zoom-controls.visible { display: flex; }
+    .stat-tab-btn.active { border-color: #2ab8d0; color: #2ab8d0; background: #071824; }
     .zoom-label {
       font-size: 0.65rem;
       color: #4a7a8a;
@@ -847,39 +860,154 @@
     .col-handle:hover::after,
     .col-handle.dragging::after { background: #2ab8d0; }
 
-    /* === VIEWER CLEAR ZONE === */
-    #viewer-clear-zone {
-      height: 900px;
-      background: #050d14;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 24px 0 32px;
-      pointer-events: none;
-    }
-    #viewer-zone-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #0d2030;
-      user-select: none;
-    }
-    #back-to-top-btn {
-      pointer-events: all;
+    /* === SECTION EDIT MODE === */
+    .edit-pencil-btn {
       background: none;
-      border: 1px solid #0f2535;
-      color: #1e4a5a;
-      font-family: 'Inter', sans-serif;
+      border: none;
+      color: #2a5a6a;
+      cursor: pointer;
       font-size: 0.7rem;
-      padding: 5px 14px;
+      padding: 0 4px;
+      opacity: 0.4;
+      transition: opacity 0.15s, color 0.15s;
+      line-height: 1;
+    }
+    .edit-pencil-btn:hover { opacity: 1; color: #2ab8d0; }
+    .section-edit-controls { display: flex; gap: 4px; align-items: center; }
+    .edit-save-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      padding: 2px 8px;
+      background: #0a3a2a;
+      border: 1px solid #20a860;
+      color: #20a860;
+      border-radius: 3px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .edit-save-btn:hover { background: #0d4a34; }
+    .edit-cancel-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      padding: 2px 6px;
+      background: none;
+      border: 1px solid #3a2020;
+      color: #6a3a3a;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .edit-cancel-btn:hover { border-color: #c04040; color: #c04040; }
+    .edit-input-sm {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      border-bottom-color: #2ab8d0;
+      color: #c8dde8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 1px 4px;
+      border-radius: 3px 3px 0 0;
+      width: 54px;
+      text-align: center;
+    }
+    .edit-input-sm:focus { outline: none; border-color: #2ab8d0; }
+    .edit-input-wide { width: 110px; text-align: left; }
+
+    /* === DICE ROLLER === */
+    .dice-dropdown-wrap { position: relative; }
+    .dice-dropdown-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #a8d8e8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      padding: 5px 12px;
       border-radius: 4px;
       cursor: pointer;
-      letter-spacing: 0.06em;
       transition: border-color 0.15s, color 0.15s;
+      letter-spacing: 0.04em;
     }
-    #back-to-top-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .dice-dropdown-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .dice-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 200;
+      min-width: 260px;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 5px;
+      padding: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      display: none;
+    }
+    .dice-panel.open { display: block; }
+    .dice-btn-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .btn-die {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #a8d8e8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      letter-spacing: 0.03em;
+    }
+    .btn-die:hover { border-color: #2ab8d0; color: #2ab8d0; background: #0d2535; }
+    .dice-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 0.7rem;
+      color: #4a7a8a;
+    }
+    .dice-controls-row input {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #c8dde8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      padding: 3px 6px;
+      border-radius: 3px;
+      width: 48px;
+      text-align: center;
+    }
+    .dice-result { text-align: center; margin-bottom: 8px; }
+    .dice-result-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4a7a8a;
+      margin-bottom: 2px;
+    }
+    .dice-result-value {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      color: #d4a843;
+      line-height: 1;
+    }
+    .dice-result-detail {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      margin-top: 2px;
+    }
+    .dice-history { border-top: 1px solid #0f2535; padding-top: 8px; margin-top: 4px; }
+    .dice-history-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      padding: 2px 0;
+      color: #3a6a7a;
+    }
+    .dice-hist-expr { color: #4a7a8a; }
+    .dice-hist-val { color: #2a8a8a; }
   </style>
 </head>
 <body>
@@ -904,35 +1032,35 @@
       <div id="attuned-wrap"></div>
     </div>
   </div>
-  <div id="viewer-clear-zone">
-    <span id="viewer-zone-label">Viewer Space</span>
-    <button id="back-to-top-btn" onclick="scrollToTop()">↑ Back to panels</button>
-  </div>
-  <div id="stat-panel">
-    <div id="stat-titlebar">
-      <span class="stat-panel-title">Material Companion</span>
-      <button id="stat-scrolldown-btn" onclick="scrollToViewerZone()" title="Scroll to viewer space"
-        style="background:none;border:1px solid #1a3a4a;color:#4a7a8a;width:20px;height:20px;
-               font-size:0.8rem;cursor:pointer;border-radius:3px;display:flex;align-items:center;
-               justify-content:center;transition:border-color 0.15s,color 0.15s;line-height:1;">
-        ⤓
-      </button>
-      <button id="stat-pin-btn" onclick="toggleStatPin()" title="Pin to page">📌</button>
+</div>
+<div id="drag-shield"></div>
+<div id="stat-panel">
+  <div class="panel-resize-handle panel-resize-n"  onmousedown="startPanelResize(event,'n')"></div>
+  <div class="panel-resize-handle panel-resize-e"  onmousedown="startPanelResize(event,'e')"></div>
+  <div class="panel-resize-handle panel-resize-w"  onmousedown="startPanelResize(event,'w')"></div>
+  <div class="panel-resize-handle panel-resize-s"  onmousedown="startPanelResize(event,'s')"></div>
+  <div class="panel-resize-handle panel-resize-nw" onmousedown="startPanelResize(event,'nw')"></div>
+  <div class="panel-resize-handle panel-resize-ne" onmousedown="startPanelResize(event,'ne')"></div>
+  <div class="panel-resize-handle panel-resize-se" onmousedown="startPanelResize(event,'se')"></div>
+  <div class="panel-resize-handle panel-resize-sw" onmousedown="startPanelResize(event,'sw')"></div>
+  <div id="stat-titlebar">
+    <span class="stat-panel-title">Stat Block Viewer</span>
+    <div style="display:flex;gap:4px;">
       <button id="stat-minimize-btn" onclick="toggleStatMinimize()" title="Minimize">—</button>
       <button id="stat-close-btn" onclick="closeStatPanel()" title="Close">✕</button>
     </div>
-    <div id="stat-zoom-controls">
-      <button class="btn-sm" onclick="adjustZoom(-0.25)">−</button>
-      <span class="zoom-label" id="zoom-display">100%</span>
-      <button class="btn-sm" onclick="adjustZoom(0.25)">+</button>
-      <button class="btn-sm" onclick="resetZoom()">Reset</button>
-    </div>
-    <div id="stat-preview">
-      <div class="stat-preview-hint">Drop a stat block image or PDF anywhere</div>
-    </div>
-    <div id="stat-thumbs">
-      <div class="drop-hint-strip">Drop files here</div>
-    </div>
+  </div>
+  <div id="stat-zoom-controls">
+    <button class="btn-sm" onclick="adjustZoom(-0.25)">−</button>
+    <span class="zoom-label" id="zoom-display">100%</span>
+    <button class="btn-sm" onclick="adjustZoom(0.25)">+</button>
+    <button class="btn-sm" onclick="resetZoom()">Reset</button>
+  </div>
+  <div id="stat-preview">
+    <div class="stat-preview-hint">Drop a stat block image or PDF anywhere</div>
+  </div>
+  <div id="stat-thumbs">
+    <div class="drop-hint-strip">Drop files here</div>
   </div>
 </div>
 <script>
@@ -986,6 +1114,10 @@
   }
 
   let state = loadState();
+  let diceHistory = [];   // max 5 entries: { expr, total, detail }
+  let diceModifier = 0;
+  let diceCount = 1;
+  let diceMenuOpen = false;
   // Migrate older saved states that lack newer fields
   if (!state.stats) state.stats = { ...DEFAULTS.stats };
   if (!state.immunities) state.immunities = [];
@@ -1018,6 +1150,85 @@
     render();
   }
 
+  // === SECTION EDIT MODE ===
+  let editSection = null;
+
+  function sectionTitle(label, key) {
+    const editing = editSection === key;
+    return `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>${label}</span>
+        ${editing
+          ? `<span class="section-edit-controls">
+               <button class="edit-save-btn" onclick="saveSection('${key}')">Save</button>
+               <button class="edit-cancel-btn" onclick="setEditSection(null)">✕</button>
+             </span>`
+          : `<button class="edit-pencil-btn" onclick="setEditSection('${key}')" title="Edit">✏</button>`
+        }
+      </div>`;
+  }
+
+  function setEditSection(key) {
+    editSection = key;
+    if (key === 'senses' && !state.sensesOpen) { state.sensesOpen = true; saveState(); }
+    renderHP();
+  }
+
+  function saveSection(key) {
+    const g = id => document.getElementById(id)?.value;
+    const vals = {};
+    if (key === 'hp') {
+      vals.current = g('edit-hp-current');
+      vals.max     = g('edit-hp-max');
+      vals.temp    = g('edit-hp-temp');
+    } else if (key === 'combat') {
+      ['ac','initiative','speed'].forEach(k => vals[k] = g('edit-' + k));
+      vals.profBonus = g('edit-profbonus');
+      vals.levelLabel = g('edit-level');
+    } else if (key === 'scores') {
+      ['str','dex','con','int','wis','cha'].forEach(k => vals[k] = g('edit-' + k));
+    } else if (key === 'saves') {
+      ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => vals[k] = g('edit-' + k));
+    } else if (key === 'spells') {
+      vals.passPerc = g('edit-passperc');
+      vals.spellDC  = g('edit-spelldc');
+      vals.spellAtk = g('edit-spellatk');
+    } else if (key === 'senses') {
+      ['truesight','blindsight','tremorsense'].forEach(k => vals[k] = g('edit-' + k));
+    }
+    editSection = null;  // clear before render() fires inside update()
+    update(s => {
+      if (key === 'hp') {
+        const max = +vals.max;
+        if (!isNaN(max) && max >= 1)     s.hp.max     = max;
+        if (!isNaN(+vals.current))       s.hp.current = Math.max(0, Math.min(s.hp.max, +vals.current));
+        if (!isNaN(+vals.temp))          s.hp.temp    = Math.max(0, +vals.temp);
+      } else if (key === 'combat') {
+        if (!isNaN(+vals.ac))         s.stats.ac         = +vals.ac;
+        if (!isNaN(+vals.initiative))  s.stats.initiative  = +vals.initiative;
+        if (!isNaN(+vals.speed))       s.stats.speed       = +vals.speed;
+        if (!isNaN(+vals.profBonus))  { s.profBonus = +vals.profBonus; s.spellDCOverride = null; s.spellAtkOverride = null; }
+        if (vals.levelLabel?.trim())   s.stats.levelLabel  = vals.levelLabel.trim();
+      } else if (key === 'scores') {
+        ['str','dex','con','int','wis','cha'].forEach(k => {
+          if (!isNaN(+vals[k])) s.stats[k] = Math.max(1, Math.min(30, +vals[k]));
+        });
+      } else if (key === 'saves') {
+        ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => {
+          if (!isNaN(+vals[k])) s.stats[k] = +vals[k];
+        });
+      } else if (key === 'spells') {
+        if (!isNaN(+vals.passPerc))  s.stats.passPerc    = +vals.passPerc;
+        if (vals.spellDC  !== undefined) s.spellDCOverride  = vals.spellDC.trim()  === '' ? null : +vals.spellDC;
+        if (vals.spellAtk !== undefined) s.spellAtkOverride = vals.spellAtk.trim() === '' ? null : +vals.spellAtk;
+      } else if (key === 'senses') {
+        ['truesight','blindsight','tremorsense'].forEach(k => {
+          if (!isNaN(+vals[k])) s.senses[k] = Math.max(0, +vals[k]);
+        });
+      }
+    });
+  }
+
   // === HP PANEL ===
   function renderHP() {
     const el = document.getElementById('panel-character');
@@ -1026,64 +1237,99 @@
     const basePct = Math.max(0, Math.min(100, (hp.current / hp.max) * 100));
     const hpCls = basePct > 50 ? 'hp-healthy' : basePct > 25 ? 'hp-hurt' : 'hp-critical';
 
+    const isHP     = editSection === 'hp';
+    const isStats  = editSection === 'combat';
+    const isScores = editSection === 'scores';
+    const isSaves  = editSection === 'saves';
+    const isSpells = editSection === 'spells';
+
     el.innerHTML = `
-      <div class="panel-title">Character</div>
+      ${sectionTitle('Character', 'hp')}
 
       <div class="hp-section">
         <div class="hp-label">Base Form</div>
         <div class="hp-bar-track"><div class="hp-bar-fill ${hpCls}" style="width:${basePct}%"></div></div>
-        <div class="hp-controls">
-          <span class="hp-display">${hp.current} / ${hp.max}</span>
-          <button class="btn-sm" onclick="adjustHP(-1)">−</button>
-          <button class="btn-sm" onclick="adjustHP(1)">+</button>
-          <button class="btn-sm" onclick="promptHP()">Set</button>
-        </div>
-        <div class="temp-hp">Temp HP: <strong>${hp.temp}</strong>
-          <button class="btn-sm" onclick="adjustTemp(-1)">−</button>
-          <button class="btn-sm" onclick="adjustTemp(1)">+</button>
-          <button class="btn-sm" onclick="promptTemp()">Set</button>
-        </div>
+        ${isHP ? `
+          <div class="stat-row"><span class="stat-label">Current HP</span><input class="edit-input-sm" id="edit-hp-current" type="number" min="0" value="${hp.current}"></div>
+          <div class="stat-row"><span class="stat-label">Max HP</span><input class="edit-input-sm" id="edit-hp-max" type="number" min="1" value="${hp.max}"></div>
+          <div class="stat-row"><span class="stat-label">Temp HP</span><input class="edit-input-sm" id="edit-hp-temp" type="number" min="0" value="${hp.temp}"></div>
+        ` : `
+          <div class="hp-controls">
+            <span class="hp-display">${hp.current} / ${hp.max}</span>
+            <button class="btn-sm" onclick="adjustHP(-1)">−</button>
+            <button class="btn-sm" onclick="adjustHP(1)">+</button>
+            <button class="btn-sm" onclick="promptHP()">Set</button>
+          </div>
+          <div class="temp-hp">Temp HP: <strong>${hp.temp}</strong>
+            <button class="btn-sm" onclick="adjustTemp(-1)">−</button>
+            <button class="btn-sm" onclick="adjustTemp(1)">+</button>
+            <button class="btn-sm" onclick="promptTemp()">Set</button>
+          </div>
+        `}
       </div>
 
+      <hr class="divider">
+      ${sectionTitle('Stats', 'combat')}
+      ${isStats ? `
+        <div class="stat-row"><span class="stat-label">AC</span><input class="edit-input-sm" id="edit-ac" type="number" value="${st.ac}"></div>
+        <div class="stat-row"><span class="stat-label">Initiative</span><input class="edit-input-sm" id="edit-initiative" type="number" value="${st.initiative}"></div>
+        <div class="stat-row"><span class="stat-label">Speed</span><input class="edit-input-sm" id="edit-speed" type="number" value="${st.speed}"></div>
+        <div class="stat-row"><span class="stat-label">Proficiency</span><input class="edit-input-sm" id="edit-profbonus" type="number" value="${state.profBonus}"></div>
+        <div class="stat-row"><span class="stat-label">Level</span><input class="edit-input-sm edit-input-wide" id="edit-level" type="text" value="${st.levelLabel}"></div>
+      ` : `
+        <div class="stat-row"><span class="stat-label">AC</span><span class="stat-value editable-stat" onclick="editStat('ac')" title="Click to edit">${st.ac}</span></div>
+        <div class="stat-row"><span class="stat-label">Initiative</span><span class="stat-value editable-stat" onclick="editStat('initiative')" title="Click to edit">+${st.initiative}</span></div>
+        <div class="stat-row"><span class="stat-label">Speed</span><span class="stat-value editable-stat" onclick="editStat('speed')" title="Click to edit">${st.speed} ft.</span></div>
+        <div class="stat-row"><span class="stat-label">Proficiency</span><span class="stat-value editable-stat" onclick="editProfBonus()" title="Click to edit">+${state.profBonus}</span></div>
+        <div class="stat-row"><span class="stat-label">Level</span><span class="stat-value editable-stat" onclick="editStat('levelLabel')" title="Click to edit">${st.levelLabel}</span></div>
+      `}
 
       <hr class="divider">
-      <div class="stat-row"><span class="stat-label">AC</span><span class="stat-value editable-stat" onclick="editStat('ac')" title="Click to edit">${st.ac}</span></div>
-      <div class="stat-row"><span class="stat-label">Initiative</span><span class="stat-value editable-stat" onclick="editStat('initiative')" title="Click to edit">+${st.initiative}</span></div>
-      <div class="stat-row"><span class="stat-label">Speed</span><span class="stat-value editable-stat" onclick="editStat('speed')" title="Click to edit">${st.speed} ft.</span></div>
-      <div class="stat-row"><span class="stat-label">Proficiency</span><span class="stat-value editable-stat" onclick="editProfBonus()" title="Click to edit">+${state.profBonus}</span></div>
-      <div class="stat-row"><span class="stat-label">Level</span><span class="stat-value editable-stat" onclick="editStat('levelLabel')" title="Click to edit">${st.levelLabel}</span></div>
-
-      <hr class="divider">
-      <div class="panel-title">Ability Scores</div>
+      ${sectionTitle('Ability Scores', 'scores')}
       <div class="saves-grid">
         ${[['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].map(([name, key]) => {
           const score = st[key];
           const mod = Math.floor((score - 10) / 2);
           const sign = mod >= 0 ? '+' : '';
-          return `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">${score} <span style="color:#5a8a9a;font-weight:400">(${sign}${mod})</span></span></div>`;
+          return isScores
+            ? `<div class="save-row"><span class="save-name">${name}</span><input class="edit-input-sm" id="edit-${key}" type="number" min="1" max="30" value="${score}"></div>`
+            : `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">${score} <span style="color:#5a8a9a;font-weight:400">(${sign}${mod})</span></span></div>`;
         }).join('')}
       </div>
 
       <hr class="divider">
-      <div class="panel-title">Saves</div>
+      ${sectionTitle('Saves', 'saves')}
       <div class="saves-grid">
         ${[['STR','savStr'],['DEX','savDex'],['CON','savCon'],['INT','savInt'],['WIS','savWis'],['CHA','savCha']].map(([name, key]) =>
-          `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">+${st[key]}</span></div>`
+          isSaves
+            ? `<div class="save-row"><span class="save-name">${name}</span><input class="edit-input-sm" id="edit-${key}" type="number" value="${st[key]}"></div>`
+            : `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">+${st[key]}</span></div>`
         ).join('')}
       </div>
 
       <hr class="divider">
-      <div class="stat-row"><span class="stat-label">Passive Perception</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
-      <div class="stat-row">
-        <span class="stat-label">Spell Ability</span>
-        <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
-          ${['int','wis','cha'].map(k =>
-            `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`
-          ).join('')}
-        </select>
-      </div>
-      <div class="stat-row"><span class="stat-label">Spell Save DC ${state.spellDCOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override (blank to reset)">${getSpellDC()}</span></div>
-      <div class="stat-row"><span class="stat-label">Spell Attack ${state.spellAtkOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override (blank to reset)">+${getSpellAtk()}</span></div>
+      ${sectionTitle('Spellcasting', 'spells')}
+      ${isSpells ? `
+        <div class="stat-row"><span class="stat-label">Passive Perception</span><input class="edit-input-sm" id="edit-passperc" type="number" value="${st.passPerc}"></div>
+        <div class="stat-row">
+          <span class="stat-label">Spell Ability</span>
+          <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+            ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
+          </select>
+        </div>
+        <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
+        <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
+      ` : `
+        <div class="stat-row"><span class="stat-label">Passive Perception</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
+        <div class="stat-row">
+          <span class="stat-label">Spell Ability</span>
+          <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+            ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
+          </select>
+        </div>
+        <div class="stat-row"><span class="stat-label">Spell Save DC ${state.spellDCOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override (blank to reset)">${getSpellDC()}</span></div>
+        <div class="stat-row"><span class="stat-label">Spell Attack ${state.spellAtkOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override (blank to reset)">+${getSpellAtk()}</span></div>
+      `}
       ${renderSenses()}
 
       <hr class="divider">
@@ -1186,16 +1432,30 @@
   }
   function renderSenses() {
     const { senses, sensesOpen } = state;
+    const isEditing = editSection === 'senses';
     return `
       <div style="margin-top:8px;">
-        <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSenses()">
-          Senses <span>${sensesOpen ? '▲' : '▼'}</span>
+        <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span onclick="toggleSenses()" style="cursor:pointer;flex:1;">Senses <span>${sensesOpen ? '▲' : '▼'}</span></span>
+          ${isEditing
+            ? `<span class="section-edit-controls">
+                 <button class="edit-save-btn" onclick="saveSection('senses')">Save</button>
+                 <button class="edit-cancel-btn" onclick="setEditSection(null)">✕</button>
+               </span>`
+            : `<button class="edit-pencil-btn" onclick="event.stopPropagation();setEditSection('senses')" title="Edit">✏</button>`
+          }
         </div>
-        ${sensesOpen ? `
+        ${sensesOpen || isEditing ? `
           <div class="senses-grid">
-            <div class="stat-row"><span class="stat-label">Truesight</span><span class="stat-value editable-stat" onclick="editSense('truesight')" title="Click to edit">${senses.truesight} ft</span></div>
-            <div class="stat-row"><span class="stat-label">Blindsight</span><span class="stat-value editable-stat" onclick="editSense('blindsight')" title="Click to edit">${senses.blindsight} ft</span></div>
-            <div class="stat-row"><span class="stat-label">Tremorsense</span><span class="stat-value editable-stat" onclick="editSense('tremorsense')" title="Click to edit">${senses.tremorsense} ft</span></div>
+            ${isEditing ? `
+              <div class="stat-row"><span class="stat-label">Truesight</span><input class="edit-input-sm" id="edit-truesight" type="number" value="${senses.truesight}"></div>
+              <div class="stat-row"><span class="stat-label">Blindsight</span><input class="edit-input-sm" id="edit-blindsight" type="number" value="${senses.blindsight}"></div>
+              <div class="stat-row"><span class="stat-label">Tremorsense</span><input class="edit-input-sm" id="edit-tremorsense" type="number" value="${senses.tremorsense}"></div>
+            ` : `
+              <div class="stat-row"><span class="stat-label">Truesight</span><span class="stat-value editable-stat" onclick="editSense('truesight')" title="Click to edit">${senses.truesight} ft</span></div>
+              <div class="stat-row"><span class="stat-label">Blindsight</span><span class="stat-value editable-stat" onclick="editSense('blindsight')" title="Click to edit">${senses.blindsight} ft</span></div>
+              <div class="stat-row"><span class="stat-label">Tremorsense</span><span class="stat-value editable-stat" onclick="editSense('tremorsense')" title="Click to edit">${senses.tremorsense} ft</span></div>
+            `}
           </div>
         ` : ''}
       </div>
@@ -1379,18 +1639,51 @@
   }
 
   function shortRest() {
-    if (confirm('Short rest taken. No spell slots recovered for Druid.')) {
+    if (confirm('Short rest taken.')) {
       render();
     }
   }
 
   function longRest() {
-    if (confirm('Long rest? This restores all spell slots and clears monster form.')) {
+    if (confirm('Long rest? This restores all spell slots and HP.')) {
       update(s => {
         s.slots = [...SLOT_MAX];
-        s.form = null;
+        s.hp.current = s.hp.max;
       });
     }
+  }
+
+  function exportCharacter() {
+    const filename = (state.characterName || 'character').replace(/[^a-z0-9_\-]/gi, '_') + '.json';
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function importCharacter() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          const required = ['hp', 'slots', 'stats', 'characterName'];
+          for (const key of required) {
+            if (!(key in parsed)) throw new Error('Missing key: ' + key);
+          }
+          update(s => Object.assign(s, parsed));
+        } catch (err) { alert('Import failed: ' + err.message); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
   }
 
   // === STAT BLOCKS ===
@@ -1433,6 +1726,18 @@
     activeStatId = id;
     imgZoom = 1.0;
     renderStatPanel();
+    renderHeader();
+  }
+
+  function activateStatBlock(id) {
+    if (!statPanelOpen) {
+      statPanelOpen = true;
+      const panel = document.getElementById('stat-panel');
+      panel.classList.add('open');
+      panel.style.left = ''; panel.style.top = '';
+      panel.style.right = '20px';
+    }
+    selectStatBlock(id);
   }
 
   function removeStatBlock(id) {
@@ -1441,6 +1746,7 @@
     statBlocks.delete(id);
     if (activeStatId === id) activeStatId = statBlocks.size > 0 ? statBlocks.keys().next().value : null;
     renderStatPanel();
+    renderHeader();
   }
 
   function renderStatPanel() {
@@ -1479,7 +1785,164 @@
         </div>`;
     }).join('');
 
-    thumbs.innerHTML = cards + `<div class="drop-hint-strip">Drop files here</div>`;
+    thumbs.innerHTML = `
+      <button class="btn-sm" onclick="pickStatFile()" style="width:100%;margin-bottom:8px;">+ Add</button>
+      ${cards}
+      <div class="drop-hint-strip">Drop files here</div>`;
+  }
+
+  function pickStatFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,.pdf';
+    input.multiple = true;
+    input.onchange = e => {
+      Array.from(e.target.files).forEach(file => {
+        const url = URL.createObjectURL(file);
+        const id = String(sbNextId++);
+        const name = file.name.replace(/\.[^.]+$/, '');
+        statBlocks.set(id, { name, type: file.type, url });
+        activeStatId = id;
+      });
+      renderStatPanel();
+      renderHeader();
+    };
+    input.click();
+  }
+
+  // === STAT PANEL ===
+  let statPanelOpen = false;
+  let draggingPanel = false;
+  let dragOffsetX = 0, dragOffsetY = 0;
+
+  function toggleStatPanel() {
+    statPanelOpen = !statPanelOpen;
+    const panel = document.getElementById('stat-panel');
+    panel.classList.toggle('open', statPanelOpen);
+    if (statPanelOpen) {
+      panel.style.left = ''; panel.style.top = '';
+      panel.style.right = '20px';
+      statMinimized = false;
+      panel.classList.remove('minimized');
+    }
+    renderHeader();
+  }
+
+  function closeStatPanel() {
+    statPanelOpen = false;
+    document.getElementById('stat-panel').classList.remove('open');
+    renderHeader();
+  }
+
+  let statMinimized = false;
+  let panelResizeState = null;
+
+  function panelZoom() {
+    return parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+  }
+
+  function startPanelResize(e, edge) {
+    e.preventDefault();
+    e.stopPropagation();
+    const z = panelZoom();
+    const panel = document.getElementById('stat-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.right = 'auto';
+    panel.style.left = rect.left + 'px';
+    panel.style.top  = rect.top  + 'px';
+    const cursors = { n:'ns-resize', s:'ns-resize', e:'ew-resize', w:'ew-resize', nw:'nwse-resize', se:'nwse-resize', ne:'nesw-resize', sw:'nesw-resize' };
+    panelResizeState = {
+      edge,
+      startX: e.clientX / z, startY: e.clientY / z,
+      startW: rect.width, startH: rect.height,
+      startLeft: rect.left, startTop: rect.top,
+    };
+    const shield = document.getElementById('drag-shield');
+    shield.style.cursor = cursors[edge] || 'default';
+    shield.classList.add('active');
+    document.body.style.userSelect = 'none';
+  }
+
+  function toggleStatMinimize() {
+    statMinimized = !statMinimized;
+    document.getElementById('stat-panel').classList.toggle('minimized', statMinimized);
+    document.getElementById('stat-minimize-btn').textContent = statMinimized ? '□' : '—';
+  }
+
+  document.getElementById('stat-titlebar').addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    draggingPanel = true;
+    const z = panelZoom();
+    const panel = document.getElementById('stat-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.right = 'auto';
+    panel.style.left = rect.left + 'px';
+    panel.style.top  = rect.top  + 'px';
+    dragOffsetX = e.clientX / z - rect.left;
+    dragOffsetY = e.clientY / z - rect.top;
+    const shield = document.getElementById('drag-shield');
+    shield.style.cursor = 'grabbing';
+    shield.classList.add('active');
+    document.body.style.cursor = 'grabbing';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  // === DICE ROLLER ===
+  function rollDice(sides) {
+    const countEl = document.getElementById('dice-count');
+    const modEl = document.getElementById('dice-modifier');
+    diceCount = countEl ? Math.max(1, Math.min(4, parseInt(countEl.value) || 1)) : diceCount;
+    diceModifier = modEl ? (parseInt(modEl.value) || 0) : diceModifier;
+    const rolls = Array.from({ length: diceCount }, () => Math.floor(Math.random() * sides) + 1);
+    const total = rolls.reduce((a, b) => a + b, 0) + diceModifier;
+    const detail = diceCount > 1
+      ? `[${rolls.join(' + ')}]${diceModifier !== 0 ? (diceModifier > 0 ? ' + ' : ' − ') + Math.abs(diceModifier) : ''}`
+      : (diceModifier !== 0 ? (diceModifier > 0 ? `+${diceModifier}` : `${diceModifier}`) : '');
+    const expr = `${diceCount}d${sides}${diceModifier > 0 ? '+' + diceModifier : diceModifier < 0 ? diceModifier : ''}`;
+    diceHistory.unshift({ expr, total, detail });
+    if (diceHistory.length > 5) diceHistory.pop();
+    renderDicePanel();
+  }
+
+  function renderDicePanel() {
+    const panel = document.getElementById('dice-panel');
+    if (!panel) return;
+    const dies = [4, 6, 8, 10, 12, 20, 100];
+    const latest = diceHistory[0];
+    const history = diceHistory.slice(1);
+    panel.innerHTML = `
+      <div class="dice-btn-row">
+        ${dies.map(d => `<button class="btn-die" onclick="rollDice(${d})">d${d}</button>`).join('')}
+      </div>
+      <div class="dice-controls-row">
+        <label>Count</label>
+        <input id="dice-count" type="number" min="1" max="4" value="${diceCount}">
+        <label>Mod</label>
+        <input id="dice-modifier" type="number" value="${diceModifier}">
+      </div>
+      ${latest ? `
+        <div class="dice-result">
+          <div class="dice-result-label">Result</div>
+          <div class="dice-result-value">${latest.total}</div>
+          ${latest.detail ? `<div class="dice-result-detail">${latest.detail}</div>` : ''}
+        </div>` : ''}
+      ${history.length > 0 ? `
+        <div class="dice-history">
+          ${history.map(h => `
+            <div class="dice-history-item">
+              <span class="dice-hist-expr">${h.expr}</span>
+              <span class="dice-hist-val">${h.total}</span>
+            </div>`).join('')}
+        </div>` : ''}
+    `;
+  }
+
+  function toggleDicePanel() {
+    diceMenuOpen = !diceMenuOpen;
+    const panel = document.getElementById('dice-panel');
+    if (panel) panel.classList.toggle('open', diceMenuOpen);
+    if (diceMenuOpen) renderDicePanel();
   }
 
   // === HEADER ===
@@ -1492,6 +1955,12 @@
     const wrap = document.querySelector('.formula-dropdown-wrap');
     if (wrap && !wrap.contains(e.target)) {
       document.getElementById('formula-panel')?.classList.remove('open');
+    }
+  });
+  document.addEventListener('click', e => {
+    if (diceMenuOpen && !e.composedPath().some(el => el.classList?.contains('dice-dropdown-wrap'))) {
+      diceMenuOpen = false;
+      document.getElementById('dice-panel')?.classList.remove('open');
     }
   });
 
@@ -1507,6 +1976,9 @@
         <div id="rest-menu" class="rest-menu${restMenuOpen ? '' : ' hidden'}">
           <button onclick="shortRest()">Short Rest</button>
           <button onclick="longRest()">Long Rest</button>
+          <hr style="border:none;border-top:1px solid #0f2535;margin:2px 0;">
+          <button onclick="exportCharacter()">Export…</button>
+          <button onclick="importCharacter()">Import…</button>
         </div>
       </div>
       <button class="formula-dropdown-btn" onclick="openStatPanel()" title="Open material viewer" style="margin-left:4px;">Materials</button>
@@ -1517,6 +1989,25 @@
           <div class="formula-row"><span class="formula-lhs">Spell Attack</span><span>= d20 + Spell Mod + Proficiency</span></div>
           <div class="formula-row"><span class="formula-lhs">Spell Save DC</span><span>= 8 + Spell Mod + Proficiency</span></div>
         </div>
+      </div>
+      <div class="dice-dropdown-wrap">
+        <button class="dice-dropdown-btn"
+          onclick="toggleDicePanel(); event.stopPropagation();">🎲 Roll ▾</button>
+        <div class="dice-panel" id="dice-panel"></div>
+      </div>
+      <div style="display:flex;gap:0;align-items:center;">
+        <button class="formula-dropdown-btn stat-tab-btn${statPanelOpen ? ' active' : ''}"
+          onclick="toggleStatPanel()" style="border-radius:4px 0 0 4px;white-space:nowrap;">Stat Blocks ${statPanelOpen ? '▲' : '▼'}</button>
+        ${Array.from(statBlocks.entries()).map(([id, sb]) => {
+          const isActive = id === activeStatId;
+          const icon = sb.type.startsWith('image/') ? '🖼' : '📄';
+          return `<button class="formula-dropdown-btn${isActive ? ' stat-tab-btn active' : ''}"
+            onclick="activateStatBlock('${id}')"
+            style="border-left:none;border-radius:0;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+            title="${sb.name}">${icon} ${sb.name}</button>`;
+        }).join('')}
+        <button class="formula-dropdown-btn" onclick="pickStatFile()"
+          title="Add stat block" style="border-left:none;border-radius:0 4px 4px 0;padding:5px 10px;">+</button>
       </div>
     `;
   }
@@ -1771,83 +2262,35 @@
     update(s => s.activeSpells.splice(idx, 1));
   }
 
-  // === STAT PANEL — FLOATING / DRAG / MINIMIZE ===
-  let statVisible = false;
-  let statMinimized = false;
-  let statPinned = false;
-
-  function openStatPanel() {
-    statVisible = true;
-    document.getElementById('stat-panel').style.display = 'flex';
-  }
-  function closeStatPanel() {
-    statVisible = false;
-    document.getElementById('stat-panel').style.display = 'none';
-  }
-  let draggingPanel = false;
-  let dragOffsetX = 0, dragOffsetY = 0;
+  // === COLUMN DRAG STATE ===
   let colDragState = null;
 
-  function toggleStatPin() {
-    const panel = document.getElementById('stat-panel');
-    const rect = panel.getBoundingClientRect();
-    if (!statPinned) {
-      panel.style.position = 'absolute';
-      panel.style.right = 'auto';
-      panel.style.bottom = 'auto';
-      panel.style.left = (rect.left + window.scrollX) + 'px';
-      panel.style.top  = (rect.top  + window.scrollY) + 'px';
-      statPinned = true;
-    } else {
-      panel.style.position = 'fixed';
-      panel.style.right = 'auto';
-      panel.style.bottom = 'auto';
-      panel.style.left = rect.left + 'px';
-      panel.style.top  = rect.top  + 'px';
-      statPinned = false;
-    }
-    document.getElementById('stat-pin-btn').classList.toggle('active', statPinned);
-  }
-
-  function toggleStatMinimize() {
-    statMinimized = !statMinimized;
-    const panel = document.getElementById('stat-panel');
-    panel.classList.toggle('minimized', statMinimized);
-    document.getElementById('stat-minimize-btn').textContent = statMinimized ? '□' : '—';
-  }
-
-  document.getElementById('stat-titlebar').addEventListener('mousedown', e => {
-    if (e.target.tagName === 'BUTTON') return;
-    draggingPanel = true;
-    const panel = document.getElementById('stat-panel');
-    const rect = panel.getBoundingClientRect();
-    panel.style.right = 'auto';
-    panel.style.bottom = 'auto';
-    if (statPinned) {
-      panel.style.left = (rect.left + window.scrollX) + 'px';
-      panel.style.top  = (rect.top  + window.scrollY) + 'px';
-    } else {
-      panel.style.left = rect.left + 'px';
-      panel.style.top  = rect.top  + 'px';
-    }
-    dragOffsetX = e.clientX - rect.left;
-    dragOffsetY = e.clientY - rect.top;
-    document.body.style.cursor = 'grabbing';
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-  });
   document.addEventListener('mousemove', e => {
-    if (!draggingPanel) return;
-    const panel = document.getElementById('stat-panel');
-    if (statPinned) {
-      panel.style.left = (e.clientX - dragOffsetX + window.scrollX) + 'px';
-      panel.style.top  = (e.clientY - dragOffsetY + window.scrollY) + 'px';
-    } else {
-      panel.style.left = (e.clientX - dragOffsetX) + 'px';
-      panel.style.top  = (e.clientY - dragOffsetY) + 'px';
+    const z = panelZoom();
+    const mx = e.clientX / z, my = e.clientY / z;
+    if (draggingPanel) {
+      const panel = document.getElementById('stat-panel');
+      panel.style.left = (mx - dragOffsetX) + 'px';
+      panel.style.top  = (my - dragOffsetY) + 'px';
     }
-  });
-  document.addEventListener('mousemove', e => {
+    if (panelResizeState) {
+      const { edge, startX, startY, startW, startH, startLeft, startTop } = panelResizeState;
+      const dx = mx - startX;
+      const dy = my - startY;
+      const panel = document.getElementById('stat-panel');
+      if (edge.includes('e'))  panel.style.width  = Math.max(280, startW + dx) + 'px';
+      if (edge.includes('s'))  panel.style.height = Math.max(160, startH + dy) + 'px';
+      if (edge.includes('w')) {
+        const newW = Math.max(280, startW - dx);
+        panel.style.width = newW + 'px';
+        panel.style.left  = (startLeft + startW - newW) + 'px';
+      }
+      if (edge.includes('n')) {
+        const newH = Math.max(160, startH - dy);
+        panel.style.height = newH + 'px';
+        panel.style.top    = (startTop + startH - newH) + 'px';
+      }
+    }
     if (!colDragState) return;
     const cols = document.querySelector('.columns');
     const totalW = cols.offsetWidth;
@@ -1866,15 +2309,21 @@
     applyColWidths(colDragState.currentLeftW, colDragState.currentRightW);
   });
   document.addEventListener('mouseup', () => {
+    if (draggingPanel || panelResizeState) {
+      draggingPanel = false;
+      panelResizeState = null;
+      document.getElementById('drag-shield').classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
     if (colDragState) {
       const { currentLeftW, currentRightW } = colDragState;
       document.querySelectorAll('.col-handle').forEach(h => h.classList.remove('dragging'));
       colDragState = null;
       update(s => { s.layout.leftW = currentLeftW; s.layout.rightW = currentRightW; });
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
     }
-    draggingPanel = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
   });
 
   document.addEventListener('dragover', e => {
@@ -1934,13 +2383,6 @@
     document.body.style.userSelect = 'none';
   }
 
-  // === VIEWER SCROLL HELPERS ===
-  function scrollToViewerZone() {
-    document.getElementById('viewer-clear-zone').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-  function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
 
   // === RENDER ===
   function render() {
