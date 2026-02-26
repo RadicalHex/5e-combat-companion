@@ -1100,7 +1100,8 @@
       passPerc: 10,
       levelLabel: '1 Fighter',
       initiative: 0,
-      speed: 30
+      speed: 30,
+      speedSwim: 0, speedClimb: 0, speedFly: 0
     },
     profBonus: 2,
     spellcastingAbility: 'wis',
@@ -1179,6 +1180,9 @@
   if (state.skillsOpen === undefined) state.skillsOpen = true;
   if (!state.skills) state.skills = { ...DEFAULTS.skills };
   if (!state.customSkills) state.customSkills = [];
+  if (state.stats.speedSwim === undefined) state.stats.speedSwim = 0;
+  if (state.stats.speedClimb === undefined) state.stats.speedClimb = 0;
+  if (state.stats.speedFly === undefined) state.stats.speedFly = 0;
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
@@ -1187,6 +1191,7 @@
 
   // === SECTION EDIT MODE ===
   let editSection = null;
+  let speedExpanded = false;
 
   function sectionTitle(label, key) {
     const editing = editSection === key;
@@ -1206,8 +1211,9 @@
   function setEditSection(key) {
     editSection = key;
     if (key === 'senses' && !state.sensesOpen) { state.sensesOpen = true; saveState(); }
-    renderHP();
+    render();
   }
+  function toggleSpeedExpand() { speedExpanded = !speedExpanded; renderHP(); }
 
   function saveSection(key) {
     const g = id => document.getElementById(id)?.value;
@@ -1217,15 +1223,14 @@
       vals.max     = g('edit-hp-max');
       vals.temp    = g('edit-hp-temp');
     } else if (key === 'combat') {
-      ['ac','initiative','speed'].forEach(k => vals[k] = g('edit-' + k));
+      ['ac','initiative','speed','speedSwim','speedClimb','speedFly'].forEach(k => vals[k] = g('edit-' + k));
       vals.profBonus = g('edit-profbonus');
-      vals.levelLabel = g('edit-level');
+      vals.passPerc = g('edit-passperc');
     } else if (key === 'scores') {
       ['str','dex','con','int','wis','cha'].forEach(k => vals[k] = g('edit-' + k));
     } else if (key === 'saves') {
       ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => vals[k] = g('edit-' + k));
     } else if (key === 'spells') {
-      vals.passPerc = g('edit-passperc');
       vals.spellDC  = g('edit-spelldc');
       vals.spellAtk = g('edit-spellatk');
     } else if (key === 'senses') {
@@ -1242,8 +1247,11 @@
         if (!isNaN(+vals.ac))         s.stats.ac         = +vals.ac;
         if (!isNaN(+vals.initiative))  s.stats.initiative  = +vals.initiative;
         if (!isNaN(+vals.speed))       s.stats.speed       = +vals.speed;
+        if (!isNaN(+vals.speedSwim))   s.stats.speedSwim   = Math.max(0, +vals.speedSwim);
+        if (!isNaN(+vals.speedClimb))  s.stats.speedClimb  = Math.max(0, +vals.speedClimb);
+        if (!isNaN(+vals.speedFly))    s.stats.speedFly    = Math.max(0, +vals.speedFly);
         if (!isNaN(+vals.profBonus))  { s.profBonus = +vals.profBonus; s.spellDCOverride = null; s.spellAtkOverride = null; }
-        if (vals.levelLabel?.trim())   s.stats.levelLabel  = vals.levelLabel.trim();
+        if (!isNaN(+vals.passPerc))   s.stats.passPerc    = +vals.passPerc;
       } else if (key === 'scores') {
         ['str','dex','con','int','wis','cha'].forEach(k => {
           if (!isNaN(+vals[k])) s.stats[k] = Math.max(1, Math.min(30, +vals[k]));
@@ -1253,7 +1261,6 @@
           if (!isNaN(+vals[k])) s.stats[k] = +vals[k];
         });
       } else if (key === 'spells') {
-        if (!isNaN(+vals.passPerc))  s.stats.passPerc    = +vals.passPerc;
         if (vals.spellDC  !== undefined) s.spellDCOverride  = vals.spellDC.trim()  === '' ? null : +vals.spellDC;
         if (vals.spellAtk !== undefined) s.spellAtkOverride = vals.spellAtk.trim() === '' ? null : +vals.spellAtk;
       } else if (key === 'senses') {
@@ -1276,7 +1283,6 @@
     const isStats  = editSection === 'combat';
     const isScores = editSection === 'scores';
     const isSaves  = editSection === 'saves';
-    const isSpells = editSection === 'spells';
 
     el.innerHTML = `
       ${sectionTitle('Character', 'hp')}
@@ -1308,15 +1314,34 @@
       ${isStats ? `
         <div class="stat-row"><span class="stat-label">AC</span><input class="edit-input-sm" id="edit-ac" type="number" value="${st.ac}"></div>
         <div class="stat-row"><span class="stat-label">Initiative</span><input class="edit-input-sm" id="edit-initiative" type="number" value="${st.initiative}"></div>
-        <div class="stat-row"><span class="stat-label">Speed</span><input class="edit-input-sm" id="edit-speed" type="number" value="${st.speed}"></div>
+        <div class="stat-row"><span class="stat-label">Walk ft.</span><input class="edit-input-sm" id="edit-speed" type="number" value="${st.speed}"></div>
+        <div class="stat-row"><span class="stat-label">Swim ft.</span><input class="edit-input-sm" id="edit-speedSwim" type="number" value="${st.speedSwim}"></div>
+        <div class="stat-row"><span class="stat-label">Climb ft.</span><input class="edit-input-sm" id="edit-speedClimb" type="number" value="${st.speedClimb}"></div>
+        <div class="stat-row"><span class="stat-label">Fly ft.</span><input class="edit-input-sm" id="edit-speedFly" type="number" value="${st.speedFly}"></div>
         <div class="stat-row"><span class="stat-label">Proficiency</span><input class="edit-input-sm" id="edit-profbonus" type="number" value="${state.profBonus}"></div>
-        <div class="stat-row"><span class="stat-label">Level</span><input class="edit-input-sm edit-input-wide" id="edit-level" type="text" value="${st.levelLabel}"></div>
+        <div class="stat-row"><span class="stat-label">Pass. Percep.</span><input class="edit-input-sm" id="edit-passperc" type="number" value="${st.passPerc}"></div>
       ` : `
         <div class="stat-row"><span class="stat-label">AC</span><span class="stat-value editable-stat" onclick="editStat('ac')" title="Click to edit">${st.ac}</span></div>
         <div class="stat-row"><span class="stat-label">Initiative</span><span class="stat-value editable-stat" onclick="editStat('initiative')" title="Click to edit">+${st.initiative}</span></div>
-        <div class="stat-row"><span class="stat-label">Speed</span><span class="stat-value editable-stat" onclick="editStat('speed')" title="Click to edit">${st.speed} ft.</span></div>
+        <div class="stat-row">
+          <span class="stat-label">Speed
+            <button class="btn-sm" onclick="toggleSpeedExpand()" title="${speedExpanded ? 'Collapse' : 'Expand'} speeds" style="font-size:0.6rem;padding:0 4px;margin-left:4px;">${speedExpanded ? '▲' : '▶'}</button>
+          </span>
+          <span class="stat-value editable-stat" onclick="editStat('speed')" title="Click to edit">${st.speed} ft.</span>
+        </div>
+        ${speedExpanded ? `
+          <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
+            <span class="stat-label" style="color:#5a8a9a;">Swim</span><span class="stat-value editable-stat" onclick="editStat('speedSwim')" title="Click to edit">${st.speedSwim} ft.</span>
+          </div>
+          <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
+            <span class="stat-label" style="color:#5a8a9a;">Climb</span><span class="stat-value editable-stat" onclick="editStat('speedClimb')" title="Click to edit">${st.speedClimb} ft.</span>
+          </div>
+          <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
+            <span class="stat-label" style="color:#5a8a9a;">Fly</span><span class="stat-value editable-stat" onclick="editStat('speedFly')" title="Click to edit">${st.speedFly} ft.</span>
+          </div>
+        ` : ''}
         <div class="stat-row"><span class="stat-label">Proficiency</span><span class="stat-value editable-stat" onclick="editProfBonus()" title="Click to edit">+${state.profBonus}</span></div>
-        <div class="stat-row"><span class="stat-label">Level</span><span class="stat-value editable-stat" onclick="editStat('levelLabel')" title="Click to edit">${st.levelLabel}</span></div>
+        <div class="stat-row"><span class="stat-label">Pass. Percep.</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
       `}
 
       <hr class="divider">
@@ -1351,29 +1376,6 @@
         }).join('')}
       </div>
 
-      <hr class="divider">
-      ${sectionTitle('Spellcasting', 'spells')}
-      ${isSpells ? `
-        <div class="stat-row"><span class="stat-label">Passive Perception</span><input class="edit-input-sm" id="edit-passperc" type="number" value="${st.passPerc}"></div>
-        <div class="stat-row">
-          <span class="stat-label">Spell Ability</span>
-          <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
-            ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
-          </select>
-        </div>
-        <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
-        <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
-      ` : `
-        <div class="stat-row"><span class="stat-label">Passive Perception</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
-        <div class="stat-row">
-          <span class="stat-label">Spell Ability</span>
-          <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
-            ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
-          </select>
-        </div>
-        <div class="stat-row"><span class="stat-label">Spell Save DC <span style="font-size:0.6rem;color:#2a6a7a;letter-spacing:0">${state.spellDCOverride !== null ? '✎' : '(auto)'}</span></span><span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override (blank to reset)">${getSpellDC()}</span></div>
-        <div class="stat-row"><span class="stat-label">Spell Attack <span style="font-size:0.6rem;color:#2a6a7a;letter-spacing:0">${state.spellAtkOverride !== null ? '✎' : '(auto)'}</span></span><span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override (blank to reset)">+${getSpellAtk()}</span></div>
-      `}
       ${renderSenses()}
 
       <hr class="divider">
@@ -1449,7 +1451,8 @@
     savStr: 'STR Save', savDex: 'DEX Save', savCon: 'CON Save',
     savInt: 'INT Save', savWis: 'WIS Save', savCha: 'CHA Save',
     passPerc: 'Passive Perception',
-    initiative: 'Initiative modifier', speed: 'Speed (ft)',
+    initiative: 'Initiative modifier', speed: 'Walk speed (ft)',
+    speedSwim: 'Swim speed (ft)', speedClimb: 'Climb speed (ft)', speedFly: 'Fly speed (ft)',
     levelLabel: 'Level & Class'
   };
   const STRING_STAT_KEYS = new Set(['levelLabel']);
@@ -1664,9 +1667,40 @@
   }
   function renderSlots() {
     const visible = state.slotsVisible;
+    const isSpells = editSection === 'spells';
     document.getElementById('slots-section').innerHTML = `
-      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-        Spell Slots
+      ${sectionTitle('Spell Slots', 'spells')}
+      ${isSpells ? `
+        <div class="stat-row" style="margin-bottom:4px;">
+          <span class="stat-label">Spell Ability</span>
+          <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+            ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
+          </select>
+        </div>
+        <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
+        <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
+        <hr class="divider">
+      ` : `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+          <div class="stat-row" style="flex:1;min-width:80px;">
+            <span class="stat-label">Ability</span>
+            <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+              ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
+            </select>
+          </div>
+          <div class="stat-row" style="flex:1;min-width:60px;">
+            <span class="stat-label">DC</span>
+            <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+          </div>
+          <div class="stat-row" style="flex:1;min-width:60px;">
+            <span class="stat-label">Atk</span>
+            <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+          </div>
+        </div>
+        <hr class="divider">
+      `}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-size:0.75rem;color:#5a8a9a;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Slots</span>
         <button class="btn-sm" onclick="toggleSlotsVisible()" title="${visible ? 'Hide' : 'Show'} spell slots">
           ${visible ? '▲' : '▼'}
         </button>
@@ -2015,6 +2049,7 @@
   function renderHeader() {
     document.getElementById('app-header').innerHTML = `
       <h1 onclick="editCharacterName()" title="Click to rename" style="cursor:pointer">${state.characterName}</h1>
+      <span onclick="editStat('levelLabel')" title="Click to edit level &amp; class" style="cursor:pointer;font-size:0.8rem;color:#5a8a9a;margin-left:2px;margin-right:8px;white-space:nowrap;">${state.stats.levelLabel}</span>
       <div class="rest-dropdown-wrap">
         <button class="rest-menu-btn" onclick="toggleRestMenu()">⚡ Rests ▾</button>
         <div id="rest-menu" class="rest-menu${restMenuOpen ? '' : ' hidden'}">
