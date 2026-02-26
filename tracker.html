@@ -1231,9 +1231,13 @@
 
   // === HEADER ===
   let restMenuOpen = false;
+  function editCharacterName() {
+    const val = prompt('Character name:', state.characterName);
+    if (val !== null && val.trim() !== '') update(s => s.characterName = val.trim());
+  }
   function renderHeader() {
     document.getElementById('app-header').innerHTML = `
-      <h1>Astraeus</h1>
+      <h1 onclick="editCharacterName()" title="Click to rename" style="cursor:pointer">${state.characterName}</h1>
       <div class="rest-dropdown-wrap">
         <button class="rest-menu-btn" onclick="toggleRestMenu()">⚡ Rests ▾</button>
         <div id="rest-menu" class="rest-menu${restMenuOpen ? '' : ' hidden'}">
