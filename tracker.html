@@ -919,6 +919,7 @@
       </button>
       <button id="stat-pin-btn" onclick="toggleStatPin()" title="Pin to page">📌</button>
       <button id="stat-minimize-btn" onclick="toggleStatMinimize()" title="Minimize">—</button>
+      <button id="stat-close-btn" onclick="closeStatPanel()" title="Close">✕</button>
     </div>
     <div id="stat-zoom-controls">
       <button class="btn-sm" onclick="adjustZoom(-0.25)">−</button>
@@ -1508,7 +1509,7 @@
           <button onclick="longRest()">Long Rest</button>
         </div>
       </div>
-      <button class="formula-dropdown-btn" onclick="toggleStatPanel()" title="${statVisible ? 'Hide' : 'Show'} material viewer" style="margin-left:4px;">${statVisible ? 'Materials ✕' : 'Materials'}</button>
+      <button class="formula-dropdown-btn" onclick="openStatPanel()" title="Open material viewer" style="margin-left:4px;">Materials</button>
       <div class="formula-dropdown-wrap">
         <button class="formula-dropdown-btn" onclick="toggleFormulaPanel(); event.stopPropagation();">Formulas ▾</button>
         <div class="formula-panel" id="formula-panel">
@@ -1775,10 +1776,13 @@
   let statMinimized = false;
   let statPinned = false;
 
-  function toggleStatPanel() {
-    statVisible = !statVisible;
-    document.getElementById('stat-panel').style.display = statVisible ? 'flex' : 'none';
-    renderHeader();
+  function openStatPanel() {
+    statVisible = true;
+    document.getElementById('stat-panel').style.display = 'flex';
+  }
+  function closeStatPanel() {
+    statVisible = false;
+    document.getElementById('stat-panel').style.display = 'none';
   }
   let draggingPanel = false;
   let dragOffsetX = 0, dragOffsetY = 0;
