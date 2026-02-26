@@ -2290,7 +2290,7 @@
     if (draggingPanel) {
       const panel = document.getElementById('stat-panel');
       panel.style.left = (mx - dragOffsetX) + 'px';
-      panel.style.top  = (my - dragOffsetY) + 'px';
+      panel.style.top  = Math.max(0, (my - dragOffsetY)) + 'px';
     }
     if (panelResizeState) {
       const { edge, startX, startY, startW, startH, startLeft, startTop } = panelResizeState;
@@ -2306,8 +2306,10 @@
       }
       if (edge.includes('n')) {
         const newH = Math.max(160, startH - dy);
-        panel.style.height = newH + 'px';
-        panel.style.top    = (startTop + startH - newH) + 'px';
+        const rawTop = startTop + startH - newH;
+        const clampedTop = Math.max(0, rawTop);
+        panel.style.height = (newH - (clampedTop - rawTop)) + 'px';
+        panel.style.top    = clampedTop + 'px';
       }
     }
     if (!colDragState) return;
