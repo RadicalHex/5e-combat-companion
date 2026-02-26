@@ -490,6 +490,42 @@
     .formula-row { display: flex; gap: 8px; }
     .formula-lhs { color: #4a7a8a; min-width: 90px; }
 
+    /* === CUSTOM ATTACKS === */
+    .attack-entry {
+      background: #071824;
+      border: 1px solid #0f2535;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+    }
+    .attack-entry-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .attack-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      color: #a8d8e8;
+      cursor: pointer;
+    }
+    .attack-name:hover { color: #2ab8d0; }
+    .attack-stats { font-size: 0.75rem; color: #8ab8c8; margin-bottom: 3px; }
+    .attack-notes { font-size: 0.7rem; color: #4a7a8a; font-style: italic; }
+    .btn-remove-attack {
+      background: none; border: none; color: #3a6a7a;
+      cursor: pointer; font-size: 0.85rem; padding: 0 4px;
+    }
+    .btn-remove-attack:hover { color: #d05050; }
+    .btn-add-attack {
+      width: 100%; margin-top: 6px;
+      background: #071824; border: 1px dashed #1a3a4a;
+      color: #4a7a8a; border-radius: 4px; padding: 6px;
+      cursor: pointer; font-size: 0.75rem; letter-spacing: 0.05em;
+    }
+    .btn-add-attack:hover { border-color: #2ab8d0; color: #2ab8d0; }
+
     /* === ACTIVE SPELLS === */
     .active-spell {
       display: flex;
@@ -782,6 +818,8 @@
       <div id="active-spells-section"></div>
       <hr class="divider">
       <div id="slots-section"></div>
+      <hr class="divider">
+      <div id="attacks-section-wrap"></div>
     </div>
     <div class="panel" id="panel-right">
     </div>
@@ -1412,6 +1450,64 @@
       if (menu) menu.classList.add('hidden');
     }
   });
+  // === CUSTOM ATTACKS ===
+  function addAttack() {
+    const name = prompt('Attack name (e.g. Sharpshooter Shot):');
+    if (!name) return;
+    const hit = prompt('To Hit bonus (e.g. +7):');
+    if (hit === null) return;
+    const dmg = prompt('Damage (e.g. 1d8+10 piercing):') ?? '';
+    const notes = prompt('Notes (e.g. -5/+10, ignore half cover) — leave blank if none:') ?? '';
+    update(s => s.attacks.push({
+      id: String(Date.now()),
+      name: name.trim(),
+      hit: hit.trim(),
+      dmg: dmg.trim(),
+      notes: notes.trim()
+    }));
+  }
+  function removeAttack(id) {
+    update(s => s.attacks = s.attacks.filter(a => a.id !== id));
+  }
+  function editAttack(id) {
+    const atk = state.attacks.find(a => a.id === id);
+    if (!atk) return;
+    const name = prompt('Attack name:', atk.name);
+    if (name === null) return;
+    const hit = prompt('To Hit:', atk.hit);
+    if (hit === null) return;
+    const dmg = prompt('Damage:', atk.dmg);
+    const notes = prompt('Notes:', atk.notes);
+    update(s => {
+      const a = s.attacks.find(a => a.id === id);
+      if (!a) return;
+      a.name = name.trim();
+      a.hit = hit.trim();
+      a.dmg = (dmg ?? atk.dmg).trim();
+      a.notes = (notes ?? atk.notes).trim();
+    });
+  }
+  function renderAttacks() {
+    const { attacks } = state;
+    return `
+      <div id="attacks-section">
+        <div class="panel-title">Attacks</div>
+        ${attacks.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:8px;">None defined</div>' : ''}
+        ${attacks.map(a => `
+          <div class="attack-entry">
+            <div class="attack-entry-header">
+              <span class="attack-name" onclick="editAttack('${a.id}')" title="Click to edit">${a.name}</span>
+              <button class="btn-remove-attack" onclick="removeAttack('${a.id}')">✕</button>
+            </div>
+            <div class="attack-stats">${a.hit} to hit &nbsp;·&nbsp; ${a.dmg || '—'}</div>
+            ${a.notes ? `<div class="attack-notes">${a.notes}</div>` : ''}
+          </div>
+        `).join('')}
+        <button class="btn-add-attack" onclick="addAttack()">+ Add Attack</button>
+      </div>
+    `;
+  }
+
   // === ACTIVE SPELLS ===
   function renderActiveSpells() {
     const spells = state.activeSpells;
@@ -1618,6 +1714,7 @@
     renderHP();
     renderActiveSpells();
     renderSlots();
+    document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
     applyColWidths();
   }
 
