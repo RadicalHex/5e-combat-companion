@@ -539,6 +539,9 @@
     }
     .editable-stat:hover { color: #7ad4e8; border-bottom-color: #7ad4e8; }
 
+    /* === SENSES PANEL === */
+    .senses-grid { margin-top: 8px; }
+
     /* === IMMUNITIES & RESISTANCES === */
     .imm-summary {
       display: grid;
@@ -961,6 +964,7 @@
       </div>
       <div class="stat-row"><span class="stat-label">Spell Save DC ${state.spellDCOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override (blank to reset)">${getSpellDC()}</span></div>
       <div class="stat-row"><span class="stat-label">Spell Attack ${state.spellAtkOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override (blank to reset)">+${getSpellAtk()}</span></div>
+      ${renderSenses()}
 
       <hr class="divider">
       ${renderImmRes()}
@@ -1049,6 +1053,33 @@
     } else if (!isNaN(+val)) {
       update(s => s.stats[key] = +val);
     }
+  }
+
+  // === SENSES ===
+  function toggleSenses() {
+    update(s => s.sensesOpen = !s.sensesOpen);
+  }
+  function editSense(key) {
+    const labels = { truesight: 'Truesight (ft)', blindsight: 'Blindsight (ft)', tremorsense: 'Tremorsense (ft)' };
+    const val = prompt(labels[key] + ':', state.senses[key]);
+    if (val !== null && !isNaN(+val)) update(s => s.senses[key] = Math.max(0, +val));
+  }
+  function renderSenses() {
+    const { senses, sensesOpen } = state;
+    return `
+      <div style="margin-top:8px;">
+        <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSenses()">
+          Senses <span>${sensesOpen ? '▲' : '▼'}</span>
+        </div>
+        ${sensesOpen ? `
+          <div class="senses-grid">
+            <div class="stat-row"><span class="stat-label">Truesight</span><span class="stat-value editable-stat" onclick="editSense('truesight')" title="Click to edit">${senses.truesight} ft</span></div>
+            <div class="stat-row"><span class="stat-label">Blindsight</span><span class="stat-value editable-stat" onclick="editSense('blindsight')" title="Click to edit">${senses.blindsight} ft</span></div>
+            <div class="stat-row"><span class="stat-label">Tremorsense</span><span class="stat-value editable-stat" onclick="editSense('tremorsense')" title="Click to edit">${senses.tremorsense} ft</span></div>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 
   // === IMMUNITIES & RESISTANCES ===
