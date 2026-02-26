@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Astraeus — Combat Tracker</title>
+  <title>5e Combat Companion</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -782,24 +782,41 @@
 <script>
   // === STATE ===
   const DEFAULTS = {
-    hp: { current: 560, max: 580, temp: 168 },
+    characterName: 'Character',
+    hp: { current: 100, max: 100, temp: 0 },
     slots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
-    stats: {
-      ac: 24,
-      str: 23, dex: 15, con: 30, int: 30, wis: 30, cha: 18,
-      savStr: 7, savDex: 3, savCon: 20, savInt: 20, savWis: 20, savCha: 5,
-      dc: 27, spellAtk: 19, passPerc: 48,
-      levelLabel: '20 Druid', initiative: 12, speed: 40
-    },
+    activeSpells: [],
+    conditions: [],
     immunities: [],
     resistances: [],
     immResOpen: false,
-    activeSpells: [],
-    conditions: [],
-    layout: { leftW: 260, rightW: 300 }
+    layout: { leftW: 260, rightW: 300 },
+    stats: {
+      ac: 15,
+      str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
+      savStr: 0, savDex: 0, savCon: 0, savInt: 0, savWis: 0, savCha: 0,
+      passPerc: 10,
+      levelLabel: '1 Fighter',
+      initiative: 0,
+      speed: 30
+    },
+    profBonus: 2,
+    spellcastingAbility: 'wis',
+    spellDCOverride: null,
+    spellAtkOverride: null,
+    slotsVisible: true,
+    senses: { truesight: 0, blindsight: 0, tremorsense: 0 },
+    sensesOpen: false,
+    attacks: [],
+    inventory: [],
+    inventoryOpen: false,
+    magicItems: [],
+    magicItemsOpen: false,
+    attunementMax: 3,
+    attunedOpen: true,
   };
 
-  const STORAGE_KEY = 'astraeus_v1';
+  const STORAGE_KEY = '5e_tracker_v1';
 
   function loadState() {
     try {
@@ -814,16 +831,31 @@
 
   let state = loadState();
   // Migrate older saved states that lack newer fields
-  if (!state.stats) state.stats = JSON.parse(JSON.stringify(DEFAULTS.stats));
+  if (!state.stats) state.stats = { ...DEFAULTS.stats };
   if (!state.immunities) state.immunities = [];
   if (!state.resistances) state.resistances = [];
   if (state.immResOpen === undefined) state.immResOpen = false;
-  if (state.stats.levelLabel === undefined) state.stats.levelLabel = '20 Druid';
-  if (state.stats.initiative === undefined) state.stats.initiative = 12;
-  if (state.stats.speed === undefined) state.stats.speed = 40;
   if (!state.activeSpells) state.activeSpells = [];
   if (!state.conditions) state.conditions = [];
   if (!state.layout) state.layout = { leftW: 260, rightW: 300 };
+  if (state.stats.levelLabel === undefined) state.stats.levelLabel = '1 Fighter';
+  if (state.stats.initiative === undefined) state.stats.initiative = 0;
+  if (state.stats.speed === undefined) state.stats.speed = 30;
+  if (state.profBonus === undefined) state.profBonus = 2;
+  if (state.spellcastingAbility === undefined) state.spellcastingAbility = 'wis';
+  if (state.spellDCOverride === undefined) state.spellDCOverride = null;
+  if (state.spellAtkOverride === undefined) state.spellAtkOverride = null;
+  if (state.slotsVisible === undefined) state.slotsVisible = true;
+  if (!state.senses) state.senses = { truesight: 0, blindsight: 0, tremorsense: 0 };
+  if (state.sensesOpen === undefined) state.sensesOpen = false;
+  if (!state.attacks) state.attacks = [];
+  if (!state.inventory) state.inventory = [];
+  if (state.inventoryOpen === undefined) state.inventoryOpen = false;
+  if (!state.magicItems) state.magicItems = [];
+  if (state.magicItemsOpen === undefined) state.magicItemsOpen = false;
+  if (state.attunementMax === undefined) state.attunementMax = 3;
+  if (state.attunedOpen === undefined) state.attunedOpen = true;
+  if (state.characterName === undefined) state.characterName = 'Character';
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
@@ -883,8 +915,6 @@
       </div>
 
       <hr class="divider">
-      <div class="stat-row"><span class="stat-label">Spell Save DC</span><span class="stat-value editable-stat" onclick="editStat('dc')" title="Click to edit">${st.dc}</span></div>
-      <div class="stat-row"><span class="stat-label">Spell Attack</span><span class="stat-value editable-stat" onclick="editStat('spellAtk')" title="Click to edit">+${st.spellAtk}</span></div>
       <div class="stat-row"><span class="stat-label">Passive Perception</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
 
       <hr class="divider">
@@ -915,7 +945,7 @@
     ac: 'AC', str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA',
     savStr: 'STR Save', savDex: 'DEX Save', savCon: 'CON Save',
     savInt: 'INT Save', savWis: 'WIS Save', savCha: 'CHA Save',
-    dc: 'Spell Save DC', spellAtk: 'Spell Attack', passPerc: 'Passive Perception',
+    passPerc: 'Passive Perception',
     initiative: 'Initiative modifier', speed: 'Speed (ft)',
     levelLabel: 'Level & Class'
   };
