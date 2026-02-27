@@ -2873,6 +2873,7 @@
           onclick="toggleDicePanel(); event.stopPropagation();">🎲 Roll ▾</button>
         <div class="dice-panel" id="dice-panel"></div>
       </div>
+      <button class="formula-dropdown-btn" onclick="toggleLorePanel()" style="margin-left:4px;">📖 Lore</button>
       <button class="btn-help" onclick="openHelp()" title="Quick Start Guide" style="margin-left:8px;">?</button>
     `;
   }
@@ -3819,6 +3820,40 @@
     }
   }
 
+  function exportLore() {
+    const filename = 'lore-book.json';
+    const blob = new Blob([JSON.stringify(state.loreBook, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function importLore() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (!Array.isArray(parsed)) throw new Error('Expected an array of pages');
+          update(s => {
+            s.loreBook = parsed;
+            s.loreActiveId = parsed.length > 0 ? parsed[0].id : null;
+          });
+          renderLorePanel();
+        } catch (err) { alert('Import failed: ' + err.message); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
   // === RENDER ===
   function render() {
     renderHeader();
@@ -3830,6 +3865,7 @@
     document.getElementById('feats-wrap').innerHTML = renderFeats();
     document.getElementById('skills-wrap').innerHTML = renderSkills();
     applyColWidths();
+    renderLorePanel();
   }
 
   render();
