@@ -2659,6 +2659,27 @@
     document.body.style.userSelect = 'none';
   }
 
+  function startLoreResize(e, edge) {
+    e.preventDefault();
+    e.stopPropagation();
+    const z = panelZoom();
+    const panel = document.getElementById('lore-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.left = rect.left + 'px';
+    panel.style.top  = rect.top  + 'px';
+    const cursors = { n:'ns-resize', s:'ns-resize', e:'ew-resize', w:'ew-resize', nw:'nwse-resize', se:'nwse-resize', ne:'nesw-resize', sw:'nesw-resize' };
+    loreResizeState = {
+      edge,
+      startX: e.clientX / z, startY: e.clientY / z,
+      startW: rect.width, startH: rect.height,
+      startLeft: rect.left, startTop: rect.top,
+    };
+    const shield = document.getElementById('drag-shield');
+    shield.style.cursor = cursors[edge] || 'default';
+    shield.classList.add('active');
+    document.body.style.userSelect = 'none';
+  }
+
   function toggleStatMinimize() {
     statMinimized = !statMinimized;
     document.getElementById('stat-panel').classList.toggle('minimized', statMinimized);
@@ -3587,6 +3608,26 @@
       const dx = mx - startX;
       const dy = my - startY;
       const panel = document.getElementById('stat-panel');
+      if (edge.includes('e'))  panel.style.width  = Math.max(280, startW + dx) + 'px';
+      if (edge.includes('s'))  panel.style.height = Math.max(160, startH + dy) + 'px';
+      if (edge.includes('w')) {
+        const newW = Math.max(280, startW - dx);
+        panel.style.width = newW + 'px';
+        panel.style.left  = (startLeft + startW - newW) + 'px';
+      }
+      if (edge.includes('n')) {
+        const newH = Math.max(160, startH - dy);
+        const rawTop = startTop + startH - newH;
+        const clampedTop = Math.max(0, rawTop);
+        panel.style.height = (newH - (clampedTop - rawTop)) + 'px';
+        panel.style.top    = clampedTop + 'px';
+      }
+    }
+    if (loreResizeState) {
+      const { edge, startX, startY, startW, startH, startLeft, startTop } = loreResizeState;
+      const dx = mx - startX;
+      const dy = my - startY;
+      const panel = document.getElementById('lore-panel');
       if (edge.includes('e'))  panel.style.width  = Math.max(280, startW + dx) + 'px';
       if (edge.includes('s'))  panel.style.height = Math.max(160, startH + dy) + 'px';
       if (edge.includes('w')) {
