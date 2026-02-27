@@ -2580,6 +2580,36 @@
   let statPanelOpen = false;
   let draggingPanel = false;
   let dragOffsetX = 0, dragOffsetY = 0;
+  let draggingLore = false;
+  let loreDragOffsetX = 0, loreDragOffsetY = 0;
+  let loreResizeState = null;
+  let loreMinimized = false;
+  let lorePageMenuOpen = false;
+
+  function toggleLorePanel() {
+    const panel = document.getElementById('lore-panel');
+    if (!panel) return;
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    if (!isOpen) {
+      loreMinimized = false;
+      panel.classList.remove('minimized');
+      document.getElementById('lore-minimize-btn').textContent = '—';
+      renderLorePanel();
+    }
+  }
+
+  function toggleLoreMinimize() {
+    loreMinimized = !loreMinimized;
+    document.getElementById('lore-panel').classList.toggle('minimized', loreMinimized);
+    document.getElementById('lore-minimize-btn').textContent = loreMinimized ? '□' : '—';
+  }
+
+  function toggleLorePageMenu(e) {
+    e.stopPropagation();
+    lorePageMenuOpen = !lorePageMenuOpen;
+    document.getElementById('lore-page-menu').classList.toggle('hidden', !lorePageMenuOpen);
+  }
 
   function toggleStatPanel() {
     statPanelOpen = !statPanelOpen;
@@ -2819,6 +2849,13 @@
       restMenuOpen = false;
       const menu = document.getElementById('rest-menu');
       if (menu) menu.classList.add('hidden');
+    }
+  });
+  // Close lore page menu when clicking outside
+  document.addEventListener('click', e => {
+    if (lorePageMenuOpen && !e.target.closest('#lore-page-dropdown-wrap')) {
+      lorePageMenuOpen = false;
+      document.getElementById('lore-page-menu')?.classList.add('hidden');
     }
   });
   function toggleMaterialsMenu(e) {
