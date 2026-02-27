@@ -1025,6 +1025,41 @@
     .dice-hist-expr { color: #4a7a8a; }
     .dice-hist-val { color: #2a8a8a; }
 
+    /* === MATERIALS DROPDOWN === */
+    .materials-dropdown-wrap { position: relative; }
+    .materials-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 4px;
+      min-width: 180px;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .materials-menu.hidden { display: none; }
+    .materials-menu button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 7px 12px;
+      background: none;
+      border: none;
+      border-bottom: 1px solid #0f2535;
+      color: #8ab8c8;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .materials-menu button:last-child { border-bottom: none; }
+    .materials-menu button:hover { background: #0f2535; color: #a8d8e8; }
+    .materials-menu button.mat-active { color: #2ab8d0; }
+    .materials-menu .mat-divider { border: none; border-top: 1px solid #0f2535; margin: 2px 0; }
+
     /* === HELP MODAL === */
     .help-overlay {
       position: fixed;
@@ -1198,6 +1233,7 @@
     attunementMax: 3,
     currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
     statusOpen: true,
+    spellsOpen: true,
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     hpEffects: {
       aid:            { active: false, value: 5 },
@@ -1283,6 +1319,7 @@
   });
   if (state.characterName === undefined) state.characterName = 'Character';
   if (state.statusOpen === undefined) state.statusOpen = true;
+  if (state.spellsOpen === undefined) state.spellsOpen = true;
   if (state.layout.rightW < 340) state.layout.rightW = 360;
   if (!state.saveProfs) state.saveProfs = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
   if (state.skillsOpen === undefined) state.skillsOpen = true;
@@ -1782,43 +1819,51 @@
     const visible = state.slotsVisible;
     const isSpells = editSection === 'spells';
     document.getElementById('slots-section').innerHTML = `
-      ${sectionTitle('Spell Slots', 'spells')}
-      ${isSpells ? `
-        <div class="stat-row" style="margin-bottom:4px;">
-          <span class="stat-label">Spell Ability</span>
-          <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
-            ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
-          </select>
-        </div>
-        <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
-        <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
-        <hr class="divider">
-      ` : `
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
-          <div class="stat-row" style="flex:1;min-width:80px;">
-            <span class="stat-label">Ability</span>
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Spell Slots</span>
+        ${isSpells
+          ? `<span class="section-edit-controls">
+               <button class="edit-save-btn" onclick="saveSection('spells')">Save</button>
+               <button class="edit-cancel-btn" onclick="setEditSection(null)">✕</button>
+             </span>`
+          : `<span style="display:flex;gap:4px;align-items:center;">
+               <button class="edit-pencil-btn" onclick="setEditSection('spells')" title="Edit">✏</button>
+               <button class="btn-sm" onclick="toggleSlotsVisible()" style="padding:0 6px;">${visible ? '▲' : '▼'}</button>
+             </span>`
+        }
+      </div>
+      ${visible ? `
+        ${isSpells ? `
+          <div class="stat-row" style="margin-bottom:4px;">
+            <span class="stat-label">Spell Ability</span>
             <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
               ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
             </select>
           </div>
-          <div class="stat-row" style="flex:1;min-width:60px;">
-            <span class="stat-label">DC</span>
-            <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+          <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
+          <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
+          <hr class="divider">
+        ` : `
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <div class="stat-row" style="flex:1;min-width:80px;">
+              <span class="stat-label">Ability</span>
+              <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+                ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
+              </select>
+            </div>
+            <div class="stat-row" style="flex:1;min-width:60px;">
+              <span class="stat-label">DC</span>
+              <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+            </div>
+            <div class="stat-row" style="flex:1;min-width:60px;">
+              <span class="stat-label">Atk</span>
+              <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+            </div>
           </div>
-          <div class="stat-row" style="flex:1;min-width:60px;">
-            <span class="stat-label">Atk</span>
-            <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
-          </div>
-        </div>
-        <hr class="divider">
-      `}
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <span style="font-size:0.75rem;color:#5a8a9a;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Slots</span>
-        <button class="btn-sm" onclick="toggleSlotsVisible()" title="${visible ? 'Hide' : 'Show'} spell slots">
-          ${visible ? '▲' : '▼'}
-        </button>
-      </div>
-      ${visible ? renderSlotsBody() : ''}
+          <hr class="divider">
+        `}
+        ${renderSlotsBody()}
+      ` : ''}
     `;
   }
 
@@ -2138,6 +2183,7 @@
 
   // === HEADER ===
   let restMenuOpen = false;
+  let materialsMenuOpen = false;
   function toggleFormulaPanel() {
     const panel = document.getElementById('formula-panel');
     panel.classList.toggle('open');
@@ -2173,7 +2219,18 @@
           <button onclick="importCharacter()">Import…</button>
         </div>
       </div>
-      <button class="formula-dropdown-btn" onclick="toggleStatPanel()" title="Open material viewer" style="margin-left:4px;">Materials</button>
+      <div class="materials-dropdown-wrap">
+        <button class="formula-dropdown-btn${statPanelOpen ? ' stat-tab-btn active' : ''}" onclick="toggleMaterialsMenu(event)">Materials ▾</button>
+        <div id="materials-menu" class="materials-menu${materialsMenuOpen ? '' : ' hidden'}">
+          ${Array.from(statBlocks.entries()).map(([id, sb]) => {
+            const isActive = id === activeStatId;
+            const icon = sb.type.startsWith('image/') ? '🖼' : '📄';
+            return `<button class="${isActive ? 'mat-active' : ''}" onclick="selectMaterial('${id}')" title="${sb.name}">${icon} ${sb.name}</button>`;
+          }).join('')}
+          ${statBlocks.size > 0 ? '<hr class="mat-divider">' : ''}
+          <button onclick="openMaterialFile()">+ Add file…</button>
+        </div>
+      </div>
       <div class="formula-dropdown-wrap">
         <button class="formula-dropdown-btn" onclick="toggleFormulaPanel(); event.stopPropagation();">Formulas ▾</button>
         <div class="formula-panel" id="formula-panel">
@@ -2186,20 +2243,6 @@
         <button class="dice-dropdown-btn"
           onclick="toggleDicePanel(); event.stopPropagation();">🎲 Roll ▾</button>
         <div class="dice-panel" id="dice-panel"></div>
-      </div>
-      <div style="display:flex;gap:0;align-items:center;">
-        <button class="formula-dropdown-btn stat-tab-btn${statPanelOpen ? ' active' : ''}"
-          onclick="toggleStatPanel()" style="border-radius:4px 0 0 4px;white-space:nowrap;">Stat Blocks ${statPanelOpen ? '▲' : '▼'}</button>
-        ${Array.from(statBlocks.entries()).map(([id, sb]) => {
-          const isActive = id === activeStatId;
-          const icon = sb.type.startsWith('image/') ? '🖼' : '📄';
-          return `<button class="formula-dropdown-btn${isActive ? ' stat-tab-btn active' : ''}"
-            onclick="activateStatBlock('${id}')"
-            style="border-left:none;border-radius:0;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-            title="${sb.name}">${icon} ${sb.name}</button>`;
-        }).join('')}
-        <button class="formula-dropdown-btn" onclick="pickStatFile()"
-          title="Add stat block" style="border-left:none;border-radius:0 4px 4px 0;padding:5px 10px;">+</button>
       </div>
       <button class="btn-help" onclick="openHelp()" title="Quick Start Guide" style="margin-left:8px;">?</button>
     `;
@@ -2214,6 +2257,30 @@
     if (restMenuOpen && !e.target.closest('.rest-dropdown-wrap')) {
       restMenuOpen = false;
       const menu = document.getElementById('rest-menu');
+      if (menu) menu.classList.add('hidden');
+    }
+  });
+  function toggleMaterialsMenu(e) {
+    e.stopPropagation();
+    materialsMenuOpen = !materialsMenuOpen;
+    const menu = document.getElementById('materials-menu');
+    if (menu) menu.classList.toggle('hidden', !materialsMenuOpen);
+  }
+  function selectMaterial(id) {
+    materialsMenuOpen = false;
+    document.getElementById('materials-menu')?.classList.add('hidden');
+    activateStatBlock(id);
+  }
+  function openMaterialFile() {
+    materialsMenuOpen = false;
+    document.getElementById('materials-menu')?.classList.add('hidden');
+    pickStatFile();
+  }
+  // Close materials menu when clicking outside
+  document.addEventListener('click', e => {
+    if (materialsMenuOpen && !e.target.closest('.materials-dropdown-wrap')) {
+      materialsMenuOpen = false;
+      const menu = document.getElementById('materials-menu');
       if (menu) menu.classList.add('hidden');
     }
   });
@@ -2622,23 +2689,32 @@
     update(s => s.statusOpen = !s.statusOpen);
   }
 
+  function toggleSpellsSection() {
+    update(s => s.spellsOpen = !s.spellsOpen);
+  }
   function renderStatus() {
     const spells = state.activeSpells;
     const open = state.statusOpen;
+    const spellsOpen = state.spellsOpen;
 
     const spellsBody = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${spellsOpen ? '6px' : '0'};">
         <span style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;">Active Spells</span>
-        <button class="btn-sm" onclick="addActiveSpell()">+</button>
+        <span style="display:flex;gap:4px;align-items:center;">
+          ${spellsOpen ? `<button class="btn-sm" onclick="addActiveSpell()">+</button>` : ''}
+          <button class="btn-sm" onclick="toggleSpellsSection()" style="padding:0 5px;">${spellsOpen ? '▲' : '▼'}</button>
+        </span>
       </div>
-      ${spells.length === 0 ? '<div class="no-spells">None active</div>' : ''}
-      ${spells.map((sp, i) => `
-        <div class="active-spell">
-          <span class="spell-name">${sp.name}</span>
-          ${sp.concentration ? '<span class="conc-badge">C</span>' : ''}
-          <button class="spell-remove" onclick="removeActiveSpell(${i})" title="End spell">✕</button>
-        </div>
-      `).join('')}
+      ${spellsOpen ? `
+        ${spells.length === 0 ? '<div class="no-spells">None active</div>' : ''}
+        ${spells.map((sp, i) => `
+          <div class="active-spell">
+            <span class="spell-name">${sp.name}</span>
+            ${sp.concentration ? '<span class="conc-badge">C</span>' : ''}
+            <button class="spell-remove" onclick="removeActiveSpell(${i})" title="End spell">✕</button>
+          </div>
+        `).join('')}
+      ` : ''}
     `;
 
     const fx = state.hpEffects;
