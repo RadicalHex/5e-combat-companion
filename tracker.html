@@ -2615,7 +2615,7 @@
             <button class="btn-sm" onclick="adjustItemQty('${i.id}',-1)" style="padding:0 5px;">−</button>
             <span style="font-size:0.75rem;color:#5a8a9a;min-width:24px;text-align:center;">×${qty}</span>
             <button class="btn-sm" onclick="adjustItemQty('${i.id}',1)" style="padding:0 5px;">+</button>
-            <span class="${isMagic ? 'magic-item-name' : 'inv-name'}" onclick="${editFn}" title="Click to rename" style="flex:1;margin-left:6px;">${i.name}</span>
+            <span class="${isMagic ? 'magic-item-name' : 'inv-name'}" ondblclick="${editFn}" title="Double-click to rename" style="flex:1;margin-left:6px;">${i.name}</span>
             ${isMagic ? `
               <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Eqp</button>
               <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Att</button>
