@@ -2040,6 +2040,15 @@
         statBlocks.set(id, { name, type: file.type, url });
         activeStatId = id;
       });
+      if (!statPanelOpen) {
+        statPanelOpen = true;
+        const panel = document.getElementById('stat-panel');
+        panel.classList.add('open');
+        panel.style.left = ''; panel.style.top = '';
+        panel.style.right = '20px';
+        statMinimized = false;
+        panel.classList.remove('minimized');
+      }
       renderStatPanel();
       renderHeader();
     };
