@@ -2081,7 +2081,104 @@
           <hr class="divider">
         `}
         ${renderSlotsBody()}
+        <hr style="border:none;border-top:1px solid #0c2535;margin:8px 0;">
+        ${renderPreparedSpells()}
       ` : ''}
+    `;
+  }
+
+  // === PREPARED SPELLS ===
+  function addPreparedSpell() {
+    const name = prompt('Spell name:');
+    if (!name?.trim()) return;
+    const lvlRaw = prompt('Spell level (1–9):', '1');
+    const level = parseInt(lvlRaw);
+    if (!level || level < 1 || level > 9) return;
+    update(s => s.preparedSpells.push({
+      id: Date.now().toString(),
+      name: name.trim(),
+      level,
+      notes: '',
+      open: false,
+    }));
+  }
+
+  function togglePreparedSpell(id) {
+    update(s => {
+      const sp = s.preparedSpells.find(x => x.id === id);
+      if (sp) sp.open = !sp.open;
+    });
+  }
+
+  function renamePreparedSpell(id) {
+    const sp = state.preparedSpells.find(x => x.id === id);
+    if (!sp) return;
+    const val = prompt('Rename spell:', sp.name);
+    if (val?.trim()) update(s => s.preparedSpells.find(x => x.id === id).name = val.trim());
+  }
+
+  function editPreparedSpellNotes(id) {
+    const sp = state.preparedSpells.find(x => x.id === id);
+    if (!sp) return;
+    const val = prompt('Notes:', sp.notes);
+    if (val !== null) update(s => s.preparedSpells.find(x => x.id === id).notes = val);
+  }
+
+  function removePreparedSpell(id) {
+    update(s => s.preparedSpells = s.preparedSpells.filter(x => x.id !== id));
+  }
+
+  function togglePreparedSpellsOpen() {
+    update(s => s.preparedSpellsOpen = !s.preparedSpellsOpen);
+  }
+
+  function renderPreparedSpells() {
+    const { preparedSpells, preparedSpellsOpen } = state;
+    const ordinals = ['','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+
+    const byLevel = {};
+    preparedSpells.forEach(sp => {
+      if (!byLevel[sp.level]) byLevel[sp.level] = [];
+      byLevel[sp.level].push(sp);
+    });
+    const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b);
+
+    return `
+      <div>
+        <div class="prep-spells-header">
+          <span>Prepared Spells</span>
+          <span style="display:flex;gap:4px;align-items:center;">
+            ${preparedSpellsOpen ? `<button class="btn-sm" onclick="addPreparedSpell()">+</button>` : ''}
+            <button class="btn-sm" onclick="togglePreparedSpellsOpen()" style="padding:0 5px;">${preparedSpellsOpen ? '▲' : '▼'}</button>
+          </span>
+        </div>
+        ${preparedSpellsOpen ? `
+          ${preparedSpells.length === 0
+            ? `<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:6px;">No spells prepared</div>`
+            : levels.map(lvl => `
+              <div class="prep-level-group">
+                <div class="prep-level-label">${ordinals[lvl]}</div>
+                ${byLevel[lvl].map(sp => `
+                  <div class="prep-spell-row">
+                    <span class="prep-spell-name"
+                      onclick="togglePreparedSpell('${sp.id}')"
+                      ondblclick="renamePreparedSpell('${sp.id}')"
+                      title="Click to expand · Double-click to rename">${sp.name}</span>
+                    <button class="btn-remove-attack" onclick="removePreparedSpell('${sp.id}')">✕</button>
+                  </div>
+                  ${sp.open ? `
+                    <div class="prep-spell-expanded">
+                      <div class="prep-spell-notes ${sp.notes ? '' : 'empty'}"
+                        ondblclick="editPreparedSpellNotes('${sp.id}')"
+                        title="Double-click to edit notes">${sp.notes || 'Double-click to add notes…'}</div>
+                    </div>
+                  ` : ''}
+                `).join('')}
+              </div>
+            `).join('')
+          }
+        ` : ''}
+      </div>
     `;
   }
 
