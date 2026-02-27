@@ -1313,6 +1313,42 @@
     <div id="sr-body"></div>
   </div>
 </div>
+<div id="lore-panel">
+  <div class="panel-resize-handle panel-resize-n"  onmousedown="startLoreResize(event,'n')"></div>
+  <div class="panel-resize-handle panel-resize-e"  onmousedown="startLoreResize(event,'e')"></div>
+  <div class="panel-resize-handle panel-resize-w"  onmousedown="startLoreResize(event,'w')"></div>
+  <div class="panel-resize-handle panel-resize-s"  onmousedown="startLoreResize(event,'s')"></div>
+  <div class="panel-resize-handle panel-resize-nw" onmousedown="startLoreResize(event,'nw')"></div>
+  <div class="panel-resize-handle panel-resize-ne" onmousedown="startLoreResize(event,'ne')"></div>
+  <div class="panel-resize-handle panel-resize-se" onmousedown="startLoreResize(event,'se')"></div>
+  <div class="panel-resize-handle panel-resize-sw" onmousedown="startLoreResize(event,'sw')"></div>
+  <div id="lore-titlebar">
+    <span class="lore-panel-title">📖 Lore Book</span>
+    <div style="display:flex;gap:4px;align-items:center;">
+      <button id="lore-minimize-btn" class="stat-panel-btn" onclick="toggleLoreMinimize()" title="Minimize">—</button>
+      <button class="stat-panel-btn" onclick="toggleLorePanel()" title="Close">✕</button>
+    </div>
+  </div>
+  <div id="lore-subheader">
+    <div id="lore-page-dropdown-wrap" class="materials-dropdown-wrap">
+      <button class="formula-dropdown-btn" onclick="toggleLorePageMenu(event)" id="lore-page-btn">— no pages —</button>
+      <div id="lore-page-menu" class="materials-menu hidden"></div>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button class="btn-sm" onclick="renameLorePage()" title="Rename page">✎</button>
+      <button class="btn-sm" onclick="deleteLorePage()" title="Delete page">✕</button>
+      <button class="btn-sm" onclick="addLorePage()">+</button>
+    </div>
+  </div>
+  <div id="lore-content">
+    <div id="lore-empty" style="display:none;">No pages yet — click + to add one</div>
+    <textarea id="lore-textarea" oninput="updateLoreContent(this.value)" placeholder="Write your lore here…"></textarea>
+  </div>
+  <div id="lore-footer">
+    <button class="btn-sm" onclick="exportLore()">Export</button>
+    <button class="btn-sm" onclick="importLore()">Import</button>
+  </div>
+</div>
 <div id="drag-shield"></div>
 <div id="stat-panel">
   <div class="panel-resize-handle panel-resize-n"  onmousedown="startPanelResize(event,'n')"></div>
