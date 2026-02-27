@@ -1304,6 +1304,7 @@
   let speedExpanded = false;
   let itemDescOpen = {};
   let itemDescEdit = null; // id of item currently being edited
+  let helpOpen = false;
 
   function sectionTitle(label, key) {
     const editing = editSection === key;
@@ -2200,6 +2201,7 @@
         <button class="formula-dropdown-btn" onclick="pickStatFile()"
           title="Add stat block" style="border-left:none;border-radius:0 4px 4px 0;padding:5px 10px;">+</button>
       </div>
+      <button class="btn-help" onclick="openHelp()" title="Quick Start Guide" style="margin-left:8px;">?</button>
     `;
   }
   function toggleRestMenu() {
@@ -2286,6 +2288,17 @@
   }
   function toggleInventory() {
     update(s => s.inventoryOpen = !s.inventoryOpen);
+  }
+  function openHelp() {
+    helpOpen = true;
+    document.getElementById('help-overlay').classList.remove('hidden');
+  }
+  function closeHelp() {
+    helpOpen = false;
+    document.getElementById('help-overlay').classList.add('hidden');
+  }
+  function closeHelpOnBackdrop(event) {
+    if (event.target === document.getElementById('help-overlay')) closeHelp();
   }
   function addInventoryItem() {
     const name = prompt('Item name:');
