@@ -1508,21 +1508,23 @@
       </div>
 
       <hr class="divider">
-      ${sectionTitle('Saves', 'saves')}
+      ${sectionTitle('Saves', null)}
       <div class="saves-grid">
-        ${[['STR','savStr','str'],['DEX','savDex','dex'],['CON','savCon','con'],['INT','savInt','int'],['WIS','savWis','wis'],['CHA','savCha','cha']].map(([name, key, abKey]) => {
+        ${[['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].map(([name, abKey]) => {
           const pipState = state.saveProfs[abKey];
           const pipCls = pipState === 2 ? 'expertise' : pipState === 1 ? 'prof' : '';
           const pipTitle = ['Not proficient', 'Proficient', 'Expertise'][pipState];
-          return isSaves
-            ? `<div class="save-row"><span class="save-name">${name}</span><input class="edit-input-sm" id="edit-${key}" type="number" value="${st[key]}"></div>`
-            : `<div class="save-row">
-                <span style="display:flex;align-items:center;gap:4px;">
-                  <span class="prof-pip ${pipCls}" onclick="cycleSaveProf('${abKey}')" title="${pipTitle}"></span>
-                  <span class="save-name">${name}</span>
-                </span>
-                <span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">+${st[key]}</span>
-              </div>`;
+          const abilityMod = Math.floor(((state.stats[abKey] ?? 10) - 10) / 2);
+          const bonus = pipState === 2 ? state.profBonus * 2 : pipState === 1 ? state.profBonus : 0;
+          const total = abilityMod + bonus;
+          const sign = total >= 0 ? '+' : '';
+          return `<div class="save-row">
+              <span style="display:flex;align-items:center;gap:4px;">
+                <span class="prof-pip ${pipCls}" onclick="cycleSaveProf('${abKey}')" title="${pipTitle}"></span>
+                <span class="save-name">${name}</span>
+              </span>
+              <span class="save-val">${sign}${total}</span>
+            </div>`;
         }).join('')}
       </div>
 
