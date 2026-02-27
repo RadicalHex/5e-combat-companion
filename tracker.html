@@ -2683,6 +2683,23 @@
     document.body.style.userSelect = 'none';
     e.preventDefault();
   });
+  document.getElementById('lore-titlebar').addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    draggingLore = true;
+    const z = panelZoom();
+    const panel = document.getElementById('lore-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.left = rect.left + 'px';
+    panel.style.top  = rect.top  + 'px';
+    loreDragOffsetX = e.clientX / z - rect.left;
+    loreDragOffsetY = e.clientY / z - rect.top;
+    const shield = document.getElementById('drag-shield');
+    shield.style.cursor = 'grabbing';
+    shield.classList.add('active');
+    document.body.style.cursor = 'grabbing';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
 
   // === DICE ROLLER ===
   function rollDice(sides) {
@@ -3560,6 +3577,11 @@
       panel.style.left = (mx - dragOffsetX) + 'px';
       panel.style.top  = Math.max(0, (my - dragOffsetY)) + 'px';
     }
+    if (draggingLore) {
+      const panel = document.getElementById('lore-panel');
+      panel.style.left = (mx - loreDragOffsetX) + 'px';
+      panel.style.top  = Math.max(0, (my - loreDragOffsetY)) + 'px';
+    }
     if (panelResizeState) {
       const { edge, startX, startY, startW, startH, startLeft, startTop } = panelResizeState;
       const dx = mx - startX;
@@ -3598,9 +3620,11 @@
     applyColWidths(colDragState.currentLeftW, colDragState.currentRightW);
   });
   document.addEventListener('mouseup', () => {
-    if (draggingPanel || panelResizeState) {
+    if (draggingPanel || panelResizeState || draggingLore || loreResizeState) {
       draggingPanel = false;
       panelResizeState = null;
+      draggingLore = false;
+      loreResizeState = null;
       document.getElementById('drag-shield').classList.remove('active');
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
