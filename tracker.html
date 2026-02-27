@@ -3738,6 +3738,87 @@
   }
 
 
+  // === LORE BOOK ===
+  function addLorePage() {
+    const title = prompt('Page title:');
+    if (!title?.trim()) return;
+    const id = Date.now().toString();
+    update(s => {
+      s.loreBook.push({ id, title: title.trim(), content: '' });
+      s.loreActiveId = id;
+    });
+    renderLorePanel();
+  }
+
+  function renameLorePage() {
+    if (!state.loreActiveId) return;
+    const page = state.loreBook.find(p => p.id === state.loreActiveId);
+    if (!page) return;
+    const val = prompt('Rename page:', page.title);
+    if (val?.trim()) {
+      update(s => s.loreBook.find(p => p.id === state.loreActiveId).title = val.trim());
+      renderLorePanel();
+    }
+  }
+
+  function deleteLorePage() {
+    if (!state.loreActiveId) return;
+    const page = state.loreBook.find(p => p.id === state.loreActiveId);
+    if (!page || !confirm(`Delete page "${page.title}"?`)) return;
+    update(s => {
+      s.loreBook = s.loreBook.filter(p => p.id !== state.loreActiveId);
+      s.loreActiveId = s.loreBook.length > 0 ? s.loreBook[s.loreBook.length - 1].id : null;
+    });
+    renderLorePanel();
+  }
+
+  function switchLorePage(id) {
+    update(s => s.loreActiveId = id);
+    lorePageMenuOpen = false;
+    document.getElementById('lore-page-menu')?.classList.add('hidden');
+    renderLorePanel();
+  }
+
+  function updateLoreContent(value) {
+    if (!state.loreActiveId) return;
+    update(s => {
+      const page = s.loreBook.find(p => p.id === state.loreActiveId);
+      if (page) page.content = value;
+    });
+  }
+
+  function renderLorePanel() {
+    const { loreBook, loreActiveId } = state;
+    const activePage = loreBook.find(p => p.id === loreActiveId) || null;
+
+    // Update page dropdown button label
+    const pageBtn = document.getElementById('lore-page-btn');
+    if (pageBtn) pageBtn.textContent = activePage ? activePage.title + ' ▾' : '— no pages — ▾';
+
+    // Rebuild page menu
+    const menu = document.getElementById('lore-page-menu');
+    if (menu) {
+      menu.innerHTML = loreBook.map(p =>
+        `<button class="${p.id === loreActiveId ? 'mat-active' : ''}" onclick="switchLorePage('${p.id}')">${p.title}</button>`
+      ).join('') + (loreBook.length > 0 ? '<hr class="mat-divider">' : '') +
+      `<button onclick="addLorePage()">+ Add page…</button>`;
+    }
+
+    // Show/hide empty state and textarea
+    const empty = document.getElementById('lore-empty');
+    const textarea = document.getElementById('lore-textarea');
+    if (!activePage) {
+      if (empty) empty.style.display = 'block';
+      if (textarea) textarea.style.display = 'none';
+    } else {
+      if (empty) empty.style.display = 'none';
+      if (textarea) {
+        textarea.style.display = 'block';
+        textarea.value = activePage.content;
+      }
+    }
+  }
+
   // === RENDER ===
   function render() {
     renderHeader();
