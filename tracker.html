@@ -2454,8 +2454,9 @@
                   <button class="btn-sm" onclick="cancelEditDesc()">Cancel</button>
                 </div>
               ` : `
-                <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;">${i.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
-                <button class="btn-sm" onclick="startEditDesc('${i.id}')" style="margin-top:4px;">✏ Edit</button>
+                <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                  ondblclick="startEditDesc('${i.id}')"
+                  title="Double-click to edit">${i.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
               `}
             </div>
           ` : ''}
