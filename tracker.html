@@ -2095,9 +2095,9 @@
   function addPreparedSpell() {
     const name = prompt('Spell name:');
     if (!name?.trim()) return;
-    const lvlRaw = prompt('Spell level (1–9):', '1');
+    const lvlRaw = prompt('Spell level (0–9, use 0 for cantrips):', '1');
     const level = parseInt(lvlRaw);
-    if (!level || level < 1 || level > 9) return;
+    if (isNaN(level) || level < 0 || level > 9) return;
     update(s => s.preparedSpells.push({
       id: Date.now().toString(),
       name: name.trim(),
@@ -2138,7 +2138,7 @@
 
   function renderPreparedSpells() {
     const { preparedSpells, preparedSpellsOpen } = state;
-    const ordinals = ['','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+    const ordinals = ['Cantrip','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
 
     const byLevel = {};
     preparedSpells.forEach(sp => {
