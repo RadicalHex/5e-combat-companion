@@ -1234,6 +1234,8 @@
     currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
     statusOpen: true,
     spellsOpen: true,
+    feats: [],
+    featsOpen: true,
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     hpEffects: {
       aid:            { active: false, value: 5 },
@@ -1320,6 +1322,11 @@
   if (state.characterName === undefined) state.characterName = 'Character';
   if (state.statusOpen === undefined) state.statusOpen = true;
   if (state.spellsOpen === undefined) state.spellsOpen = true;
+  if (!state.feats) state.feats = [];
+  if (state.featsOpen === undefined) state.featsOpen = true;
+  state.feats.forEach(f => {
+    if (f.description === undefined) f.description = '';
+  });
   if (state.layout.rightW < 340) state.layout.rightW = 360;
   if (!state.saveProfs) state.saveProfs = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
   if (state.skillsOpen === undefined) state.skillsOpen = true;
@@ -2417,6 +2424,47 @@
       i.qty = (qty ?? item.qty).trim();
     });
   }
+  // === FEATS ===
+  let featDescOpen = {};
+  let featDescEdit = null;
+
+  function addFeat() {
+    const name = prompt('Feat name:');
+    if (!name) return;
+    update(s => s.feats.push({ id: String(Date.now()), name: name.trim(), description: '' }));
+  }
+  function removeFeat(id) {
+    featDescOpen[id] = false;
+    if (featDescEdit === id) featDescEdit = null;
+    update(s => s.feats = s.feats.filter(f => f.id !== id));
+  }
+  function editFeatName(id) {
+    const feat = state.feats.find(f => f.id === id);
+    if (!feat) return;
+    const val = prompt('Feat name:', feat.name);
+    if (val !== null && val.trim()) update(s => { const f = s.feats.find(f => f.id === id); if (f) f.name = val.trim(); });
+  }
+  function toggleFeatDesc(id) {
+    featDescOpen[id] = !featDescOpen[id];
+    render();
+  }
+  function startEditFeatDesc(id) {
+    featDescEdit = id;
+    render();
+  }
+  function cancelEditFeatDesc() {
+    featDescEdit = null;
+    render();
+  }
+  function saveFeatDesc(id) {
+    const val = document.getElementById('feat-desc-' + id)?.value ?? '';
+    update(s => { const f = s.feats.find(f => f.id === id); if (f) f.description = val; });
+    featDescEdit = null;
+  }
+  function toggleFeatsSection() {
+    update(s => s.featsOpen = !s.featsOpen);
+  }
+
   // === UNIFIED INVENTORY ===
   function renderInventory() {
     const { items, inventoryOpen, attunementMax, currency } = state;
