@@ -630,6 +630,56 @@
     }
     .btn-add-attack:hover { border-color: #2ab8d0; color: #2ab8d0; }
 
+    /* === PREPARED SPELLS === */
+    .prep-spells-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px 0 6px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #4a7a8a;
+    }
+    .prep-level-group {
+      margin-bottom: 8px;
+    }
+    .prep-level-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #2a5a6a;
+      margin-bottom: 3px;
+    }
+    .prep-spell-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 0;
+      border-bottom: 1px solid #0c2535;
+    }
+    .prep-spell-name {
+      flex: 1;
+      font-size: 0.8rem;
+      color: #8ab8c8;
+      cursor: pointer;
+      user-select: none;
+    }
+    .prep-spell-name:hover { color: #a8d8e8; }
+    .prep-spell-expanded {
+      padding: 4px 0 6px 6px;
+      border-bottom: 1px solid #0c2535;
+    }
+    .prep-spell-notes {
+      font-size: 0.75rem;
+      color: #6a9aaa;
+      line-height: 1.5;
+      min-height: 20px;
+      cursor: text;
+      white-space: pre-wrap;
+    }
+    .prep-spell-notes.empty { color: #2a5a6a; font-style: italic; }
+
     /* === ACTIVE SPELLS === */
     .active-spell {
       display: flex;
