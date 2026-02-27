@@ -1043,10 +1043,6 @@
     <div class="panel" id="panel-right">
       <div id="inventory-wrap"></div>
       <hr class="divider">
-      <div id="magic-items-wrap"></div>
-      <hr class="divider">
-      <div id="attuned-wrap"></div>
-      <hr class="divider">
       <div id="skills-wrap"></div>
     </div>
   </div>
@@ -2141,39 +2137,6 @@
     const attuned = state.items.filter(i => i.attuned).length;
     update(s => s.attunementMax = Math.max(attuned, s.attunementMax - 1));
   }
-  function renderAttunedItems() {
-    const attuned = state.magicItems.filter(i => i.attuned);
-    const max = state.attunementMax;
-    const count = attuned.length;
-    const over = count > max;
-    const { attunedOpen } = state;
-    return `
-      <div style="margin-top:12px;">
-        <div class="panel-title collapsible-title" onclick="toggleAttunedSection()">
-          <span>Attuned Items</span>
-          <span style="display:flex;align-items:center;gap:8px;">
-            <span class="attuned-counter ${over ? 'over' : ''}">${count} / ${max}</span>
-            <span>${attunedOpen ? '▲' : '▼'}</span>
-          </span>
-        </div>
-        ${attunedOpen ? `
-          ${attuned.length === 0
-            ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No attuned items</div>'
-            : attuned.map(i => `
-              <div class="attuned-item-row">
-                <div class="attuned-dot"></div>
-                <span>${i.name}</span>
-              </div>
-            `).join('')
-          }
-          <div style="display:flex;gap:6px;align-items:center;">
-            <button class="btn-add-attunement-slot" onclick="decreaseAttunementMax()">−</button>
-            <button class="btn-add-attunement-slot" onclick="increaseAttunementMax()">+</button>
-          </div>
-        ` : ''}
-      </div>
-    `;
-  }
 
   // === MAGIC ITEMS ===
   function addMagicItem() {
@@ -2200,60 +2163,6 @@
   }
   function toggleAttuned(id) {
     update(s => { const i = s.items.find(i => i.id === id); if (i) i.attuned = !i.attuned; });
-  }
-  function renderMagicItems() {
-    const { magicItems, magicItemsOpen } = state;
-    const magicRows = magicItems.map(i => {
-      const qty = parseInt(i.qty) || 1;
-      const descOpen = itemDescOpen[i.id];
-      const editing = itemDescEdit === i.id;
-      return `
-        <div>
-          <div class="magic-item">
-            <div class="magic-item-header">
-              <div style="display:flex;align-items:center;gap:4px;flex:1;min-width:0;">
-                <button class="btn-sm" onclick="adjustMagicQty('${i.id}',-1)" style="padding:0 5px;">−</button>
-                <span style="font-size:0.75rem;color:#5a8a9a;min-width:24px;text-align:center;">×${qty}</span>
-                <button class="btn-sm" onclick="adjustMagicQty('${i.id}',1)" style="padding:0 5px;">+</button>
-                <span class="magic-item-name" onclick="editMagicItemName('${i.id}')" title="Click to rename" style="margin-left:4px;">${i.name}</span>
-              </div>
-              <div class="magic-item-actions">
-                <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Eqp</button>
-                <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Att</button>
-                <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${i.description ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
-                <button class="btn-remove-magic" onclick="removeMagicItem('${i.id}')">✕</button>
-              </div>
-            </div>
-          </div>
-          ${descOpen ? `
-            <div style="padding:4px 6px 4px 10px;background:#0a1825;border-left:2px solid #1a3a4a;margin-bottom:4px;">
-              ${editing ? `
-                <textarea id="edit-desc-${i.id}" style="width:100%;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px;border-radius:3px;font-size:0.75rem;resize:vertical;min-height:48px;">${i.description}</textarea>
-                <div style="display:flex;gap:4px;margin-top:4px;">
-                  <button class="btn-sm" onclick="saveItemDesc('${i.id}',false)">Save</button>
-                  <button class="btn-sm" onclick="cancelEditDesc()">Cancel</button>
-                </div>
-              ` : `
-                <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;">${i.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
-                <button class="btn-sm" onclick="startEditDesc('${i.id}')" style="margin-top:4px;">✏ Edit</button>
-              `}
-            </div>
-          ` : ''}
-        </div>
-      `;
-    }).join('');
-    return `
-      <div style="margin-top:12px;">
-        <div class="panel-title collapsible-title" onclick="toggleMagicItems()">
-          Magic Items <span>${magicItemsOpen ? '▲' : '▼'}</span>
-        </div>
-        ${magicItemsOpen ? `
-          ${magicItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">None</div>' : ''}
-          ${magicRows}
-          <button class="btn-add-inv" onclick="addMagicItem()">+ Add Magic Item</button>
-        ` : ''}
-      </div>
-    `;
   }
 
   // === INVENTORY / ITEM DESC / QTY / CURRENCY ===
@@ -2321,28 +2230,40 @@
       i.qty = (qty ?? item.qty).trim();
     });
   }
+  // === UNIFIED INVENTORY ===
   function renderInventory() {
-    const { inventory, inventoryOpen, currency } = state;
-    const invRows = inventory.map(i => {
+    const { items, inventoryOpen, attunementMax, currency } = state;
+    const normalItems  = items.filter(i => i.type === 'normal');
+    const magicItems   = items.filter(i => i.type === 'magic');
+    const attunedItems = items.filter(i => i.attuned);
+    const attunedCount = attunedItems.length;
+    const over = attunedCount > attunementMax;
+
+    function itemRow(i, isMagic) {
       const qty = parseInt(i.qty) || 1;
       const descOpen = itemDescOpen[i.id];
-      const editing = itemDescEdit === i.id;
+      const editing  = itemDescEdit === i.id;
+      const editFn   = isMagic ? `editMagicItemName('${i.id}')` : `editInventoryItem('${i.id}')`;
       return `
         <div>
           <div class="inventory-item">
-            <button class="btn-sm" onclick="adjustInvQty('${i.id}',-1)" style="padding:0 5px;">−</button>
-            <span class="inv-qty" style="min-width:28px;text-align:center;">×${qty}</span>
-            <button class="btn-sm" onclick="adjustInvQty('${i.id}',1)" style="padding:0 5px;">+</button>
-            <span class="inv-name" onclick="editInventoryItem('${i.id}')" title="Click to rename" style="flex:1;margin-left:6px;">${i.name}</span>
+            <button class="btn-sm" onclick="adjustItemQty('${i.id}',-1)" style="padding:0 5px;">−</button>
+            <span style="font-size:0.75rem;color:#5a8a9a;min-width:24px;text-align:center;">×${qty}</span>
+            <button class="btn-sm" onclick="adjustItemQty('${i.id}',1)" style="padding:0 5px;">+</button>
+            <span class="${isMagic ? 'magic-item-name' : 'inv-name'}" onclick="${editFn}" title="Click to rename" style="flex:1;margin-left:6px;">${i.name}</span>
+            ${isMagic ? `
+              <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Eqp</button>
+              <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Att</button>
+            ` : ''}
             <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${i.description ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
-            <button class="btn-remove-inv" onclick="removeInventoryItem('${i.id}')">✕</button>
+            <button class="btn-remove-inv" onclick="removeItem('${i.id}')">✕</button>
           </div>
           ${descOpen ? `
             <div style="padding:4px 6px 4px 10px;background:#0a1825;border-left:2px solid #1a3a4a;margin-bottom:4px;">
               ${editing ? `
                 <textarea id="edit-desc-${i.id}" style="width:100%;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px;border-radius:3px;font-size:0.75rem;resize:vertical;min-height:48px;">${i.description}</textarea>
                 <div style="display:flex;gap:4px;margin-top:4px;">
-                  <button class="btn-sm" onclick="saveItemDesc('${i.id}',true)">Save</button>
+                  <button class="btn-sm" onclick="saveItemDesc('${i.id}')">Save</button>
                   <button class="btn-sm" onclick="cancelEditDesc()">Cancel</button>
                 </div>
               ` : `
@@ -2353,7 +2274,13 @@
           ` : ''}
         </div>
       `;
-    }).join('');
+    }
+
+    const slotMax = Math.max(attunementMax, attunedCount);
+    const pips = Array.from({ length: slotMax }, (_, idx) =>
+      `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 2px;background:${idx < attunedCount ? '#7070d8' : 'transparent'};border:1px solid ${idx < attunedCount ? '#7070d8' : '#3a4a6a'};"></span>`
+    ).join('');
+
     const currencyRow = `
       <div style="border-top:1px solid #0f2535;margin-top:8px;padding-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         ${['pp','gp','sp','cp'].map(c => `
@@ -2365,15 +2292,43 @@
         `).join('')}
       </div>
     `;
+
+    const subHeader = label =>
+      `<div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:#2a5a6a;margin:8px 0 4px;border-bottom:1px solid #0f2535;padding-bottom:2px;">${label}</div>`;
+
     return `
       <div>
-        <div class="panel-title collapsible-title" onclick="toggleInventory()">
-          Inventory <span>${inventoryOpen ? '▲' : '▼'}</span>
+        <div class="panel-title collapsible-title" onclick="toggleInventory()" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Inventory</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addInventoryItem()">+ Item</button>
+            <button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addMagicItem()">+ Magic</button>
+            <span>${inventoryOpen ? '▲' : '▼'}</span>
+          </span>
         </div>
         ${inventoryOpen ? `
-          ${inventory.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">Empty</div>' : ''}
-          ${invRows}
-          <button class="btn-add-inv" onclick="addInventoryItem()">+ Add Item</button>
+          ${subHeader('Items')}
+          ${normalItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">Empty</div>' : normalItems.map(i => itemRow(i, false)).join('')}
+
+          ${subHeader('Magic Items')}
+          ${magicItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">None</div>' : magicItems.map(i => itemRow(i, true)).join('')}
+
+          ${subHeader('Attuned')}
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            ${pips}
+            <span class="attuned-counter ${over ? 'over' : ''}">${attunedCount} / ${attunementMax}</span>
+            <button class="btn-add-attunement-slot" onclick="decreaseAttunementMax()">−</button>
+            <button class="btn-add-attunement-slot" onclick="increaseAttunementMax()">+</button>
+          </div>
+          ${attunedItems.length === 0
+            ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No attuned items</div>'
+            : attunedItems.map(i => `
+              <div class="attuned-item-row">
+                <div class="attuned-dot"></div>
+                <span>${i.name}</span>
+              </div>
+            `).join('')
+          }
           ${currencyRow}
         ` : ''}
       </div>
@@ -2779,8 +2734,6 @@
     renderSlots();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
     document.getElementById('inventory-wrap').innerHTML = renderInventory();
-    document.getElementById('magic-items-wrap').innerHTML = renderMagicItems();
-    document.getElementById('attuned-wrap').innerHTML = renderAttunedItems();
     document.getElementById('skills-wrap').innerHTML = renderSkills();
     applyColWidths();
   }
