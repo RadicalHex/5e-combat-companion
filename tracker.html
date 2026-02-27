@@ -1215,9 +1215,9 @@
     <div class="panel" id="panel-resources">
       <div id="status-section"></div>
       <hr class="divider">
-      <div id="slots-section"></div>
-      <hr class="divider">
       <div id="attacks-section-wrap"></div>
+      <hr class="divider">
+      <div id="slots-section"></div>
     </div>
     <div class="panel" id="panel-right">
       <div id="inventory-wrap"></div>
@@ -1988,7 +1988,7 @@
     const isSpells = editSection === 'spells';
     document.getElementById('slots-section').innerHTML = `
       <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Spell Slots</span>
+        <span>Spellcasting</span>
         ${isSpells
           ? `<span class="section-edit-controls">
                <button class="edit-save-btn" onclick="saveSection('spells')">Save</button>
