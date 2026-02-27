@@ -1364,6 +1364,9 @@
   let diceModifier = 0;
   let diceCount = 1;
   let diceMenuOpen = false;
+  let srDiceToSpend = 1;
+  let srRolls = [];        // array of { roll, conMod, total }
+  let srPhase = 'pick';    // 'pick' | 'rolled'
   // Migrate older saved states that lack newer fields
   if (!state.hitDice) state.hitDice = { max: 0, current: 0, dieType: 'd8', open: false };
   if (state.hitDice.open === undefined) state.hitDice.open = false;
@@ -2036,8 +2039,86 @@
   }
 
   function shortRest() {
-    if (confirm('Short rest taken.')) {
-      render();
+    if (state.hitDice.current === 0) {
+      alert('No hit dice remaining.');
+      return;
+    }
+    srDiceToSpend = 1;
+    srRolls = [];
+    srPhase = 'pick';
+    renderSRModal();
+    document.getElementById('short-rest-overlay').classList.remove('hidden');
+  }
+
+  function closeShortRest() {
+    document.getElementById('short-rest-overlay').classList.add('hidden');
+  }
+
+  function srCloseOnBackdrop(event) {
+    if (event.target === document.getElementById('short-rest-overlay')) closeShortRest();
+  }
+
+  function srAdjust(delta) {
+    const max = state.hitDice.current;
+    srDiceToSpend = Math.max(1, Math.min(max, srDiceToSpend + delta));
+    renderSRModal();
+  }
+
+  function srRoll() {
+    const die = parseInt(state.hitDice.dieType.replace('d', ''));
+    const conMod = Math.floor((state.stats.con - 10) / 2);
+    srRolls = Array.from({ length: srDiceToSpend }, () => {
+      const roll = Math.floor(Math.random() * die) + 1;
+      return { roll, conMod, total: roll + conMod };
+    });
+    srPhase = 'rolled';
+    renderSRModal();
+  }
+
+  function srHeal() {
+    const healAmount = srRolls.reduce((sum, r) => sum + r.total, 0);
+    update(s => {
+      s.hp.current = Math.min(s.hp.max + (s.hp.temp || 0), s.hp.current + healAmount);
+      s.hitDice.current = Math.max(0, s.hitDice.current - srDiceToSpend);
+    });
+    closeShortRest();
+  }
+
+  function renderSRModal() {
+    const { dieType, current } = state.hitDice;
+    const body = document.getElementById('sr-body');
+    if (srPhase === 'pick') {
+      body.innerHTML = `
+        <div class="sr-dice-count">${current} ${dieType} available</div>
+        <div class="sr-picker">
+          <button class="btn-sm" onclick="srAdjust(-1)">−</button>
+          <span class="sr-picker-val">${srDiceToSpend}</span>
+          <button class="btn-sm" onclick="srAdjust(1)">+</button>
+          <span style="font-size:0.8rem;color:#6a9aaa;">dice to spend</span>
+        </div>
+        <div class="sr-actions">
+          <button class="btn-sm" onclick="srRoll()">Roll</button>
+          <button class="btn-sm" onclick="closeShortRest()">Cancel</button>
+        </div>
+      `;
+    } else {
+      const healTotal = srRolls.reduce((sum, r) => sum + r.total, 0);
+      const sign = srRolls[0].conMod >= 0 ? '+' : '';
+      body.innerHTML = `
+        <div class="sr-roll-list">
+          ${srRolls.map(r =>
+            `<div class="sr-roll-row">
+              <span>♥ ${dieType} → ${r.roll} ${sign}${r.conMod} CON</span>
+              <span style="color:#a8d8e8;font-weight:600;">${r.total}</span>
+            </div>`
+          ).join('')}
+        </div>
+        <div class="sr-total">Heal for ${healTotal} HP</div>
+        <div class="sr-actions">
+          <button class="btn-sm" onclick="srHeal()">Heal</button>
+          <button class="btn-sm" onclick="closeShortRest()">Cancel</button>
+        </div>
+      `;
     }
   }
 
