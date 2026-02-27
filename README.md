@@ -63,3 +63,17 @@ Built for high-level, high-complexity play where strict level-cap assumptions an
 ## Class Variants
 
 Class-specific variants (Druid with Wild Shape, etc.) are maintained on separate branches.
+
+## Upcoming Features
+
+**Next session**
+- Feats section — collapsible list with expandable descriptions, double-click to edit
+- Conditions reference — header dropdown with all 15 SRD conditions and their mechanical effects
+- Double-click to edit item descriptions (removes the extra ✏ button step)
+
+**Planned**
+- Prepared spells — manual spell list folded into the Spell Slots panel, organized by level
+- Magic item charges — pip-based charge tracker per item (Wand of Magic Missiles, etc.)
+- Class resource blocks — Bardic Inspiration, Channel Divinity, Action Surge, Ki Points, etc. as named pip counters, toggled on per-class via a Settings panel; supports multiclassing and feat-granted class features
+- Lore Book — floating notes panel with session-by-session import/export, separate from character data
+- Combat section revamp — Actions, Bonus Actions, and Reactions in labelled columns with one-click dice rolls wired to the existing roller
