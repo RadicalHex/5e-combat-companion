@@ -1355,6 +1355,8 @@
     if (i.type === undefined) i.type = 'normal';
     if (i.equipped === undefined) i.equipped = false;
     if (i.attuned === undefined) i.attuned = false;
+    if (i.chargeMax === undefined) i.chargeMax = 0;
+    if (i.chargeCurrent === undefined) i.chargeCurrent = 0;
   });
   if (state.characterName === undefined) state.characterName = 'Character';
   if (state.statusOpen === undefined) state.statusOpen = true;
@@ -1927,10 +1929,11 @@
   }
 
   function longRest() {
-    if (confirm('Long rest? This restores all spell slots and HP.')) {
+    if (confirm('Long rest? This restores all spell slots, HP, and item charges.')) {
       update(s => {
         s.slots = [...SLOT_MAX];
         s.hp.current = s.hp.max;
+        s.items.forEach(i => { if (i.chargeMax > 0) i.chargeCurrent = i.chargeMax; });
       });
     }
   }
@@ -2412,7 +2415,9 @@
       description: '',
       type: 'magic',
       equipped: false,
-      attuned: false
+      attuned: false,
+      chargeMax: 0,
+      chargeCurrent: 0
     }));
   }
   function editMagicItemName(id) {
@@ -2420,6 +2425,28 @@
     if (!item) return;
     const name = prompt('Magic item name:', item.name);
     if (name !== null && name.trim()) update(s => { const i = s.items.find(i => i.id === id); if (i) i.name = name.trim(); });
+  }
+  function clickChargePip(id, idx) {
+    update(s => {
+      const item = s.items.find(i => i.id === id);
+      if (!item) return;
+      // Click filled pip = spend down to that index; click empty = restore up to idx+1
+      item.chargeCurrent = item.chargeCurrent > idx ? idx : idx + 1;
+    });
+  }
+  function setItemChargeMax(id, val) {
+    const max = Math.max(0, parseInt(val) || 0);
+    update(s => {
+      const item = s.items.find(i => i.id === id);
+      if (!item) return;
+      const wasOff = item.chargeMax === 0;
+      item.chargeMax = max;
+      if (wasOff && max > 0) {
+        item.chargeCurrent = max; // Start full when first enabled
+      } else {
+        item.chargeCurrent = Math.min(item.chargeCurrent, max);
+      }
+    });
   }
   function toggleEquipped(id) {
     update(s => { const i = s.items.find(i => i.id === id); if (i) i.equipped = !i.equipped; });
@@ -2620,11 +2647,34 @@
               <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Eqp</button>
               <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Att</button>
             ` : ''}
-            <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${i.description ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
+            <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${(i.description || isMagic) ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
             <button class="btn-remove-inv" onclick="removeItem('${i.id}')">✕</button>
           </div>
+          ${isMagic && i.chargeMax > 0 ? `
+            <div style="padding:1px 0 3px 32px;display:flex;align-items:center;gap:3px;">
+              <span style="font-size:0.65rem;color:#c8904a;margin-right:2px;">⚡</span>
+              ${Array.from({length: i.chargeMax}, (_, idx) => `
+                <span onclick="clickChargePip('${i.id}',${idx})" title="${idx < i.chargeCurrent ? 'Click to spend' : 'Click to restore'}"
+                  style="cursor:pointer;display:inline-block;width:9px;height:9px;border-radius:50%;
+                         background:${idx < i.chargeCurrent ? '#c8904a' : 'transparent'};
+                         border:1px solid ${idx < i.chargeCurrent ? '#c8904a' : '#3a5a6a'};"></span>
+              `).join('')}
+              <span style="font-size:0.65rem;color:#6a9aaa;margin-left:3px;">${i.chargeCurrent}/${i.chargeMax}</span>
+            </div>
+          ` : ''}
           ${descOpen ? `
             <div style="padding:4px 6px 4px 10px;background:#0a1825;border-left:2px solid #1a3a4a;margin-bottom:4px;">
+              ${isMagic ? `
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                  <span style="font-size:0.65rem;color:#c8904a;">⚡</span>
+                  <span style="font-size:0.72rem;color:#5a8a9a;">Charges:</span>
+                  <input type="number" min="0" max="20" value="${i.chargeMax}"
+                    onchange="setItemChargeMax('${i.id}',this.value)"
+                    style="width:40px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;"
+                    title="Max charges (0 = disabled)">
+                  <span style="font-size:0.65rem;color:#2a4a5a;">max (0 = off, restores on long rest)</span>
+                </div>
+              ` : ''}
               ${editing ? `
                 <textarea id="edit-desc-${i.id}" style="width:100%;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px;border-radius:3px;font-size:0.75rem;resize:vertical;min-height:48px;">${i.description}</textarea>
                 <div style="display:flex;gap:4px;margin-top:4px;">
