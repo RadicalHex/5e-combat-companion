@@ -24,8 +24,8 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 **Spellcasting**
 - Spell Save DC and Spell Attack (auto-calculated, manual override available)
 - Spellcasting Ability selector (INT / WIS / CHA)
-- Spell slots for all 9 levels (toggleable — hide entirely for martial characters)
-- Active spells tracker with Concentration handling
+- Spell slots for all 9 levels with collapsible panel — DC/Atk/pips all hide together
+- Active spells tracker with Concentration handling, independently collapsible
 
 **Status**
 - Conditions tracker
@@ -33,10 +33,11 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Optional Senses panel (Truesight, Blindsight, Tremorsense)
 
 **Inventory**
-- Normal items and Magic Items (Equipped / Attuned toggles)
+- Unified item list — normal items and magic items in one panel
+- Magic items have Equipped and Attuned toggles; Attuned section shows pip display
+- Adjustable attunement slot cap
 - Quantity +/− buttons on all items
 - Collapsible item descriptions with pencil edit
-- Attuned Items tracker with adjustable slot cap
 - Currency tracker: PP / GP / SP / CP
 
 **Combat**
@@ -44,15 +45,20 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Dice roller with modifier and history
 
 **Tools**
-- Floating Stat Block Viewer — drag, pin, resize, drop images or PDFs
+- **Materials** button — opens floating stat block viewer and dropdown to manage loaded files
+- Drag-and-drop images or PDFs directly into the viewer; supports multiple files
 - Export / Import character as JSON
-- Formula reference dropdown
-- Resizable column layout
+- Formula reference dropdown (Attack Roll, Spell Attack, Spell Save DC)
+- Quick-start **Help guide** (? button in header)
 - All data persists in browser localStorage
 
 ## Usage
 
-Download `tracker.html` and open it in your browser. Everything saves automatically.
+Download `tracker.html` and open it in your browser. Everything saves automatically. To load a stat block, click **Materials ▾** and either drag a file onto the viewer or use **+ Add file…**.
+
+## Design Philosophy
+
+Built for high-level, high-complexity play where strict level-cap assumptions and locked character sheets get in the way. Every field is editable, every section is optional, and nothing requires an external database or account.
 
 ## Class Variants
 

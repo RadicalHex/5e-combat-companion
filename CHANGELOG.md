@@ -1,5 +1,29 @@
 # Changelog
 
+## v1.1.0 — 2026-02-26
+
+### Inventory Consolidation
+- Merged **Inventory**, **Magic Items**, and **Attuned Items** into a single unified **Inventory** panel
+- Items now carry a type (`normal` / `magic`) — magic items show Equipped and Attuned toggles inline
+- Attuned sub-section with pip display sits below the item list; attunement slot cap still adjustable
+- Full data migration from old localStorage shape — existing saves upgrade automatically
+
+### Spellcasting
+- Spell Save DC, Spell Attack, and Ability selector now **collapse with the Spell Slots panel** — no more values floating above the fold when slots are hidden
+
+### Status Panel
+- **Active Spells sub-section is now independently collapsible** — collapse state persists in localStorage
+
+### Materials Viewer
+- Replaced the standalone **Materials** button and the **Stat Blocks** tab bar with a single **Materials ▾** dropdown
+- Clicking Materials always opens the floating viewer (ready for drag-and-drop)
+- Dropdown lists all loaded stat blocks; clicking one activates it and brings the panel forward
+- Loading a new file via **+ Add file…** opens the viewer automatically
+- Viewer panel can still be closed independently via its own controls
+
+### Help Guide
+- Added **?** button to the header that opens a quick-start guide modal covering all major sections
+
 ## v1.0.0 — 2026-02-26
 
 First full-featured release.
