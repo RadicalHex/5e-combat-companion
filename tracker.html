@@ -1024,6 +1024,70 @@
     }
     .dice-hist-expr { color: #4a7a8a; }
     .dice-hist-val { color: #2a8a8a; }
+
+    /* === HELP MODAL === */
+    .help-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .help-overlay.hidden { display: none; }
+    .help-modal {
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 480px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .help-modal h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      color: #a8d8e8;
+      margin-bottom: 16px;
+      padding-right: 24px;
+    }
+    .help-modal h3 {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #4a8a9a;
+      margin: 14px 0 4px;
+    }
+    .help-modal p {
+      font-size: 0.8rem;
+      color: #8ab8c8;
+      line-height: 1.5;
+    }
+    .help-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: #4a7a8a;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .help-close:hover { color: #a8d8e8; }
+    .btn-help {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #5a8a9a;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-help:hover { border-color: #4a8a9a; color: #a8d8e8; }
   </style>
 </head>
 <body>
@@ -1045,6 +1109,28 @@
       <hr class="divider">
       <div id="skills-wrap"></div>
     </div>
+  </div>
+</div>
+<div id="help-overlay" class="help-overlay hidden" onclick="closeHelpOnBackdrop(event)">
+  <div class="help-modal">
+    <button class="help-close" onclick="closeHelp()">✕</button>
+    <h2>Quick Start Guide</h2>
+    <h3>Editing Stats</h3>
+    <p>Click any stat value to edit it directly. For sections with a ✏ icon, click it to open a multi-field edit mode, then click Save.</p>
+    <h3>HP</h3>
+    <p>Use − / + to adjust current HP. "Set" jumps to any value. Click the ✏ icon to edit max HP and temp HP.</p>
+    <h3>Spell Slots</h3>
+    <p>Click a pip to use or restore a spell slot. All slots refill on Long Rest.</p>
+    <h3>Skills &amp; Saves</h3>
+    <p>Click the pip next to a skill or save to cycle proficiency: hollow → teal (proficient) → ring (expertise).</p>
+    <h3>Status</h3>
+    <p>Track active spells, HP Effects (Aid, Heroes' Feast, etc.), and conditions. Add them with the + buttons in the Status panel.</p>
+    <h3>Inventory</h3>
+    <p>Use − / + to adjust quantity. Click ▶ to expand an item's description. Magic items have Eqp and Att toggle buttons. Currency is at the bottom of the Inventory panel.</p>
+    <h3>Stat Block Viewer</h3>
+    <p>Drag a PDF or image onto the page to load a stat block. Drag the viewer panel to reposition it.</p>
+    <h3>Saving</h3>
+    <p>Everything saves automatically to this browser. Use Export / Import (in the Rests menu) to back up or transfer your character.</p>
   </div>
 </div>
 <div id="drag-shield"></div>
