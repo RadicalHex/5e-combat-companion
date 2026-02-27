@@ -19,6 +19,7 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 
 **Saves & Skills**
 - Saving throws with 3-state proficiency pips (none / proficient / expertise)
+- **Flat bonus per save** — pencil edit mode to add item/effect bonuses (Ring of Protection, Good Luck Stone, etc.) — shown in amber when active
 - Full skills section with auto-calculated modifiers, 3-state pips
 - Custom skills support
 - Click any skill value to set a flat bonus (racial, item, etc.) — pip turns red when active
@@ -53,6 +54,13 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Custom Attacks (name, to-hit, damage, notes)
 - Dice roller with modifier and history
 
+**Lore Book**
+- Floating, draggable, resizable **📖 Lore** panel — open from the header
+- Named pages for NPCs, locations, factions, session notes, etc.
+- Page dropdown to switch between pages; rename or delete via inline controls
+- Freeform textarea per page — auto-saves to localStorage
+- Export lore as a standalone JSON file; import to restore
+
 **Tools**
 - **Materials** button — opens floating stat block viewer and dropdown to manage loaded files
 - Drag-and-drop images or PDFs directly into the viewer; supports multiple files
@@ -78,5 +86,4 @@ Class-specific variants (Druid with Wild Shape, etc.) are maintained on separate
 **Planned**
 - Prepared spells — manual spell list folded into the Spell Slots panel, organized by level
 - Combat section revamp — Actions, Bonus Actions, and Reactions in labelled columns with one-click dice rolls wired to the existing roller
-- Lore Book — floating notes panel with session-by-session import/export, separate from character data
 - Class resource blocks — Bardic Inspiration, Channel Divinity, Action Surge, Ki Points, etc. (deferred; tied to class variant system)

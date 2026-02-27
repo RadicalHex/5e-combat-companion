@@ -1,5 +1,34 @@
 # Changelog
 
+## v1.4.0 — 2026-02-27
+
+### Lore Book
+- New **📖 Lore** floating panel — open from the header button
+- Create named pages for NPCs, locations, factions, session notes, etc.
+- Page dropdown to switch between pages; **+** to add, **✎** to rename, **✕** to delete
+- Freeform textarea per page — content auto-saves to localStorage
+- **Export** downloads a standalone `lore-book.json`; **Import** restores from file
+- Panel is draggable, resizable (8-handle), and minimizable — same controls as the stat block viewer
+- Lore Book entry added to the **?** help guide
+
+### Saves
+- **Flat bonus per save** — click **✏** on the Saves section to enter edit mode and set a per-save bonus
+- Stacks on top of your ability modifier and proficiency (for items like Ring of Protection, Good Luck Stone, Cloak of Protection)
+- Active bonuses shown in **amber** next to the save total
+
+### Left Column — Collapsible Sections
+- **Character**, **Stats**, **Ability Scores**, and **Saves** sections are now individually collapsible
+- Click the section title or the **▲/▼** chevron to toggle; collapse state persists across reloads
+- Clicking **✏** on a collapsed section auto-expands it before entering edit mode
+
+### Polish & Fixes
+- Lore panel titlebar buttons (minimize/close) now styled correctly — were showing browser-default white background
+- Saves section title was permanently showing the Save button due to a `null` key bug — fixed
+- Section title chevrons: resolved a double `style` attribute bug that was preventing `justify-content: space-between` from applying; chevrons now sit flush right, matching all other collapsible sections
+- Edit pencil button opacity raised from 0.4 → 0.65 for better visibility at rest
+
+---
+
 ## v1.3.0 — 2026-02-26
 
 ### Hit Dice
