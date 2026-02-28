@@ -3467,16 +3467,32 @@
       <div id="attacks-section">
         <div class="panel-title">Attacks</div>
         ${attacks.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:8px;">None defined</div>' : ''}
-        ${attacks.map(a => `
-          <div class="attack-entry">
-            <div class="attack-entry-header">
-              <span class="attack-name" onclick="editAttack('${a.id}')" title="Click to edit">${a.name}</span>
-              <button class="btn-remove-attack" onclick="removeAttack('${a.id}')">✕</button>
+        ${attacks.map(a => {
+          const r = attackRolls[a.id] || {};
+          const dmgParsed = parseDiceExpr(a.dmg);
+          const dmgLabel = dmgParsed
+            ? `🎲 ${dmgParsed.count}d${dmgParsed.sides}${dmgParsed.modifier > 0 ? '+' + dmgParsed.modifier : dmgParsed.modifier < 0 ? dmgParsed.modifier : ''}`
+            : null;
+          return `
+            <div class="attack-entry">
+              <div class="attack-entry-header">
+                <span class="attack-name" onclick="editAttack('${a.id}')" title="Click to edit">${a.name}</span>
+                <button class="btn-remove-attack" onclick="removeAttack('${a.id}')">✕</button>
+              </div>
+              <div class="attack-stats">${a.hit} to hit &nbsp;·&nbsp; ${a.dmg || '—'}</div>
+              ${a.notes ? `<div class="attack-notes">${a.notes}</div>` : ''}
+              <div class="attack-roll-row">
+                <button class="btn-atk-roll" onclick="rollAttackHit('${a.id}')">🎲 To Hit</button>
+                ${dmgLabel ? `<button class="btn-atk-roll" onclick="rollAttackDmg('${a.id}')">${dmgLabel}</button>` : ''}
+              </div>
+              ${r.hit || r.dmg ? `
+                <div class="attack-roll-results">
+                  ${r.hit ? `<span class="atk-result-hit">Hit: ${r.hit}</span>` : ''}
+                  ${r.dmg ? `<span class="atk-result-dmg">Dmg: ${r.dmg}</span>` : ''}
+                </div>` : ''}
             </div>
-            <div class="attack-stats">${a.hit} to hit &nbsp;·&nbsp; ${a.dmg || '—'}</div>
-            ${a.notes ? `<div class="attack-notes">${a.notes}</div>` : ''}
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
         <button class="btn-add-attack" onclick="addAttack()">+ Add Attack</button>
       </div>
     `;
