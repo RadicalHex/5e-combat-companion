@@ -3396,6 +3396,34 @@
     };
   }
 
+  function rollAttackHit(id) {
+    const atk = state.attacks.find(a => a.id === id);
+    if (!atk) return;
+    const parsed = parseDiceExpr(atk.hit);
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const mod = parsed ? parsed.modifier : 0;
+    const total = roll + mod;
+    if (!attackRolls[id]) attackRolls[id] = {};
+    attackRolls[id].hit = String(total);
+    document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
+  }
+
+  function rollAttackDmg(id) {
+    const atk = state.attacks.find(a => a.id === id);
+    if (!atk) return;
+    const parsed = parseDiceExpr(atk.dmg);
+    if (!parsed) return;
+    const rolls = Array.from({ length: parsed.count }, () => Math.floor(Math.random() * parsed.sides) + 1);
+    const subtotal = rolls.reduce((a, b) => a + b, 0);
+    const total = subtotal + parsed.modifier;
+    const breakdown = parsed.count > 1 ? `[${rolls.join('+')}]` : String(rolls[0]);
+    const modStr = parsed.modifier > 0 ? `+${parsed.modifier}` : parsed.modifier < 0 ? String(parsed.modifier) : '';
+    const label = `${breakdown}${modStr} = ${total}${parsed.suffix ? ' ' + parsed.suffix : ''}`;
+    if (!attackRolls[id]) attackRolls[id] = {};
+    attackRolls[id].dmg = label;
+    document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
+  }
+
   // === CUSTOM ATTACKS ===
   function addAttack() {
     const name = prompt('Attack name (e.g. Sharpshooter Shot):');
