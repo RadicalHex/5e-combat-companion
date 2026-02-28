@@ -3484,7 +3484,7 @@
               <div class="attack-stats">${a.hit} to hit &nbsp;·&nbsp; ${a.dmg || '—'}</div>
               ${a.notes ? `<div class="attack-notes">${a.notes}</div>` : ''}
               <div class="attack-roll-row">
-                <button class="btn-atk-roll" onclick="rollAttackHit('${a.id}')">🎲 To Hit</button>
+                <button class="btn-atk-roll" onclick="rollAttackHit('${a.id}')">🎲 ${a.hit}</button>
                 ${dmgLabel ? `<button class="btn-atk-roll" onclick="rollAttackDmg('${a.id}')">${dmgLabel}</button>` : ''}
               </div>
               ${r.hit || r.dmg ? `
