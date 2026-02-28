@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.4.1 — 2026-02-28
+
+### Offline Support
+- Cinzel and Inter fonts are now **embedded locally** — the tracker is fully functional with no internet connection (contributed by Spirutural via PR #3)
+
+### Bug Fixes
+- `talent-companion.html`: Short Rest rolled-phase modal now guards with an explicit `srPhase === 'rolled'` check, preventing stale renders if the state machine is interrupted mid-flow
+
+---
+
 ## talent-companion v1.0.0 — 2026-02-27
 
 ### The Talent's Companion — New File
