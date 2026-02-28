@@ -1561,6 +1561,7 @@
 
   let state = loadState();
   let diceHistory = [];   // max 5 entries: { expr, total, detail }
+  let attackRolls = {};   // { [attackId]: { hit?: string, dmg?: string } }
   let diceModifier = 0;
   let diceCount = 1;
   let diceMenuOpen = false;
