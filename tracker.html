@@ -3441,6 +3441,7 @@
     }));
   }
   function removeAttack(id) {
+    delete attackRolls[id];
     update(s => s.attacks = s.attacks.filter(a => a.id !== id));
   }
   function editAttack(id) {
@@ -3452,6 +3453,7 @@
     if (hit === null) return;
     const dmg = prompt('Damage:', atk.dmg);
     const notes = prompt('Notes:', atk.notes);
+    delete attackRolls[id];
     update(s => {
       const a = s.attacks.find(a => a.id === id);
       if (!a) return;
