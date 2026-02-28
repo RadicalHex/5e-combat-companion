@@ -3378,6 +3378,24 @@
     `;
   }
 
+  // === DICE EXPRESSION PARSER ===
+  function parseDiceExpr(str) {
+    if (!str) return null;
+    const s = str.trim();
+    // Flat modifier only: "+7", "7", "-2"  → treated as 1d20 + modifier (to-hit usage)
+    const flat = s.match(/^([+-]?\d+)$/);
+    if (flat) return { count: 1, sides: 20, modifier: parseInt(flat[1], 10), suffix: '' };
+    // Dice expression: "2d6+3 fire", "1d8", "d4-1 necrotic", "1d20+5"
+    const dice = s.match(/^(\d+)?d(\d+)([+-]\d+)?(.*)$/i);
+    if (!dice) return null;
+    return {
+      count:    parseInt(dice[1] || '1', 10),
+      sides:    parseInt(dice[2], 10),
+      modifier: parseInt(dice[3] || '0', 10),
+      suffix:   dice[4].trim()
+    };
+  }
+
   // === CUSTOM ATTACKS ===
   function addAttack() {
     const name = prompt('Attack name (e.g. Sharpshooter Shot):');
