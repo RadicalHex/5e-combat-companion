@@ -1503,7 +1503,7 @@
 <div id="short-rest-overlay" class="help-overlay hidden" onclick="srCloseOnBackdrop(event)">
   <div class="sr-modal">
     <button class="help-close" onclick="closeShortRest()">✕</button>
-    <h2 style="font-family:'Cinzel',serif;font-size:1rem;color:#a8d8e8;margin-bottom:16px;">Short Rest</h2>
+    <h2 id="sr-title" style="font-family:'Cinzel',serif;font-size:1rem;color:#a8d8e8;margin-bottom:16px;">Short Rest</h2>
     <div id="sr-body"></div>
   </div>
 </div>
@@ -1878,7 +1878,8 @@
   let diceMenuOpen = false;
   let srDiceToSpend = 1;
   let srRolls = [];        // array of { roll, conMod, total }
-  let srPhase = 'pick';    // 'pick' | 'rolled'
+  let srPhase = 'pick';    // 'pick' | 'rolled' | 'strain'
+  let srStrainRoll = null;
   // Migrate older saved states that lack newer fields
   if (!state.hitDice) state.hitDice = { max: 0, current: 0, dieType: 'd8', open: false };
   if (state.hitDice.open === undefined) state.hitDice.open = false;
@@ -2474,13 +2475,10 @@
   }
 
   function shortRest() {
-    if (state.hitDice.current === 0) {
-      alert('No hit dice remaining.');
-      return;
-    }
     srDiceToSpend = 1;
     srRolls = [];
-    srPhase = 'pick';
+    srStrainRoll = null;
+    srPhase = state.hitDice.current === 0 ? 'strain' : 'pick';
     renderSRModal();
     document.getElementById('short-rest-overlay').classList.remove('hidden');
   }
@@ -2516,12 +2514,26 @@
       s.hp.current = Math.min(s.hp.max + (s.hp.temp || 0), s.hp.current + healAmount);
       s.hitDice.current = Math.max(0, s.hitDice.current - srDiceToSpend);
     });
+    srStrainRoll = null;
+    srPhase = 'strain';
+    renderSRModal();
+  }
+  function srRollStrain() {
+    const sides = parseInt(state.manifestDie.slice(1));
+    srStrainRoll = Math.ceil(Math.random() * sides);
+    renderSRModal();
+  }
+  function srApplyStrain(type) {
+    if (!srStrainRoll) return;
+    update(s => { s.strain[type] = Math.max(0, s.strain[type] - srStrainRoll); });
     closeShortRest();
   }
 
   function renderSRModal() {
     const { dieType, current } = state.hitDice;
     const body = document.getElementById('sr-body');
+    const titleEl = document.getElementById('sr-title');
+    if (titleEl) titleEl.textContent = srPhase === 'strain' ? 'Psionic Recovery' : 'Short Rest';
     if (srPhase === 'pick') {
       body.innerHTML = `
         <div class="sr-dice-count">${current} ${dieType} available</div>
@@ -2550,10 +2562,43 @@
         </div>
         <div class="sr-total">Heal for ${healTotal} HP</div>
         <div class="sr-actions">
-          <button class="btn-sm" onclick="srHeal()">Heal</button>
+          <button class="btn-sm" onclick="srHeal()">Heal →</button>
           <button class="btn-sm" onclick="closeShortRest()">Cancel</button>
         </div>
       `;
+    } else if (srPhase === 'strain') {
+      const dieLabel = state.manifestDie.toUpperCase();
+      const sb = state.strain.body, sm = state.strain.mind, ss = state.strain.soul;
+      const totalStrain = sb + sm + ss;
+      if (totalStrain === 0) {
+        body.innerHTML = `
+          <div style="text-align:center;color:#2a8a6a;padding:12px;font-size:0.85rem;">✓ No strain to recover.</div>
+          <div class="sr-actions"><button class="btn-sm" onclick="closeShortRest()">Done</button></div>
+        `;
+      } else if (srStrainRoll === null) {
+        body.innerHTML = `
+          <div class="sr-dice-count" style="font-size:0.8rem;margin-bottom:8px;">Psionic Recovery</div>
+          <div style="font-size:0.75rem;color:#4a7a8a;text-align:center;margin-bottom:14px;">
+            Roll your ${dieLabel} — reduce one strain pool by the result.
+          </div>
+          <div class="sr-actions">
+            <button class="btn-sm" onclick="srRollStrain()">🎲 Roll ${dieLabel}</button>
+            <button class="btn-sm" onclick="closeShortRest()">Skip</button>
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <div class="sr-total">Rolled ${srStrainRoll} — choose a pool to reduce:</div>
+          <div class="sr-actions" style="flex-direction:column;gap:8px;margin-top:10px;">
+            ${[['body','#FF4DA6',sb],['mind','#4DD9FF',sm],['soul','#9B59FF',ss]].map(([t,c,v]) => `
+              <button onclick="srApplyStrain('${t}')"
+                style="background:${c}22;border:1px solid ${c};color:${c};padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.8rem;">
+                ${t.charAt(0).toUpperCase()+t.slice(1)}: ${v} → ${Math.max(0, v - srStrainRoll)}
+              </button>`).join('')}
+            <button class="btn-sm" onclick="closeShortRest()" style="margin-top:4px;">Skip</button>
+          </div>
+        `;
+      }
     }
   }
 
@@ -3780,8 +3825,9 @@
 
   // === STRAIN TRACKER ===
   function renderStrain() {
-    const { strain, strainMax, manifestDie, strainOpen } = state;
+    const { strain, strainMax, manifestDie, strainOpen, concentration } = state;
     const total = strain.body + strain.mind + strain.soul;
+    const concBonus = concentration.length;
     const isWarning = total >= strainMax - 2;
 
     const pipRow = (type) => {
@@ -3812,7 +3858,14 @@
           ${pipRow('mind')}
           ${pipRow('soul')}
         </div>
-        <div class="manifest-die-display" onclick="editManifestDie()" title="Click to edit" style="cursor:pointer;">Manifestation Die: <span>${manifestDie}</span></div>
+        <div class="manifest-die-display" style="display:flex;justify-content:space-between;align-items:center;">
+          <span onclick="editManifestDie()" title="Click to edit" style="cursor:pointer;">Manifestation Die: <span>${manifestDie}</span></span>
+          <span style="font-size:0.7rem;color:#4a7a8a;">
+            ${concBonus > 0
+              ? `Concentrating: <strong style="color:#FF4DA6;">+${concBonus}</strong> to scores`
+              : `Concentrating: <span style="color:#2a5a6a;">none</span>`}
+          </span>
+        </div>
       ` : ''}`;
   }
 
@@ -3839,6 +3892,14 @@
       const isOpen = !!powerCardOpen[p.id];
       const desc = POWER_DESCRIPTIONS[p.id] || '';
       const timeLabel = { action: 'Action', bonus: 'Bonus', reaction: 'Reaction', special: 'Special' }[p.manifestTime] || p.manifestTime;
+      const selOrder = powerManifestOrder[p.id] || p.order;
+      const orderSelect = p.order < 6 ? `
+        <select onchange="event.stopPropagation();setPowerManifestOrder('${p.id}',this.value)"
+          style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;border-radius:3px;font-size:0.7rem;padding:2px 3px;cursor:pointer;">
+          ${Array.from({length: 6 - p.order + 1}, (_, i) => p.order + i).map(o =>
+            `<option value="${o}" ${o === selOrder ? 'selected' : ''}>${['','1st','2nd','3rd','4th','5th','6th'][o]}</option>`
+          ).join('')}
+        </select>` : '';
       return `
         <div class="power-card" style="flex-direction:column;align-items:stretch;gap:0;padding:0;">
           <div style="display:flex;align-items:center;gap:6px;padding:7px 8px;cursor:pointer;" onclick="togglePowerCard('${p.id}')">
@@ -3850,7 +3911,8 @@
               <button class="power-conc-toggle ${isConc ? 'active' : ''}"
                 onclick="event.stopPropagation();toggleConcentration('${p.id}')" title="Toggle concentration">C</button>
             ` : ''}
-            <button class="power-manifest-btn" onclick="event.stopPropagation();openManifestModal('${p.id}')">Manifest</button>
+            ${orderSelect}
+            <button class="power-manifest-btn" onclick="event.stopPropagation();openManifestModal('${p.id}',${selOrder})">Manifest</button>
             <span style="font-size:0.65rem;color:#2a5a6a;padding-left:2px;">${isOpen ? '▲' : '▼'}</span>
           </div>
           ${isOpen && desc ? `
@@ -3893,11 +3955,11 @@
     });
   }
 
-  function openManifestModal(id) {
+  function openManifestModal(id, order) {
     const power = POWERS_DATA.find(p => p.id === id);
     if (!power) return;
     document.getElementById('manifest-modal').style.display = 'flex';
-    renderManifestModal(power);
+    renderManifestModal(power, order || power.order);
   }
 
   function openManagePowers() {
@@ -3905,10 +3967,15 @@
     renderManagePowersModal();
   }
 
-  let powerCardOpen = {};   // id → true when description is expanded
+  let powerCardOpen = {};      // id → true when description is expanded
+  let powerManifestOrder = {}; // id → selected order for manifesting (defaults to power.order)
 
   function togglePowerCard(id) {
     powerCardOpen[id] = !powerCardOpen[id];
+    renderActivePowers();
+  }
+  function setPowerManifestOrder(id, order) {
+    powerManifestOrder[id] = +order;
     renderActivePowers();
   }
 
@@ -3992,31 +4059,31 @@
   }
 
   // === MANIFESTATION RESOLVER ===
-  let manifestState = { power: null, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
+  let manifestState = { power: null, selectedOrder: 1, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
 
-  function renderManifestModal(power) {
-    manifestState = { power, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
+  function renderManifestModal(power, selectedOrder) {
+    manifestState = { power, selectedOrder: selectedOrder || power.order, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
     _drawManifestModal();
   }
 
   function _drawManifestModal() {
     const modal = document.getElementById('manifest-modal');
-    const { power, step, roll, strainGained, allocated } = manifestState;
+    const { power, selectedOrder, step, roll, strainGained, allocated } = manifestState;
     const { concentration, strain, strainMax } = state;
 
     const concCount = concentration.filter(id => id !== power.id).length;
-    const score = power.order + concCount;
+    const score = selectedOrder + concCount;
     const total = strain.body + strain.mind + strain.soul;
     const allocTotal = allocated.body + allocated.mind + allocated.soul;
     const dieLabel = state.manifestDie.toUpperCase();
 
-    if (power.order === 1) {
+    if (selectedOrder === 1) {
       modal.className = 'modal-overlay';
       modal.innerHTML = `
         <div class="modal-box resolver-box">
           <div class="modal-title">${power.name} <button class="modal-close" onclick="closeManifestModal()">✕</button></div>
           <div style="text-align:center;padding:16px">
-            <div style="font-size:0.8rem;color:#4a7a8a;margin-bottom:8px">1st-order power — no manifestation test required.</div>
+            <div style="font-size:0.8rem;color:#4a7a8a;margin-bottom:8px">1st-order — no manifestation test required.</div>
             <div class="resolver-result success">✓ Power manifested. No strain.</div>
             <button class="resolver-confirm-btn" style="margin-top:12px" onclick="closeManifestModal()">Done</button>
           </div>
@@ -4024,6 +4091,8 @@
       return;
     }
 
+    const ordinalLabel = ['','1st','2nd','3rd','4th','5th','6th'][selectedOrder];
+    const upcasting = selectedOrder > power.order ? ` (upcast from ${['','1st','2nd','3rd','4th','5th','6th'][power.order]})` : '';
     let body = '';
     if (step === 1) {
       const concNames = concentration.filter(id => id !== power.id)
@@ -4032,10 +4101,10 @@
         <div class="resolver-step">
           <div class="resolver-score">
             Score: ${score}
-            <small>Order ${power.order}${concCount > 0 ? ` + ${concCount} (concentrating on ${concNames.join(', ')})` : ''}</small>
+            <small>${ordinalLabel} Order${upcasting}${concCount > 0 ? ` + ${concCount} (concentrating on ${concNames.join(', ')})` : ''}</small>
           </div>
           <div style="font-size:0.75rem;color:#4a7a8a;text-align:center;margin-bottom:12px">
-            Roll your ${dieLabel}. If roll &gt; ${score}: no strain. If = ${score}: +1 strain. If &lt; ${score}: +${power.order} strain.
+            Roll your ${dieLabel}. If roll &gt; ${score}: no strain. If = ${score}: +1 strain. If &lt; ${score}: +${selectedOrder} strain.
           </div>
           <button class="resolver-roll-btn" onclick="manifestRollForMe()">🎲 Roll ${dieLabel} for me</button>
           <div style="text-align:center;margin:8px 0;font-size:0.7rem;color:#4a7a8a">— or enter your roll —</div>
@@ -4050,7 +4119,7 @@
       let resultClass, resultText;
       if (roll > score)       { resultClass = 'success'; resultText = `✓ ${roll} > ${score} — Success! No strain.`; }
       else if (roll === score) { resultClass = 'partial'; resultText = `~ ${roll} = ${score} — Success + 1 strain`; }
-      else                     { resultClass = 'failure'; resultText = `✗ ${roll} < ${score} — Success + ${strainGained} strain (order ${power.order})`; }
+      else                     { resultClass = 'failure'; resultText = `✗ ${roll} < ${score} — Success + ${strainGained} strain (${ordinalLabel} order)`; }
 
       if (wouldExceed && strainGained > 0) {
         body = `
@@ -4090,7 +4159,7 @@
           <button class="modal-close" onclick="closeManifestModal()">✕</button>
         </div>
         <div style="font-size:0.7rem;color:#4a7a8a;margin-bottom:12px">
-          ${power.school} &bull; ${['','1st','2nd','3rd','4th','5th','6th'][power.order]} Order
+          ${power.school} &bull; ${ordinalLabel} Order${upcasting ? `<span style="color:#2ab8d0"> ${upcasting}</span>` : ''}
           ${power.concentration ? ' &bull; <span style="color:#FF4DA6">Concentration</span>' : ''}
         </div>
         ${body}
@@ -4103,12 +4172,12 @@
   }
 
   function manifestSetRoll(roll) {
-    const { power } = manifestState;
+    const { power, selectedOrder } = manifestState;
     const concCount = state.concentration.filter(id => id !== power.id).length;
-    const score = power.order + concCount;
+    const score = selectedOrder + concCount;
     let strainGained = 0;
     if (roll === score) strainGained = 1;
-    if (roll < score)  strainGained = power.order;
+    if (roll < score)  strainGained = selectedOrder;
     manifestState = { ...manifestState, step: 2, roll, strainGained, allocated: { body: 0, mind: 0, soul: 0 } };
     _drawManifestModal();
   }
