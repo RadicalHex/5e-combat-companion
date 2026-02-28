@@ -2548,7 +2548,7 @@
           <button class="btn-sm" onclick="closeShortRest()">Cancel</button>
         </div>
       `;
-    } else {
+    } else if (srPhase === 'rolled') {
       const healTotal = srRolls.reduce((sum, r) => sum + r.total, 0);
       const sign = srRolls[0].conMod >= 0 ? '+' : '';
       body.innerHTML = `
