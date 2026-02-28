@@ -1677,6 +1677,113 @@
     { id: 'souls-intertwined', name: 'Souls Intertwined', order: 6, school: 'Telepathy', schoolKey: 'tlp', manifestTime: 'action', concentration: true, duration: '1 hour' },
   ];
 
+  // === POWER DESCRIPTIONS ===
+  const POWER_DESCRIPTIONS = {
+    'glimpse': `You glimpse the immediate future of one willing creature within 5 feet and impart a warning into their mind. The next attack roll made against the target before the end of your next turn has disadvantage.`,
+    'time-thief': `You psionically absorb the life force of a creature within 30 feet, causing them to age faster than normal. The target makes a Constitution save; on a failure they take 1d4 necrotic damage and you gain temporary hit points equal to the damage taken.`,
+    'again': `As a reaction when you or a creature within 30 feet misses with an attack, you momentarily rewind time, allowing that creature a second chance. The creature rerolls the attack and must use the new result.`,
+    'intuition': `You target up to three willing creatures within 30 feet, gifting them precognitive insight. For up to 1 minute (Concentration), each time a target takes damage, the damage is reduced by 1d4 (minimum 0).`,
+    'precognition': `You touch a willing creature and gift them limited foresight. For 8 hours, the target adds 1d6 to initiative rolls and cannot be surprised.`,
+    'read-object': `You touch an object and receive a mental image of the last creature to hold it, and see and hear any events within 20 feet of the object in the last 8 hours from the object's perspective. Instantaneous.`,
+    'forget': `You reach into the mind of a creature within 60 feet, making them forget critical knowledge (Constitution save). On a failure, for 1 minute the target either can't manifest powers of 4th order or lower, can't cast spells of 3rd level or higher, or loses weapon proficiencies (save ends at end of turn).`,
+    'ravages-of-time': `You attempt to rapidly age the body of one creature within 60 feet (Constitution save). On a failure, the target takes 5d8 necrotic damage and ages 1d10 years; the aging reverts on a long rest.`,
+    'restore-the-past': `You touch a piece of a destroyed Large or smaller mundane object (worth up to 1,000 gp) and remake it with your mind, even if pieces are missing or reduced to dust. Instantaneous.`,
+    'memory-gap': `You attempt to erase another creature's memory within 30 feet (Wisdom save). On a failure, you permanently eliminate their memory of one event within the last 24 hours that lasted no more than 10 minutes; the creature is unbothered by the gap.`,
+    'stasis-field': `You shape a translucent 20-foot cube originating from you. For 8 hours, objects inside the cube that aren't worn or carried cannot be moved, damaged, or destroyed; only you and creatures inside when it appears can pass freely through it.`,
+    'reveal-the-path': `Over 10 minutes you name or describe a creature familiar to you that passed within 1,000 feet of your location in the last 24 hours, then instantly know every location it visited and the direction and distance to each. Instantaneous.`,
+    'witness-demise': `You project a mental image into the minds of up to three creatures within 30 feet. Choose Future Demise (targets can't be frightened and have advantage on saves for 1 minute) or Imminent Demise (Wisdom save or 8d8 psychic damage and frightened for 1 minute, save ends at end of turn).`,
+    'ally-of-time': `You alter time in a 40-foot cube within 120 feet (Concentration, up to 1 minute). When a creature starts their turn in the cube, you may Accelerate it (doubled speed, +2 AC, advantage on Dex saves, extra limited action) or Decelerate it (Wisdom save or halved speed, −2 AC, disadvantage on Dex saves, no reactions).`,
+    'rejuvenate': `You touch one creature and reshape the flow of time through their body. They gain one of: regain 50 hit points, end one condition (blinded, charmed, dazed, deafened, frightened, paralyzed, petrified, poisoned, stunned), or regain one expended spell slot of level 1d4+1 or lower. Instantaneous.`,
+    'minor-acceleration': `You touch a willing creature as a bonus action, increasing their speed by 10 feet until the end of your next turn. Instantaneous.`,
+    'sharpened-senses': `As a bonus action, you make a Wisdom (Perception) check to detect hidden creatures, doors, objects, or traps in your surroundings, with advantage from psionic focus. Instantaneous.`,
+    'adapt': `You choose up to four willing creatures within 15 feet. For 24 hours, each target can survive without food or water and is immune to exhaustion from mundane environmental or weather effects.`,
+    'disappear': `You send psionic energy through a willing creature you touch, making them and everything they wear or carry invisible until the end of your next turn. Concentration, up to 1 round.`,
+    'flay': `You shoot a 15-foot cone of pure psionic energy. Each creature in the area makes an Intelligence save, taking 2d6 psychic damage on a failure or half on a success. Instantaneous.`,
+    'fluid-motion': `You imbue your body with psionic energy for up to 1 minute (Concentration). Choose one benefit: Dash as a bonus action, triple jump distance, or advantage on Athletics/Acrobatics checks to escape grapples and on saves against being grappled or restrained.`,
+    'fortify': `As a reaction when you or a creature within 30 feet takes acid, cold, fire, force, lightning, or thunder damage, you create a barrier granting resistance to that damage type (including the triggering damage) until the end of your next turn.`,
+    'penetrating-sight': `For 1 minute you can see into and through solid matter out to 30 feet. Vision penetrates 1 foot of stone, 1 inch of metal, or 3 feet of wood or dirt; lead blocks it.`,
+    'sixth-sense': `You touch a willing creature and grant them one new sense for 1 hour: darkvision (60 ft), tremorsense (10 ft), or the ability to detect psionics within 30 feet.`,
+    'amplify': `As a bonus action, you channel psionic power into a creature within 30 feet. The next time the target hits with a weapon attack within 1 minute, the attack deals an extra 2d8 psychic damage.`,
+    'beam-gaze': `You unleash a beam of force at a creature within 120 feet (Constitution save). On a failure, they take 3d10 force damage and are poisoned, or have halved speed and no reactions, or attacks against them have advantage for 1 minute (save ends at end of turn).`,
+    'cure-ailment': `You touch a creature and end either one disease or one condition affecting them (blinded, charmed, dazed, deafened, frightened, or poisoned). Instantaneous.`,
+    'embrace-the-deep': `You choose up to five willing creatures within 30 feet. For 24 hours, they don't need to breathe and gain either a burrowing speed or swimming speed equal to their walking speed.`,
+    'iron': `Your skin turns into hard, dark metal for up to 10 minutes (Concentration). You gain 15 temporary HP, +2 AC, and can make up to two psionic unarmed strikes (1d10 + manifestation modifier bludgeoning).`,
+    'psionic-resilience': `You touch a willing creature and grant them immunity to one chosen condition for 1 hour. If they already have the condition, it is suppressed for the duration.`,
+    'shadow-form': `You transform yourself into amorphous shadow for up to 10 minutes (Concentration). You gain a flying speed of 60 ft, resistance to mundane damage, advantage on Stealth checks, and can move through spaces as narrow as 1 inch.`,
+    'bones-of-glass': `You attempt to psionically weaken a creature within 90 feet (Constitution save). On a failure, the target gains vulnerability to bludgeoning, force, piercing, and slashing damage for up to 1 minute (Concentration); on a success, it takes 3d10 psychic damage.`,
+    'the-real': `A willing creature you touch gains truesight out to 120 feet, automatically notices psionic or magical secret doors, and can see into the Ethereal Plane for 1 hour.`,
+    'brain-overload': `You unleash a surge of energy in the mind of a creature within 120 feet (Constitution save). On a failure, the target takes 14d10 psychic damage; if this reduces them to 0 HP and they have a brain, their brain explodes and they die instantly. Instantaneous.`,
+    'paragon': `One willing creature you touch has each of their ability scores become 20 (unless already higher) for 8 hours.`,
+    'steel': `Your skin turns into hard metal for up to 10 minutes (Concentration). You gain resistance to bludgeoning/piercing/slashing damage, critical hits become normal hits, you can make up to three psionic unarmed strikes (2d10 + modifier), and you regain 10 HP at the start of each turn.`,
+    'caress-of-fire': `You touch a willing creature, wreathing them in psionic fire for up to 1 minute (Concentration). Any creature that touches the target or hits them with a melee attack for the first time on a turn takes 1d4 fire damage.`,
+    'flames-master': `You emit a burst of psionic energy affecting every Medium or smaller fire-based light source within 30 feet, individually igniting or snuffing each. Supernatural sources are unaffected. Instantaneous.`,
+    'incinerate': `A column of flame filling a 5-foot cube bursts from the ground at a point within 60 feet and burns until the end of your next turn. Any creature in it makes a Dexterity save or takes 1d6 fire damage; ignites unattended flammable objects.`,
+    'ignite': `You ignite a creature within 60 feet (Dexterity save). On a failure, the target takes 2d6 fire damage and catches fire, taking 1d6 fire damage at the end of each turn until extinguished (target uses an action and repeats the save). Concentration, up to 1 minute.`,
+    'kindling': `You psionically weaken a creature or object within 30 feet to fire (Constitution save for creatures). For up to 1 minute (Concentration), fire immunity becomes resistance, resistance is removed, or neither becomes vulnerability.`,
+    'scorch': `A line of fire 30 feet long and 5 feet wide blasts from you. Each creature in the line makes a Dexterity save, taking 2d6 fire damage on a failure or half on a success; flammable objects ignite. Instantaneous.`,
+    'imbue-flame': `You touch a willing creature and imbue them with fiery psionic force for up to 10 minutes (Concentration). Their weapon attacks and unarmed strikes deal an extra 1d6 fire damage.`,
+    'overheat': `You attempt to raise the internal temperature of a creature within 30 feet (Constitution save). On a success they take 2d6 fire damage; on a failure they gain one level of exhaustion. Creatures resistant or immune to fire auto-succeed. Instantaneous.`,
+    'smoke-screen': `You create a 20-foot-radius sphere of opaque smoke centered on a point within 90 feet (Concentration, up to 1 minute). The area is heavily obscured. Each creature entering or starting in the smoke makes a Constitution save, taking 3d6 fire damage on a failure or half on a success.`,
+    'fire-form': `You encase yourself in psionic flame for up to 10 minutes (Concentration), gaining a flying speed of 60 ft, immunity to cold and fire, 1d6 fire damage to melee attackers, and extra 1d6 fire damage on your own attacks.`,
+    'melt': `You cause a manufactured metal object (no larger than Medium) within 60 feet to glow red-hot. If unattended it melts; if carried, the bearer makes a Dexterity save, taking 5d10 fire damage on a failure (object melts) or half on a success. Instantaneous.`,
+    'detonate': `You place an explosive psionic spark in a creature within 120 feet (Constitution save). On a failure, the spark is imbued (Concentration, up to 1 hour); you can use an action to detonate it, dealing 8d10 fire damage to the target and 8d10 to all creatures within 20 feet (Dexterity save for half).`,
+    'heat-shell': `A shimmering globe of heat extends 10 feet from you for up to 1 hour (Concentration). Creatures touching the shell or starting inside it take 4d8 fire damage; the shell blocks physical passage but not spells or ranged attacks.`,
+    'crucible': `You ignite a 50-foot-square area within 150 feet (Concentration, up to 1 minute). Each creature starting their turn inside makes a Dexterity save, taking 7d10 fire damage on a failure or half on a success. The fire spreads 5 feet per round.`,
+    'heat-transfer': `You drain warmth from one non-Construct, non-Undead creature within 120 feet (Concentration, up to 1 minute). At the start of each of their turns they make a Constitution save, taking 4d10 cold damage on a failure or half on a success; you may grant half the cold damage as healing to another eligible creature within range.`,
+    'apparition': `You create a sound or image that only you and one creature within 60 feet perceive. A sound can range from a whisper to a scream; an image must fit within a 5-foot cube and can't move or affect senses other than sight. Concentration, up to 1 minute.`,
+    'illuminator': `You create a focused 30-foot cone of bright light from yourself for 1 hour, with sharp edges and no dim light. You can change its color and toggle it on or off at will (no action required).`,
+    'psionic-bolt': `You shoot a purple beam of psychic force at a creature or object within 120 feet (ranged power attack). On a hit, the target takes 1d6 force damage and, if Large or smaller, is pushed 5 feet away from you. Instantaneous.`,
+    'rewrite': `You bend reality to transform one Tiny mundane unattended object within 5 feet into another Tiny mundane object of equal or lesser value for up to 10 minutes (Concentration).`,
+    'jaunt': `You teleport yourself or one willing creature you touch to an unoccupied space within 30 feet that you can see; the target need not see the destination. Instantaneous.`,
+    'mindscape': `You alter a creature's perception of their environment within 30 feet (Wisdom save). On a success, the target takes 1d6 psychic damage; on a failure, they take the Dash action and move in a random direction. Duration 1 round.`,
+    'weight': `You alter a creature's relationship with gravity within 30 feet (Constitution save). For up to 1 minute (Concentration), choose Gravitas (speed reduced by 20 ft) or Levitas (target rises 5 ft at the start of each of their turns; save ends at end of turn).`,
+    'elsewhere': `You target three creatures within 30 feet (Intelligence save). On a failure, a target is teleported up to 30 feet to an unoccupied space you can see and their speed becomes 0 until the start of your next turn. Instantaneous.`,
+    'extinguish': `Choose one creature, object, or psionic effect within 120 feet. Any power of 3rd order or lower on the target ends. Instantaneous.`,
+    'guise': `You project a psionic appearance over your body, transforming your look into any creature of your size you have encountered for 1 hour. The disguise fails under physical inspection (Intelligence Investigation vs. your power save DC).`,
+    'icon-of-fear': `Pick one creature within 120 feet. Each creature of your choice within 30 feet of that target sees them as something to fear and must make a Wisdom save or be frightened of them for up to 1 minute (Concentration; save ends at end of turn).`,
+    'momentary-lapse-of-reason': `Choose one creature or object within 120 feet. Each creature of your choice within 30 feet sees it as something they greatly desire and must make a Wisdom save or drop what they hold and rush toward it, falling prone beside it. Instantaneous.`,
+    'reminisce': `One creature within 30 feet makes a Wisdom save. On a failure, the target believes a friend or loved one has appeared and engages in imaginary conversation for up to 1 hour (Concentration), taking no actions; the effect ends if they take damage or are told the figure isn't real.`,
+    'restructure': `You touch a Large or smaller mundane object and alter the material it is made of (metal to stone, wood to glass, etc.) without changing its state or increasing its value. Instantaneous.`,
+    'target-of-hate': `Choose one creature within 120 feet. Each hostile creature within 30 feet of the target sees them as something they despise and must make a Wisdom save or use their reaction to move toward and attack the target. Instantaneous.`,
+    'fold-space': `Over 10 minutes you create a one-way 10-foot-diameter portal in an unoccupied space within 30 feet that transports any creature passing through it to a destination on any plane of existence you know. The portal lasts until the end of your next turn.`,
+    'reflection': `You psionically create a perfect copy of one creature within 60 feet (CR 10 or lower). Concentration, up to 1 minute. The copy appears in range, acts after your turn on your initiative, shares the original's current statistics and resources, and is loyal to you via a mental link.`,
+    'concussive-slam': `You slam invisible force down upon a creature within 30 feet (Strength save). On a failed save, the target takes 1d4 force damage and is knocked prone. Instantaneous.`,
+    'invisible-force': `Choose one: manipulate one object with movable parts within 30 feet, move an object (5 lbs or less) up to 30 feet, or hurl a 5-pound object at a creature (ranged power attack, 1d8 damage on a hit). Instantaneous.`,
+    'psionic-shift': `As a bonus action, choose one non-grappled creature other than you within 15 feet (Strength save). On a failure, the target is moved 5 feet in a direction of your choice; the target may choose to fail. Instantaneous.`,
+    'choke': `You attempt to crush a Large or smaller creature within 30 feet in your telekinetic grip (Dexterity save). On a failure, the target is restrained (Concentration, up to 1 minute) and takes 1d6 force damage at the start of each turn.`,
+    'kinetic-crush': `One creature within 60 feet is held in your telekinetic grip (Strength save). On a failure, the target takes 2d8 force damage and their speed becomes 0 until the start of your next turn. On a success, half damage and no speed loss.`,
+    'repel': `You telekinetically force a Medium or smaller creature or object (300 lbs or less) within 30 feet away from you (Strength save for creatures). On a failure, the target moves up to 30 feet in any direction; on a success, 5 feet. Objects automatically fail. Instantaneous.`,
+    'capture-energy': `As a reaction to taking acid, cold, fire, force, lightning, or thunder damage, you capture some of it, taking only half damage. You can then hurl the captured energy at a creature or object within 30 feet (ranged power attack), dealing the remaining damage on a hit. Instantaneous.`,
+    'pulse': `Waves of force emanate from you in a 15-foot radius for up to 10 minutes (Concentration). Creatures of your choice treat the area as difficult terrain, and whenever a creature ends their turn within 15 feet of you, you can attempt to trip them (Strength save or fall prone, no action required).`,
+    'telekinetic-burst': `You unleash an explosion of mental force from a point within 90 feet. Each creature in a 20-foot-radius sphere makes a Dexterity save, taking 5d6 force damage and being pushed 10 feet on a failure, or half damage and no push on a success. Instantaneous.`,
+    'fulcrum': `You exert your will to control one Huge or smaller creature or object within 60 feet (Concentration, up to 10 minutes). On each of your turns you can move the target up to 30 feet in any direction (Strength save for creatures; failure leaves them restrained and suspended in midair).`,
+    'gravitational-collapse': `You bring crushing force down on a creature within 90 feet (Dexterity save). On a failure, the target takes 10d6 force damage and is knocked prone (Concentration, up to 1 minute); they can use an action to make a Strength check to stand and end the effect.`,
+    'chariot-of-thought': `A 10-foot-radius disk of psionic force springs up beneath your feet, granting you a flying speed of 60 feet for up to 10 minutes (Concentration). The disk carries up to nine Medium creatures and passes harmlessly through creatures and objects.`,
+    'force-orbs': `You create three orbs of swirling energy that orbit you for 10 minutes, each granting +1 AC. As a bonus action, you can hurl one orb at a target within 60 feet (ranged power attack, 4d10 force damage on a hit); the orb disappears after use.`,
+    'concussive-wave': `You send forth a rising telekinetic shockwave. Each creature of your choice within 30 feet makes a Strength save or is thrown up to 90 feet vertically and 30 feet away from you, then slammed to the ground taking 1d6 bludgeoning per 10 feet fallen and landing prone. Instantaneous.`,
+    'mass-choke': `You lock enemies in your telekinetic grip. Each creature of your choice within 30 feet makes a Dexterity save or is restrained (Concentration, up to 1 minute), taking 5d8 force damage at the start of each of their turns. Ends if any target leaves range or has total cover from you.`,
+    'influence': `As a bonus action, you make a Charisma check (with advantage from psionic touch) to influence or entertain a creature within 30 feet. On a failure, the creature realizes you used psionics and becomes hostile. Creatures that can't be charmed are immune. Instantaneous.`,
+    'psychic-stab': `One creature within 120 feet makes an Intelligence save, taking 1d10 psychic damage on a failed save. Instantaneous.`,
+    'shared-thoughts': `You send a telepathic message of up to 25 words (or a single image) to a creature within 30 feet you are aware of. The target can reply with up to 25 words before the start of your next turn. Messages pass through most solid barriers.`,
+    'awe': `You project psionic emotional energy onto one creature within 30 feet (Concentration, up to 1 minute). Choose Inspiring (target gains temporary HP equal to your manifestation modifier at start of their turns) or Terrifying (Wisdom save or frightened of you, save ends at end of turn).`,
+    'believe': `One creature within 60 feet makes a Wisdom save or gains a new belief until the end of their next turn: Chasm (falls prone, can't stand), Disaster (Dashes randomly), Enemies (attacks nearest ally), or Friends (incapacitated).`,
+    'bolster-ego': `As a reaction when you or a creature within 30 feet makes a saving throw, you psionically bolster them, granting advantage on that save. Instantaneous.`,
+    'make-friends': `You attempt to charm a Humanoid within 30 feet (Wisdom save, advantage if in combat). On a failure, the target is charmed by you for 1 hour, regarding you as a friendly acquaintance. When the effect ends, the creature knows they were charmed.`,
+    'read-thoughts': `You choose a creature within 60 feet and learn their surface thoughts for up to 1 minute (Concentration). You have advantage on Insight and Charisma checks against them. Creatures with Intelligence 3 or lower or no language are immune.`,
+    'share-pain': `As a reaction to being damaged by a creature within 60 feet, you reach out psionically. The creature makes a Wisdom save, taking 1d12 psychic damage on a failure or half on a success. Instantaneous.`,
+    'veritas': `You target up to three creatures within 60 feet (Charisma save). On a failure, you know when each creature speaks or communicates a lie for 10 minutes.`,
+    'clarity': `You touch one creature, helping them enter a state of intense focus. For up to 1 minute (Concentration), the target has advantage on ability checks and attack rolls.`,
+    'dagger-of-the-mind': `One creature within 60 feet makes an Intelligence save. On a failure, the target takes 4d10 psychic damage and can only Dash, Disengage, or Dodge on their next turn; on a success, half damage and no restriction.`,
+    'distant-voice': `You send a message of 25 words or fewer to a familiar creature at any distance or across planes. The creature hears you in their mind, recognizes you, and can reply immediately. Duration 1 round.`,
+    'aura-projection': `You manifest a psionic emotional aura in a 30-foot radius (Concentration, up to 1 minute). At the start of your turn, choose one creature within range and apply: Inspired (advantage on attacks and saves), Sorrow (Wisdom save or next action spent weeping), or Terror (Wisdom save or frightened until your next turn).`,
+    'harlequin': `You psionically grasp for control of one Humanoid within 120 feet (Wisdom save, advantage if in combat). On a failure, the target is charmed (Concentration, up to 1 hour) and you have a telepathic link; you can issue commands and use your action for total control. Charm ends if they succeed on a new save after taking damage.`,
+    'broadcast': `Over 1 minute, you broadcast a telepathic message to every creature of your choice that can understand a language within up to 1 mile, including personal images. The message lasts 1 minute. Instantaneous.`,
+    'fracture': `You unleash a burst of psionic power at a point within 90 feet. Each creature in a 20-foot-radius sphere makes an Intelligence save. On a failure, they take 6d8 psychic damage and are fractured for 1 minute (halved speed, disadvantage on checks/attacks/saves; save ends at end of turn). Instantaneous.`,
+    'psychic-projection': `Over 10 minutes you project your consciousness to a known location on the same plane for up to 1 hour (Concentration). Your body is left unconscious. Your projection shares your statistics but can't affect the world physically or manifest powers; it has immunity to all damage except force and psychic.`,
+    'mindwipe': `You attempt to wipe the mind of a creature within 60 feet (Wisdom save). On a success, the target takes 3d10 psychic damage. On a failure, their proficiency bonus becomes +0 and they can't cast spells, manifest powers, understand language, or communicate intelligibly (Concentration, up to 1 minute).`,
+    'souls-intertwined': `You attempt to swap the minds of two creatures within 60 feet (Charisma save each). If both fail, their minds swap (Concentration, up to 1 hour), each using the other's INT/WIS/CHA scores and memories. If one dies while swapped, their soul may move on or contest to reclaim its original body.`,
+  };
+
   // === STATE ===
   const DEFAULTS = {
     characterName: 'Character',
@@ -3718,18 +3825,29 @@
     const cards = activePowers.map(p => {
       const isConc = concentration.includes(p.id);
       const ordinal = ['', '1st', '2nd', '3rd', '4th', '5th', '6th'][p.order];
+      const isOpen = !!powerCardOpen[p.id];
+      const desc = POWER_DESCRIPTIONS[p.id] || '';
+      const timeLabel = { action: 'Action', bonus: 'Bonus', reaction: 'Reaction', special: 'Special' }[p.manifestTime] || p.manifestTime;
       return `
-        <div class="power-card">
-          <span class="power-order-badge">${ordinal}</span>
-          <span class="power-name">
-            ${p.name}
-            <span class="power-school">${p.school}</span>
-          </span>
-          ${p.concentration ? `
-            <button class="power-conc-toggle ${isConc ? 'active' : ''}"
-              onclick="toggleConcentration('${p.id}')" title="Toggle concentration">C</button>
+        <div class="power-card" style="flex-direction:column;align-items:stretch;gap:0;padding:0;">
+          <div style="display:flex;align-items:center;gap:6px;padding:7px 8px;cursor:pointer;" onclick="togglePowerCard('${p.id}')">
+            <span class="power-order-badge">${ordinal}</span>
+            <span class="power-name">
+              ${p.name}
+              <span class="power-school">${p.school} · ${timeLabel}${p.concentration ? ' · C' : ''}</span>
+            </span>
+            ${p.concentration ? `
+              <button class="power-conc-toggle ${isConc ? 'active' : ''}"
+                onclick="event.stopPropagation();toggleConcentration('${p.id}')" title="Toggle concentration">C</button>
+            ` : ''}
+            <button class="power-manifest-btn" onclick="event.stopPropagation();openManifestModal('${p.id}')">Manifest</button>
+            <span style="font-size:0.65rem;color:#2a5a6a;padding-left:2px;">${isOpen ? '▲' : '▼'}</span>
+          </div>
+          ${isOpen && desc ? `
+            <div style="border-top:1px solid #0f2535;padding:7px 10px 8px;font-size:0.75rem;color:#7ab8c8;line-height:1.5;">
+              ${desc}
+            </div>
           ` : ''}
-          <button class="power-manifest-btn" onclick="openManifestModal('${p.id}')">Manifest</button>
         </div>`;
     }).join('');
 
@@ -3764,6 +3882,13 @@
   function openManagePowers() {
     document.getElementById('manage-powers-modal').style.display = 'flex';
     renderManagePowersModal();
+  }
+
+  let powerCardOpen = {};   // id → true when description is expanded
+
+  function togglePowerCard(id) {
+    powerCardOpen[id] = !powerCardOpen[id];
+    renderActivePowers();
   }
 
   // === MANAGE POWERS MODAL ===
