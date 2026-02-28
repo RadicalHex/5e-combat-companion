@@ -745,6 +745,162 @@
       padding: 6px 0 2px;
     }
 
+    /* === STRAIN TRACKER === */
+    .strain-section { margin-bottom: 20px; }
+    .strain-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .strain-label {
+      font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+      width: 40px; font-weight: 600;
+    }
+    .strain-label.body { color: #FF4DA6; }
+    .strain-label.mind { color: #4DD9FF; }
+    .strain-label.soul { color: #9B59FF; }
+    .strain-pips { display: flex; gap: 3px; flex: 1; }
+    .strain-pip {
+      font-size: 0.9rem; cursor: pointer; opacity: 0.2;
+      transition: opacity 0.15s, filter 0.15s;
+      user-select: none;
+    }
+    .strain-pip.filled { opacity: 1; }
+    .strain-pip.filled.body  { filter: drop-shadow(0 0 4px #FF4DA6); }
+    .strain-pip.filled.mind  { filter: drop-shadow(0 0 4px #4DD9FF); }
+    .strain-pip.filled.soul  { filter: drop-shadow(0 0 4px #9B59FF); }
+    .strain-adj { background: none; border: 1px solid #1a3a4a; color: #4a7a8a;
+      border-radius: 3px; width: 20px; height: 20px; font-size: 0.75rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .strain-adj:hover { border-color: #a8d8e8; color: #a8d8e8; }
+    .strain-total {
+      font-size: 0.75rem; text-align: center; margin-bottom: 8px;
+      color: #4a7a8a; letter-spacing: 0.05em;
+    }
+    .strain-total.warning { color: #d04040; animation: pulse 1s infinite; }
+    .strain-total strong { color: #c8dde8; }
+    .manifest-die-display {
+      font-size: 0.7rem; color: #4a7a8a; text-align: center; margin-top: 4px;
+    }
+    .manifest-die-display span { color: #FF4DA6; font-weight: 600; }
+
+    /* === ACTIVE POWERS === */
+    .powers-section { margin-bottom: 20px; }
+    .power-card {
+      background: #07131c; border: 1px solid #0f2535;
+      border-radius: 4px; padding: 8px 10px; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .power-card:hover { border-color: #1a3a4a; }
+    .power-order-badge {
+      font-size: 0.6rem; background: #0a1e2a; border: 1px solid #1a3a4a;
+      border-radius: 3px; padding: 2px 5px; color: #4a7a8a;
+      white-space: nowrap; font-family: 'Cinzel', serif;
+    }
+    .power-name { flex: 1; font-size: 0.8rem; color: #c8dde8; }
+    .power-school { font-size: 0.6rem; color: #4a7a8a; text-transform: uppercase; letter-spacing: 0.08em; }
+    .power-conc-toggle {
+      font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; cursor: pointer;
+      border: 1px solid #1a3a4a; background: none; color: #4a7a8a;
+    }
+    .power-conc-toggle.active { border-color: #FF4DA6; color: #FF4DA6; }
+    .power-manifest-btn {
+      font-size: 0.65rem; padding: 3px 8px; border-radius: 3px; cursor: pointer;
+      background: #0a1e2a; border: 1px solid #1a4a6a; color: #a8d8e8;
+    }
+    .power-manifest-btn:hover { background: #1a3a4a; }
+    .powers-manage-btn {
+      width: 100%; font-size: 0.7rem; padding: 6px; margin-top: 4px;
+      background: none; border: 1px dashed #1a3a4a; border-radius: 4px;
+      color: #4a7a8a; cursor: pointer; letter-spacing: 0.05em;
+    }
+    .powers-manage-btn:hover { border-color: #a8d8e8; color: #a8d8e8; }
+
+    /* === MANAGE POWERS MODAL === */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .modal-box {
+      background: #060f18; border: 1px solid #1a3a4a; border-radius: 8px;
+      padding: 20px; max-width: 600px; width: 95vw;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .modal-title {
+      font-family: 'Cinzel', serif; font-size: 1rem; color: #a8d8e8;
+      margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #0f2535;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-close {
+      background: none; border: none; color: #4a7a8a; font-size: 1.2rem;
+      cursor: pointer; padding: 0 4px;
+    }
+    .modal-close:hover { color: #d04040; }
+    .order-group { margin-bottom: 16px; }
+    .order-group-title {
+      font-family: 'Cinzel', serif; font-size: 0.7rem; color: #4a7a8a;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #071320;
+    }
+    .power-pick-row {
+      display: flex; align-items: center; gap: 8px; padding: 4px 0;
+      border-bottom: 1px solid #071320;
+    }
+    .power-pick-row:last-child { border-bottom: none; }
+    .power-pick-checkbox { accent-color: #FF4DA6; width: 14px; height: 14px; cursor: pointer; }
+    .power-pick-name { flex: 1; font-size: 0.8rem; color: #c8dde8; }
+    .power-pick-school { font-size: 0.65rem; color: #4a7a8a; text-transform: uppercase; }
+    .power-pick-time { font-size: 0.65rem; color: #2a6a7a; }
+    .modal-search {
+      width: 100%; background: #07131c; border: 1px solid #1a3a4a; color: #c8dde8;
+      border-radius: 4px; padding: 6px 10px; font-size: 0.8rem; margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+    .school-filter { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+    .school-btn {
+      font-size: 0.65rem; padding: 3px 8px; border-radius: 12px; cursor: pointer;
+      border: 1px solid #1a3a4a; background: none; color: #4a7a8a;
+    }
+    .school-btn.active { background: #0a1e2a; border-color: #FF4DA6; color: #FF4DA6; }
+
+    /* === MANIFEST RESOLVER === */
+    .resolver-box { max-width: 400px; }
+    .resolver-step { margin-bottom: 16px; }
+    .resolver-score {
+      font-size: 1.4rem; text-align: center; font-family: 'Cinzel', serif;
+      color: #a8d8e8; margin: 8px 0;
+    }
+    .resolver-score small { font-size: 0.7rem; color: #4a7a8a; display: block; }
+    .resolver-roll-btn {
+      width: 100%; padding: 12px; font-size: 1rem; border-radius: 4px;
+      background: #0a1e2a; border: 1px solid #1a4a6a; color: #a8d8e8;
+      cursor: pointer; font-family: 'Cinzel', serif; letter-spacing: 0.1em;
+    }
+    .resolver-roll-btn:hover { background: #1a3a4a; }
+    .resolver-result {
+      text-align: center; padding: 12px; border-radius: 4px; margin: 12px 0;
+      font-size: 0.9rem;
+    }
+    .resolver-result.success { background: #0a2a0a; border: 1px solid #1a6a1a; color: #4ada4a; }
+    .resolver-result.partial { background: #2a2a0a; border: 1px solid #6a6a1a; color: #dada4a; }
+    .resolver-result.failure { background: #2a0a0a; border: 1px solid #6a1a1a; color: #da4a4a; }
+    .resolver-result.death-warning {
+      background: #1a0a0a; border: 1px solid #d04040; color: #d04040;
+    }
+    .strain-alloc { display: flex; gap: 8px; justify-content: center; margin: 12px 0; }
+    .strain-alloc-btn {
+      padding: 8px 16px; border-radius: 4px; border: 1px solid; cursor: pointer;
+      font-size: 0.8rem; background: none;
+    }
+    .strain-alloc-btn.body { border-color: #FF4DA6; color: #FF4DA6; }
+    .strain-alloc-btn.mind { border-color: #4DD9FF; color: #4DD9FF; }
+    .strain-alloc-btn.soul { border-color: #9B59FF; color: #9B59FF; }
+    .strain-alloc-btn:hover { opacity: 0.8; }
+    .alloc-tally { text-align: center; font-size: 0.8rem; color: #4a7a8a; margin-bottom: 8px; }
+    .resolver-confirm-btn {
+      width: 100%; padding: 10px; border-radius: 4px; cursor: pointer;
+      background: #1a3a4a; border: 1px solid #4a7a8a; color: #a8d8e8;
+      font-size: 0.85rem;
+    }
+    .resolver-confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
     /* === EDITABLE STATS === */
     .editable-stat {
       cursor: pointer;
@@ -1562,6 +1718,7 @@
     attunementMax: 3,
     currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
     statusOpen: true,
+    spellsOpen: true,
     feats: [],
     featsOpen: true,
     loreBook: [],
@@ -1685,6 +1842,7 @@
   if (!state.concentration) state.concentration = [];
   if (state.strainOpen === undefined) state.strainOpen = true;
   if (state.powersOpen === undefined) state.powersOpen = true;
+  if (state.spellsOpen === undefined) state.spellsOpen = true;
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
@@ -1979,6 +2137,23 @@
   function editProfBonus() {
     const val = prompt('Proficiency Bonus:', state.profBonus);
     if (val !== null && !isNaN(+val)) update(s => { s.profBonus = +val; });
+  }
+  function getPowerAtk() {
+    const intMod = Math.floor(((state.stats.int ?? 10) - 10) / 2);
+    return (state.profBonus ?? 2) + intMod;
+  }
+  function getPowerSaveDC() {
+    return 8 + getPowerAtk();
+  }
+  function editStrainMax() {
+    const val = prompt('Strain Maximum (typically 16):', state.strainMax);
+    if (val !== null && !isNaN(+val) && +val >= 1) update(s => { s.strainMax = +val; });
+  }
+  function editManifestDie() {
+    const val = prompt('Manifestation Die (d4 / d6 / d8):', state.manifestDie);
+    if (val !== null && ['d4','d6','d8'].includes(val.trim().toLowerCase())) {
+      update(s => { s.manifestDie = val.trim().toLowerCase(); });
+    }
   }
   function cycleSaveProf(key) {
     update(s => s.saveProfs[key] = (s.saveProfs[key] + 1) % 3);
@@ -2727,8 +2902,8 @@
         <button class="formula-dropdown-btn" onclick="toggleFormulaPanel(); event.stopPropagation();">Formulas ▾</button>
         <div class="formula-panel" id="formula-panel">
           <div class="formula-row"><span class="formula-lhs">Attack Roll</span><span>= d20 + Ability Mod + Proficiency</span></div>
-          <div class="formula-row"><span class="formula-lhs">Spell Attack</span><span>= d20 + Spell Mod + Proficiency</span></div>
-          <div class="formula-row"><span class="formula-lhs">Spell Save DC</span><span>= 8 + Spell Mod + Proficiency</span></div>
+          <div class="formula-row"><span class="formula-lhs">Power Attack</span><span>= d20 + INT Mod + Proficiency &nbsp;<strong style="color:#2ab8d0;">+${getPowerAtk()}</strong></span></div>
+          <div class="formula-row"><span class="formula-lhs">Power Save DC</span><span>= 8 + INT Mod + Proficiency &nbsp;<strong style="color:#2ab8d0;">${getPowerSaveDC()}</strong></span></div>
         </div>
       </div>
       <div class="dice-dropdown-wrap">
@@ -3366,14 +3541,44 @@
   function toggleSpellsSection() {
     update(s => s.spellsOpen = !s.spellsOpen);
   }
+  // Auto-strain threshold effects — shown in Effects section
+  const STRAIN_EFFECTS = [
+    { type: 'body', threshold: 1, label: 'Disadv. STR/DEX checks',    color: '#FF4DA6' },
+    { type: 'body', threshold: 3, label: 'Speed halved',               color: '#FF4DA6' },
+    { type: 'body', threshold: 5, label: 'Disadv. STR/DEX saves',      color: '#FF4DA6' },
+    { type: 'body', threshold: 7, label: 'HP max halved',              color: '#FF4DA6' },
+    { type: 'mind', threshold: 1, label: "Can't Dash/Disengage/Dodge", color: '#4DD9FF' },
+    { type: 'mind', threshold: 3, label: 'No skill proficiency',       color: '#4DD9FF' },
+    { type: 'mind', threshold: 5, label: '−5 penalty to AC',           color: '#4DD9FF' },
+    { type: 'mind', threshold: 7, label: 'No save proficiency',        color: '#4DD9FF' },
+    { type: 'soul', threshold: 1, label: 'Disadv. WIS/CHA checks',    color: '#9B59FF' },
+    { type: 'soul', threshold: 3, label: 'Disadv. on death saves',     color: '#9B59FF' },
+    { type: 'soul', threshold: 5, label: 'Disadv. WIS/CHA saves',     color: '#9B59FF' },
+    { type: 'soul', threshold: 7, label: 'Half supernatural healing',  color: '#9B59FF' },
+  ];
+
   function renderStatus() {
     const spells = state.activeSpells;
     const open = state.statusOpen;
     const spellsOpen = state.spellsOpen;
 
+    // Auto-strain condition badges
+    const activeStrainEffects = STRAIN_EFFECTS.filter(ef => (state.strain[ef.type] || 0) >= ef.threshold);
+    const strainFxBody = activeStrainEffects.length === 0 ? '' : `
+      <div style="margin-bottom:8px;">
+        <div style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;">Strain Conditions</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          ${activeStrainEffects.map(ef => `
+            <span style="font-size:0.7rem;background:${ef.color}22;border:1px solid ${ef.color};color:${ef.color};padding:2px 6px;border-radius:4px;white-space:nowrap;">${ef.label}</span>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
     const spellsBody = `
+      ${activeStrainEffects.length > 0 ? strainFxBody : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${spellsOpen ? '6px' : '0'};">
-        <span style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;">Active Spells</span>
+        <span style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;">Manual Effects</span>
         <span style="display:flex;gap:4px;align-items:center;">
           ${spellsOpen ? `<button class="btn-sm" onclick="addActiveSpell()">+</button>` : ''}
           <button class="btn-sm" onclick="toggleSpellsSection()" style="padding:0 5px;">${spellsOpen ? '▲' : '▼'}</button>
@@ -3385,7 +3590,7 @@
           <div class="active-spell">
             <span class="spell-name">${sp.name}</span>
             ${sp.concentration ? '<span class="conc-badge">C</span>' : ''}
-            <button class="spell-remove" onclick="removeActiveSpell(${i})" title="End spell">✕</button>
+            <button class="spell-remove" onclick="removeActiveSpell(${i})" title="End effect">✕</button>
           </div>
         `).join('')}
       ` : ''}
@@ -3424,7 +3629,7 @@
 
     document.getElementById('status-section').innerHTML = `
       <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Status</span>
+        <span>Effects</span>
         <button class="btn-sm" onclick="toggleStatus()">${open ? '▲' : '▼'}</button>
       </div>
       ${open ? spellsBody + hpFxBody + condsBody : ''}
@@ -3449,6 +3654,353 @@
   }
   function removeActiveSpell(idx) {
     update(s => s.activeSpells.splice(idx, 1));
+  }
+  function toggleSpellsSection() {
+    update(s => s.spellsOpen = !s.spellsOpen);
+  }
+
+  // === STRAIN TRACKER ===
+  function renderStrain() {
+    const { strain, strainMax, manifestDie, strainOpen } = state;
+    const total = strain.body + strain.mind + strain.soul;
+    const isWarning = total >= strainMax - 2;
+
+    const pipRow = (type) => {
+      const val = strain[type];
+      const pips = Array.from({ length: 8 }, (_, i) =>
+        `<span class="strain-pip ${i < val ? 'filled ' + type : ''}"
+          onclick="adjustStrain('${type}', ${i + 1})" title="${type} strain ${i + 1}">🧠</span>`
+      ).join('');
+      return `
+        <div class="strain-row">
+          <span class="strain-label ${type}">${type}</span>
+          <div class="strain-pips">${pips}</div>
+          <button class="strain-adj" onclick="adjustStrain('${type}', -1)" title="Remove ${type} strain">−</button>
+          <button class="strain-adj" onclick="adjustStrain('${type}', 1)" title="Add ${type} strain">+</button>
+        </div>`;
+    };
+
+    const section = document.getElementById('strain-section');
+    if (!section) return;
+    section.innerHTML = sectionTitle('Strain', 'strainOpen', () => update(s => s.strainOpen = !s.strainOpen), strainOpen) + `
+      ${strainOpen ? `
+        <div class="strain-total ${isWarning ? 'warning' : ''}">
+          Total Strain: <strong>${total}</strong> / <strong onclick="editStrainMax()" title="Click to edit" style="cursor:pointer;text-decoration:underline dotted;">${strainMax}</strong>
+          ${total >= strainMax ? ' ⚠ MAXIMUM REACHED' : ''}
+        </div>
+        <div class="strain-section">
+          ${pipRow('body')}
+          ${pipRow('mind')}
+          ${pipRow('soul')}
+        </div>
+        <div class="manifest-die-display" onclick="editManifestDie()" title="Click to edit" style="cursor:pointer;">Manifestation Die: <span>${manifestDie}</span></div>
+      ` : ''}`;
+  }
+
+  function adjustStrain(type, delta) {
+    update(s => {
+      if (delta === -1) {
+        s.strain[type] = Math.max(0, s.strain[type] - 1);
+      } else if (delta > 0 && delta <= 8) {
+        s.strain[type] = s.strain[type] === delta ? delta - 1 : delta;
+      } else {
+        s.strain[type] = Math.min(8, s.strain[type] + 1);
+      }
+    });
+    renderStatus();
+  }
+
+  // === ACTIVE POWERS ===
+  function renderActivePowers() {
+    const { knownPowers, concentration, powersOpen } = state;
+    const activePowers = POWERS_DATA.filter(p => knownPowers.includes(p.id));
+
+    const cards = activePowers.map(p => {
+      const isConc = concentration.includes(p.id);
+      const ordinal = ['', '1st', '2nd', '3rd', '4th', '5th', '6th'][p.order];
+      return `
+        <div class="power-card">
+          <span class="power-order-badge">${ordinal}</span>
+          <span class="power-name">
+            ${p.name}
+            <span class="power-school">${p.school}</span>
+          </span>
+          ${p.concentration ? `
+            <button class="power-conc-toggle ${isConc ? 'active' : ''}"
+              onclick="toggleConcentration('${p.id}')" title="Toggle concentration">C</button>
+          ` : ''}
+          <button class="power-manifest-btn" onclick="openManifestModal('${p.id}')">Manifest</button>
+        </div>`;
+    }).join('');
+
+    const section = document.getElementById('powers-section');
+    if (!section) return;
+    section.innerHTML = sectionTitle('Active Powers', 'powersOpen', () => update(s => s.powersOpen = !s.powersOpen), powersOpen) + `
+      ${powersOpen ? `
+        <div class="powers-section">
+          ${activePowers.length === 0
+            ? `<div style="font-size:0.75rem;color:#2a5a6a;text-align:center;padding:12px">No powers selected — use Manage Powers to add them</div>`
+            : cards}
+          <button class="powers-manage-btn" onclick="openManagePowers()">⚙ Manage Powers</button>
+        </div>
+      ` : ''}`;
+  }
+
+  function toggleConcentration(id) {
+    update(s => {
+      const idx = s.concentration.indexOf(id);
+      if (idx >= 0) s.concentration.splice(idx, 1);
+      else s.concentration.push(id);
+    });
+  }
+
+  function openManifestModal(id) {
+    const power = POWERS_DATA.find(p => p.id === id);
+    if (!power) return;
+    document.getElementById('manifest-modal').style.display = 'flex';
+    renderManifestModal(power);
+  }
+
+  function openManagePowers() {
+    document.getElementById('manage-powers-modal').style.display = 'flex';
+    renderManagePowersModal();
+  }
+
+  // === MANAGE POWERS MODAL ===
+  let managePowersFilter = { search: '', school: '' };
+
+  function renderManagePowersModal() {
+    const modal = document.getElementById('manage-powers-modal');
+    const { search, school } = managePowersFilter;
+    const schools = ['Chronopathy', 'Metamorphosis', 'Pyrokinesis', 'Resopathy', 'Telekinesis', 'Telepathy'];
+
+    const filtered = POWERS_DATA.filter(p =>
+      (!search || p.name.toLowerCase().includes(search.toLowerCase())) &&
+      (!school || p.school === school)
+    );
+
+    const byOrder = [1, 2, 3, 4, 5, 6].map(order => {
+      const powers = filtered.filter(p => p.order === order);
+      if (!powers.length) return '';
+      const ordinal = ['', '1st', '2nd', '3rd', '4th', '5th', '6th'][order];
+      const rows = powers.map(p => `
+        <div class="power-pick-row">
+          <input type="checkbox" class="power-pick-checkbox"
+            ${state.knownPowers.includes(p.id) ? 'checked' : ''}
+            onchange="toggleKnownPower('${p.id}', this.checked)">
+          <span class="power-pick-name">${p.name}</span>
+          <span class="power-pick-school">${p.school}</span>
+          <span class="power-pick-time">${p.manifestTime}</span>
+        </div>`).join('');
+      return `<div class="order-group"><div class="order-group-title">${ordinal} Order</div>${rows}</div>`;
+    }).join('');
+
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-box">
+        <div class="modal-title">
+          Manage Powers
+          <button class="modal-close" onclick="closeManagePowers()">✕</button>
+        </div>
+        <input class="modal-search" placeholder="Search powers..."
+          value="${search}" oninput="managePowersSearch(this.value)">
+        <div class="school-filter">
+          <button class="school-btn ${!school ? 'active' : ''}" onclick="managePowersSchool('')">All</button>
+          ${schools.map(s => `<button class="school-btn ${school === s ? 'active' : ''}" onclick="managePowersSchool('${s}')">${s}</button>`).join('')}
+        </div>
+        ${byOrder || '<div style="color:#2a5a6a;text-align:center;padding:20px">No powers match</div>'}
+      </div>`;
+  }
+
+  function toggleKnownPower(id, checked) {
+    update(s => {
+      if (checked && !s.knownPowers.includes(id)) s.knownPowers.push(id);
+      if (!checked) {
+        s.knownPowers = s.knownPowers.filter(p => p !== id);
+        s.concentration = s.concentration.filter(p => p !== id);
+      }
+    });
+    renderActivePowers();
+  }
+
+  function managePowersSearch(val) {
+    managePowersFilter.search = val;
+    renderManagePowersModal();
+  }
+
+  function managePowersSchool(val) {
+    managePowersFilter.school = val;
+    renderManagePowersModal();
+  }
+
+  function closeManagePowers() {
+    document.getElementById('manage-powers-modal').style.display = 'none';
+    managePowersFilter = { search: '', school: '' };
+  }
+
+  // === MANIFESTATION RESOLVER ===
+  let manifestState = { power: null, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
+
+  function renderManifestModal(power) {
+    manifestState = { power, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
+    _drawManifestModal();
+  }
+
+  function _drawManifestModal() {
+    const modal = document.getElementById('manifest-modal');
+    const { power, step, roll, strainGained, allocated } = manifestState;
+    const { concentration, strain, strainMax } = state;
+
+    const concCount = concentration.filter(id => id !== power.id).length;
+    const score = power.order + concCount;
+    const total = strain.body + strain.mind + strain.soul;
+    const allocTotal = allocated.body + allocated.mind + allocated.soul;
+    const dieLabel = state.manifestDie.toUpperCase();
+
+    if (power.order === 1) {
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-box resolver-box">
+          <div class="modal-title">${power.name} <button class="modal-close" onclick="closeManifestModal()">✕</button></div>
+          <div style="text-align:center;padding:16px">
+            <div style="font-size:0.8rem;color:#4a7a8a;margin-bottom:8px">1st-order power — no manifestation test required.</div>
+            <div class="resolver-result success">✓ Power manifested. No strain.</div>
+            <button class="resolver-confirm-btn" style="margin-top:12px" onclick="closeManifestModal()">Done</button>
+          </div>
+        </div>`;
+      return;
+    }
+
+    let body = '';
+    if (step === 1) {
+      const concNames = concentration.filter(id => id !== power.id)
+        .map(id => POWERS_DATA.find(p => p.id === id)?.name).filter(Boolean);
+      body = `
+        <div class="resolver-step">
+          <div class="resolver-score">
+            Score: ${score}
+            <small>Order ${power.order}${concCount > 0 ? ` + ${concCount} (concentrating on ${concNames.join(', ')})` : ''}</small>
+          </div>
+          <div style="font-size:0.75rem;color:#4a7a8a;text-align:center;margin-bottom:12px">
+            Roll your ${dieLabel}. If roll &gt; ${score}: no strain. If = ${score}: +1 strain. If &lt; ${score}: +${power.order} strain.
+          </div>
+          <button class="resolver-roll-btn" onclick="manifestRollForMe()">🎲 Roll ${dieLabel} for me</button>
+          <div style="text-align:center;margin:8px 0;font-size:0.7rem;color:#4a7a8a">— or enter your roll —</div>
+          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+            ${Array.from({ length: parseInt(state.manifestDie.slice(1)) }, (_, i) =>
+              `<button class="strain-adj" onclick="manifestSetRoll(${i + 1})" style="width:28px">${i + 1}</button>`
+            ).join('')}
+          </div>
+        </div>`;
+    } else if (step === 2) {
+      const wouldExceed = total + strainGained > strainMax;
+      let resultClass, resultText;
+      if (roll > score)       { resultClass = 'success'; resultText = `✓ ${roll} > ${score} — Success! No strain.`; }
+      else if (roll === score) { resultClass = 'partial'; resultText = `~ ${roll} = ${score} — Success + 1 strain`; }
+      else                     { resultClass = 'failure'; resultText = `✗ ${roll} < ${score} — Success + ${strainGained} strain (order ${power.order})`; }
+
+      if (wouldExceed && strainGained > 0) {
+        body = `
+          <div class="resolver-result death-warning">
+            ⚠ Gaining ${strainGained} strain would exceed your maximum (${total} + ${strainGained} &gt; ${strainMax}).
+            <div style="margin-top:8px;font-size:0.8rem">Choose:</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="resolver-confirm-btn" onclick="manifestAndDie()">Manifest &amp; Die</button>
+            <button class="resolver-confirm-btn" onclick="manifestCancel()">Cancel (drop to 0 HP)</button>
+          </div>`;
+      } else if (strainGained === 0) {
+        body = `
+          <div class="resolver-result ${resultClass}">${resultText}</div>
+          <button class="resolver-confirm-btn" style="margin-top:8px" onclick="closeManifestModal()">Done ✓</button>`;
+      } else {
+        body = `
+          <div class="resolver-result ${resultClass}">${resultText}</div>
+          <div style="margin:12px 0;font-size:0.8rem;color:#4a7a8a;text-align:center">Distribute ${strainGained} strain:</div>
+          <div class="alloc-tally">${allocTotal} / ${strainGained} allocated</div>
+          <div class="strain-alloc">
+            <button class="strain-alloc-btn body" onclick="manifestAlloc('body')">+Body (${allocated.body})</button>
+            <button class="strain-alloc-btn mind" onclick="manifestAlloc('mind')">+Mind (${allocated.mind})</button>
+            <button class="strain-alloc-btn soul" onclick="manifestAlloc('soul')">+Soul (${allocated.soul})</button>
+          </div>
+          <button class="resolver-confirm-btn" ${allocTotal < strainGained ? 'disabled' : ''} onclick="manifestConfirmStrain()">
+            Confirm Strain
+          </button>`;
+      }
+    }
+
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-box resolver-box">
+        <div class="modal-title">
+          Manifest: ${power.name}
+          <button class="modal-close" onclick="closeManifestModal()">✕</button>
+        </div>
+        <div style="font-size:0.7rem;color:#4a7a8a;margin-bottom:12px">
+          ${power.school} &bull; ${['','1st','2nd','3rd','4th','5th','6th'][power.order]} Order
+          ${power.concentration ? ' &bull; <span style="color:#FF4DA6">Concentration</span>' : ''}
+        </div>
+        ${body}
+      </div>`;
+  }
+
+  function manifestRollForMe() {
+    const sides = parseInt(state.manifestDie.slice(1));
+    manifestSetRoll(Math.ceil(Math.random() * sides));
+  }
+
+  function manifestSetRoll(roll) {
+    const { power } = manifestState;
+    const concCount = state.concentration.filter(id => id !== power.id).length;
+    const score = power.order + concCount;
+    let strainGained = 0;
+    if (roll === score) strainGained = 1;
+    if (roll < score)  strainGained = power.order;
+    manifestState = { ...manifestState, step: 2, roll, strainGained, allocated: { body: 0, mind: 0, soul: 0 } };
+    _drawManifestModal();
+  }
+
+  function manifestAlloc(type) {
+    const { strainGained, allocated } = manifestState;
+    const total = allocated.body + allocated.mind + allocated.soul;
+    if (total >= strainGained) return;
+    manifestState.allocated[type]++;
+    _drawManifestModal();
+  }
+
+  function manifestConfirmStrain() {
+    const { allocated } = manifestState;
+    update(s => {
+      s.strain.body = Math.min(8, s.strain.body + allocated.body);
+      s.strain.mind = Math.min(8, s.strain.mind + allocated.mind);
+      s.strain.soul = Math.min(8, s.strain.soul + allocated.soul);
+    });
+    closeManifestModal();
+    renderStrain();
+    renderStatus();
+  }
+
+  function manifestAndDie() {
+    const { allocated } = manifestState;
+    update(s => {
+      s.strain.body = Math.min(8, s.strain.body + allocated.body);
+      s.strain.mind = Math.min(8, s.strain.mind + allocated.mind);
+      s.strain.soul = Math.min(8, s.strain.soul + allocated.soul);
+      s.hp.current = 0;
+    });
+    closeManifestModal();
+    render();
+  }
+
+  function manifestCancel() {
+    update(s => s.hp.current = 0);
+    closeManifestModal();
+    render();
+  }
+
+  function closeManifestModal() {
+    document.getElementById('manifest-modal').style.display = 'none';
+    manifestState = { power: null, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
   }
 
   // === COLUMN DRAG STATE ===
@@ -3721,6 +4273,8 @@
   function render() {
     renderHeader();
     renderHP();
+    renderStrain();
+    renderActivePowers();
     renderStatus();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
     document.getElementById('inventory-wrap').innerHTML = renderInventory();

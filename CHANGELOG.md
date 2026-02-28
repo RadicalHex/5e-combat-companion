@@ -1,5 +1,43 @@
 # Changelog
 
+## talent-companion v1.0.0 — 2026-02-27
+
+### The Talent's Companion — New File
+- New single-file tracker (`talent-companion.html`) on the `talent-companion` branch, tailored to **The Talent** psionic class (MCDM / Matthew Colville)
+- Based on `tracker.html` v1.4.0 — all base features preserved
+- Storage key: `talent_companion_v1` (separate from main tracker)
+
+### Strain Tracker
+- Three strain rows — **Body** (pink), **Mind** (cyan), **Soul** (violet) — each with 8 brain pip slots
+- Click a pip to set strain directly; **+/−** buttons for manual adjustment
+- Total Strain / Strain Maximum display — **pulses red** when within 2 of maximum, shows ⚠ MAXIMUM REACHED when at limit
+- Strain Max and Manifestation Die are click-to-edit inline
+- Long rest now resets strain and concentration instead of spell slots
+
+### Psionics Powers System
+- **103 powers** hardcoded from The Talent rulebook across 6 schools: Chronopathy, Metamorphosis, Pyrokinesis, Resopathy, Telekinesis, Telepathy
+- **Manage Powers** button opens a searchable modal — filter by name or school, check to add powers to your active list
+- **Active Powers List** — compact cards showing order, school, manifestation time, concentration status
+- Concentration toggle per power — tracked for Manifestation Score calculation
+
+### Manifestation Resolver
+- **Manifest** button on any power card opens a step-by-step resolver modal
+- Shows Manifestation Score (order + extra concentrating powers)
+- Roll the die yourself or let the tracker roll for you
+- Color-coded results: 🟢 No strain / 🟡 +1 strain / 🔴 +order strain
+- Strain Allocation step — distribute gained strain across Body/Mind/Soul before confirming
+- Special warning when strain would exceed maximum — choose to manifest and die, or cancel
+
+### Effects Section (replaces Active Spells)
+- **Status** panel renamed to **Effects**
+- **Strain Conditions** auto-populate as colored badges based on current strain values (12 threshold conditions across Body/Mind/Soul)
+- **Manual Effects** sub-panel replaces Active Spells — same free-text entry, dismissable, works as before
+
+### Formulas Update
+- Formulas dropdown now shows **Power Attack** (d20 + INT Mod + Proficiency) and **Power Save DC** (8 + INT Mod + Proficiency) with live calculated values instead of generic Spell Attack/Spell Save DC
+
+---
+
 ## v1.4.0 — 2026-02-27
 
 ### Lore Book
