@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.5.0 — 2026-02-28
+
+### Attack Dice Roller
+- Each custom attack card now has two inline roll buttons: **🎲 [modifier]** (to hit) and **🎲 [dice expression]** (damage)
+- Button labels show the actual values at a glance — `🎲 +7` and `🎲 2d6+3` instead of generic labels
+- Clicking a button rolls instantly and displays the result inline on the card
+- To Hit shows a single total; Damage shows a full breakdown (e.g. `[4+2]+3 = 9 slashing`)
+- Results clear automatically when the attack is edited or removed
+- **Nat 20**: gold `⚔️ CRITICAL HIT!` toast + card result highlighted in bright gold
+- **Nat 1**: red `💀 CRITICAL MISS...` toast + card result highlighted in red
+- Powered by `parseDiceExpr()` — regex parser handles `+7`, `1d8+3 fire`, `d4`, and anything in between
+- Ported identically to `talent-companion.html`
+- Fully offline — pure JS, no external calls
+
 ## v1.4.1 — 2026-02-28
 
 ### Offline Support
