@@ -135,33 +135,6 @@
     .stat-label { color: #4a7a8a; }
     .stat-value { color: #d4a843; font-weight: 600; }
 
-    /* === SPELL SLOTS === */
-    .slots-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .slot-group { }
-    .slot-level-label {
-      font-size: 0.65rem;
-      color: #4a7a8a;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 4px;
-    }
-    .slot-pips { display: flex; gap: 4px; flex-wrap: wrap; }
-    .pip {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.15s;
-      border: 1px solid #1a3a4a;
-    }
-    .pip.full  { background: #2ab8d0; box-shadow: 0 0 5px #2ab8d060; }
-    .pip.empty { background: #0a1e2a; }
-    .pip:hover { transform: scale(1.2); }
     /* === PROFICIENCY PIPS === */
     .prof-pip {
       width: 11px; height: 11px;
@@ -629,56 +602,6 @@
       cursor: pointer; font-size: 0.75rem; letter-spacing: 0.05em;
     }
     .btn-add-attack:hover { border-color: #2ab8d0; color: #2ab8d0; }
-
-    /* === PREPARED SPELLS === */
-    .prep-spells-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 10px 0 6px;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #4a7a8a;
-    }
-    .prep-level-group {
-      margin-bottom: 8px;
-    }
-    .prep-level-label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #2a5a6a;
-      margin-bottom: 3px;
-    }
-    .prep-spell-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 0;
-      border-bottom: 1px solid #0c2535;
-    }
-    .prep-spell-name {
-      flex: 1;
-      font-size: 0.8rem;
-      color: #8ab8c8;
-      cursor: pointer;
-      user-select: none;
-    }
-    .prep-spell-name:hover { color: #a8d8e8; }
-    .prep-spell-expanded {
-      padding: 4px 0 6px 6px;
-      border-bottom: 1px solid #0c2535;
-    }
-    .prep-spell-notes {
-      font-size: 0.75rem;
-      color: #6a9aaa;
-      line-height: 1.5;
-      min-height: 20px;
-      cursor: text;
-      white-space: pre-wrap;
-    }
-    .prep-spell-notes.empty { color: #2a5a6a; font-style: italic; }
 
     /* === LORE BOOK PANEL === */
     #lore-panel {
@@ -1368,7 +1291,9 @@
       <hr class="divider">
       <div id="attacks-section-wrap"></div>
       <hr class="divider">
-      <div id="slots-section"></div>
+      <div id="strain-section"></div>
+      <hr class="divider">
+      <div id="powers-section"></div>
     </div>
     <div class="panel" id="panel-right">
       <div id="inventory-wrap"></div>
@@ -1820,9 +1745,6 @@
       ['str','dex','con','int','wis','cha'].forEach(k => vals[k] = g('edit-' + k));
     } else if (key === 'saves') {
       ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => vals[k] = g('edit-' + k));
-    } else if (key === 'spells') {
-      vals.spellDC  = g('edit-spelldc');
-      vals.spellAtk = g('edit-spellatk');
     } else if (key === 'senses') {
       ['truesight','blindsight','tremorsense'].forEach(k => vals[k] = g('edit-' + k));
     }
@@ -1840,7 +1762,7 @@
         if (!isNaN(+vals.speedSwim))   s.stats.speedSwim   = Math.max(0, +vals.speedSwim);
         if (!isNaN(+vals.speedClimb))  s.stats.speedClimb  = Math.max(0, +vals.speedClimb);
         if (!isNaN(+vals.speedFly))    s.stats.speedFly    = Math.max(0, +vals.speedFly);
-        if (!isNaN(+vals.profBonus))  { s.profBonus = +vals.profBonus; s.spellDCOverride = null; s.spellAtkOverride = null; }
+        if (!isNaN(+vals.profBonus))  s.profBonus = +vals.profBonus;
         if (!isNaN(+vals.passPerc))   s.stats.passPerc    = +vals.passPerc;
       } else if (key === 'scores') {
         ['str','dex','con','int','wis','cha'].forEach(k => {
@@ -1850,9 +1772,6 @@
         ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => {
           if (!isNaN(+vals[k])) s.stats[k] = +vals[k];
         });
-      } else if (key === 'spells') {
-        if (vals.spellDC  !== undefined) s.spellDCOverride  = vals.spellDC.trim()  === '' ? null : +vals.spellDC;
-        if (vals.spellAtk !== undefined) s.spellAtkOverride = vals.spellAtk.trim() === '' ? null : +vals.spellAtk;
       } else if (key === 'senses') {
         ['truesight','blindsight','tremorsense'].forEach(k => {
           if (!isNaN(+vals[k])) s.senses[k] = Math.max(0, +vals[k]);
@@ -2057,48 +1976,9 @@
     if (val !== null && !isNaN(+val)) update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, +val)));
   }
 
-  function getSpellMod() {
-    const key = state.spellcastingAbility;
-    const score = state.stats[key] ?? 10;
-    return Math.floor((score - 10) / 2);
-  }
-  function getSpellDC() {
-    if (state.spellDCOverride !== null) return state.spellDCOverride;
-    return 8 + state.profBonus + getSpellMod();
-  }
-  function getSpellAtk() {
-    if (state.spellAtkOverride !== null) return state.spellAtkOverride;
-    return state.profBonus + getSpellMod();
-  }
-  function editSpellDC() {
-    const auto = 8 + state.profBonus + getSpellMod();
-    const val = prompt(`Spell Save DC (auto: ${auto}, blank to reset):`, state.spellDCOverride ?? auto);
-    if (val === null) return;
-    if (val.trim() === '') { update(s => s.spellDCOverride = null); return; }
-    if (!isNaN(+val)) update(s => s.spellDCOverride = +val);
-  }
-  function editSpellAtk() {
-    const auto = state.profBonus + getSpellMod();
-    const val = prompt(`Spell Attack (auto: +${auto}, blank to reset):`, state.spellAtkOverride ?? auto);
-    if (val === null) return;
-    if (val.trim() === '') { update(s => s.spellAtkOverride = null); return; }
-    if (!isNaN(+val)) update(s => s.spellAtkOverride = +val);
-  }
-  function setSpellcastingAbility(key) {
-    update(s => {
-      s.spellcastingAbility = key;
-      s.spellDCOverride = null;
-      s.spellAtkOverride = null;
-    });
-  }
-
   function editProfBonus() {
     const val = prompt('Proficiency Bonus:', state.profBonus);
-    if (val !== null && !isNaN(+val)) update(s => {
-      s.profBonus = +val;
-      s.spellDCOverride = null;
-      s.spellAtkOverride = null;
-    });
+    if (val !== null && !isNaN(+val)) update(s => { s.profBonus = +val; });
   }
   function cycleSaveProf(key) {
     update(s => s.saveProfs[key] = (s.saveProfs[key] + 1) % 3);
@@ -2299,187 +2179,6 @@
     });
   }
 
-  // === SPELL SLOTS ===
-  const SLOT_MAX = [4, 3, 3, 3, 3, 2, 2, 1, 1];
-
-  function toggleSlotsVisible() {
-    update(s => s.slotsVisible = !s.slotsVisible);
-  }
-  function renderSlotsBody() {
-    const { slots } = state;
-    const ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
-    return `
-      <div class="slots-grid">
-        ${SLOT_MAX.map((max, i) => `
-          <div class="slot-group">
-            <div class="slot-level-label">${ordinals[i]}</div>
-            <div class="slot-pips">
-              ${Array.from({length: max}, (_, j) => `
-                <div class="pip ${j < slots[i] ? 'full' : 'empty'}"
-                  onclick="toggleSlot(${i}, ${j})"></div>
-              `).join('')}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-  function renderSlots() {
-    const visible = state.slotsVisible;
-    const isSpells = editSection === 'spells';
-    document.getElementById('slots-section').innerHTML = `
-      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Spellcasting</span>
-        ${isSpells
-          ? `<span class="section-edit-controls">
-               <button class="edit-save-btn" onclick="saveSection('spells')">Save</button>
-               <button class="edit-cancel-btn" onclick="setEditSection(null)">✕</button>
-             </span>`
-          : `<span style="display:flex;gap:4px;align-items:center;">
-               <button class="edit-pencil-btn" onclick="setEditSection('spells')" title="Edit">✏</button>
-               <button class="btn-sm" onclick="toggleSlotsVisible()" style="padding:0 6px;">${visible ? '▲' : '▼'}</button>
-             </span>`
-        }
-      </div>
-      ${visible ? `
-        ${isSpells ? `
-          <div class="stat-row" style="margin-bottom:4px;">
-            <span class="stat-label">Spell Ability</span>
-            <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
-              ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
-            </select>
-          </div>
-          <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
-          <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
-          <hr class="divider">
-        ` : `
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
-            <div class="stat-row" style="flex:1;min-width:80px;">
-              <span class="stat-label">Ability</span>
-              <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
-                ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
-              </select>
-            </div>
-            <div class="stat-row" style="flex:1;min-width:60px;">
-              <span class="stat-label">DC</span>
-              <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
-            </div>
-            <div class="stat-row" style="flex:1;min-width:60px;">
-              <span class="stat-label">Atk</span>
-              <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
-            </div>
-          </div>
-          <hr class="divider">
-        `}
-        ${renderSlotsBody()}
-        <hr style="border:none;border-top:1px solid #0c2535;margin:8px 0;">
-        ${renderPreparedSpells()}
-      ` : ''}
-    `;
-  }
-
-  // === PREPARED SPELLS ===
-  function addPreparedSpell() {
-    const name = prompt('Spell name:');
-    if (!name?.trim()) return;
-    const lvlRaw = prompt('Spell level (0–9, use 0 for cantrips):', '1');
-    const level = parseInt(lvlRaw);
-    if (isNaN(level) || level < 0 || level > 9) return;
-    update(s => s.preparedSpells.push({
-      id: Date.now().toString(),
-      name: name.trim(),
-      level,
-      notes: '',
-      open: false,
-    }));
-  }
-
-  function togglePreparedSpell(id) {
-    update(s => {
-      const sp = s.preparedSpells.find(x => x.id === id);
-      if (sp) sp.open = !sp.open;
-    });
-  }
-
-  function renamePreparedSpell(id) {
-    const sp = state.preparedSpells.find(x => x.id === id);
-    if (!sp) return;
-    const val = prompt('Rename spell:', sp.name);
-    if (val?.trim()) update(s => s.preparedSpells.find(x => x.id === id).name = val.trim());
-  }
-
-  function editPreparedSpellNotes(id) {
-    const sp = state.preparedSpells.find(x => x.id === id);
-    if (!sp) return;
-    const val = prompt('Notes:', sp.notes);
-    if (val !== null) update(s => s.preparedSpells.find(x => x.id === id).notes = val);
-  }
-
-  function removePreparedSpell(id) {
-    update(s => s.preparedSpells = s.preparedSpells.filter(x => x.id !== id));
-  }
-
-  function togglePreparedSpellsOpen() {
-    update(s => s.preparedSpellsOpen = !s.preparedSpellsOpen);
-  }
-
-  function renderPreparedSpells() {
-    const { preparedSpells, preparedSpellsOpen } = state;
-    const ordinals = ['Cantrip','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
-
-    const byLevel = {};
-    preparedSpells.forEach(sp => {
-      if (!byLevel[sp.level]) byLevel[sp.level] = [];
-      byLevel[sp.level].push(sp);
-    });
-    const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b);
-
-    return `
-      <div>
-        <div class="prep-spells-header">
-          <span>Prepared Spells</span>
-          <span style="display:flex;gap:4px;align-items:center;">
-            ${preparedSpellsOpen ? `<button class="btn-sm" onclick="addPreparedSpell()">+</button>` : ''}
-            <button class="btn-sm" onclick="togglePreparedSpellsOpen()" style="padding:0 5px;">${preparedSpellsOpen ? '▲' : '▼'}</button>
-          </span>
-        </div>
-        ${preparedSpellsOpen ? `
-          ${preparedSpells.length === 0
-            ? `<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:6px;">No spells prepared</div>`
-            : levels.map(lvl => `
-              <div class="prep-level-group">
-                <div class="prep-level-label">${ordinals[lvl]}</div>
-                ${byLevel[lvl].map(sp => `
-                  <div class="prep-spell-row">
-                    <span class="prep-spell-name"
-                      onclick="togglePreparedSpell('${sp.id}')"
-                      ondblclick="renamePreparedSpell('${sp.id}')"
-                      title="Click to expand · Double-click to rename">${sp.name}</span>
-                    <button class="btn-remove-attack" onclick="removePreparedSpell('${sp.id}')">✕</button>
-                  </div>
-                  ${sp.open ? `
-                    <div class="prep-spell-expanded">
-                      <div class="prep-spell-notes ${sp.notes ? '' : 'empty'}"
-                        ondblclick="editPreparedSpellNotes('${sp.id}')"
-                        title="Double-click to edit notes">${sp.notes || 'Double-click to add notes…'}</div>
-                    </div>
-                  ` : ''}
-                `).join('')}
-              </div>
-            `).join('')
-          }
-        ` : ''}
-      </div>
-    `;
-  }
-
-  function toggleSlot(level, pipIndex) {
-    update(s => {
-      const cur = s.slots[level];
-      s.slots[level] = pipIndex < cur ? pipIndex : pipIndex + 1;
-    });
-  }
-
   function shortRest() {
     if (state.hitDice.current === 0) {
       alert('No hit dice remaining.');
@@ -2565,10 +2264,11 @@
   }
 
   function longRest() {
-    if (confirm('Long rest? This restores all spell slots and HP.')) {
+    if (confirm('Long rest? This restores HP and resets strain.')) {
       update(s => {
-        s.slots = [...SLOT_MAX];
         s.hp.current = s.hp.max;
+        s.strain = { body: 0, mind: 0, soul: 0 };
+        s.concentration = [];
       });
     }
   }
@@ -2594,7 +2294,7 @@
       reader.onload = evt => {
         try {
           const parsed = JSON.parse(evt.target.result);
-          const required = ['hp', 'slots', 'stats', 'characterName'];
+          const required = ['hp', 'stats', 'characterName'];
           for (const key of required) {
             if (!(key in parsed)) throw new Error('Missing key: ' + key);
           }
@@ -4022,7 +3722,6 @@
     renderHeader();
     renderHP();
     renderStatus();
-    renderSlots();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
     document.getElementById('inventory-wrap').innerHTML = renderInventory();
     document.getElementById('feats-wrap').innerHTML = renderFeats();
@@ -4035,5 +3734,7 @@
   initColHandles();
   window.addEventListener('resize', () => applyColWidths());
 </script>
+  <div id="manage-powers-modal" style="display:none"></div>
+  <div id="manifest-modal" style="display:none"></div>
 </body>
 </html>
