@@ -652,8 +652,24 @@
       margin-top: 5px;
       font-size: 0.68rem;
     }
-    .atk-result-hit { color: #d4a843; }
-    .atk-result-dmg { color: #2ab8d0; }
+    .atk-result-hit  { color: #d4a843; }
+    .atk-result-crit { color: #f0c040; font-weight: 600; }
+    .atk-result-fumble { color: #d05050; }
+    .atk-result-dmg  { color: #2ab8d0; }
+    @keyframes toastPop {
+      0%   { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+      15%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+      75%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+    }
+    .roll-toast {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      padding: 8px 22px; border-radius: 5px; font-family: 'Cinzel', serif;
+      font-size: 0.9rem; letter-spacing: 0.1em; pointer-events: none;
+      z-index: 9999; animation: toastPop 2.5s ease forwards;
+    }
+    .roll-toast.crit   { background: #1a1200; border: 1px solid #d4a843; color: #f0c040; }
+    .roll-toast.fumble { background: #1a0000; border: 1px solid #d05050; color: #e06060; }
 
     /* === PREPARED SPELLS === */
     .prep-spells-header {
@@ -3396,6 +3412,13 @@
     };
   }
 
+  function showRollToast(type) {
+    const toast = document.createElement('div');
+    toast.className = `roll-toast ${type}`;
+    toast.textContent = type === 'crit' ? '⚔️ CRITICAL HIT!' : '💀 CRITICAL MISS...';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  }
   function rollAttackHit(id) {
     const atk = state.attacks.find(a => a.id === id);
     if (!atk) return;
@@ -3403,8 +3426,11 @@
     const roll = Math.floor(Math.random() * 20) + 1;
     const mod = parsed ? parsed.modifier : 0;
     const total = roll + mod;
+    const nat = roll === 20 ? 'crit' : roll === 1 ? 'fumble' : null;
     if (!attackRolls[id]) attackRolls[id] = {};
     attackRolls[id].hit = String(total);
+    attackRolls[id].nat = nat;
+    if (nat) showRollToast(nat);
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
   }
 
@@ -3489,7 +3515,7 @@
               </div>
               ${r.hit || r.dmg ? `
                 <div class="attack-roll-results">
-                  ${r.hit ? `<span class="atk-result-hit">Hit: ${r.hit}</span>` : ''}
+                  ${r.hit ? `<span class="${r.nat === 'crit' ? 'atk-result-crit' : r.nat === 'fumble' ? 'atk-result-fumble' : 'atk-result-hit'}">${r.nat === 'crit' ? '⚔️ ' : r.nat === 'fumble' ? '💀 ' : ''}Hit: ${r.hit}</span>` : ''}
                   ${r.dmg ? `<span class="atk-result-dmg">Dmg: ${r.dmg}</span>` : ''}
                 </div>` : ''}
             </div>
