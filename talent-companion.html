@@ -1455,6 +1455,18 @@
       font-family: 'Inter', sans-serif;
     }
     .btn-help:hover { border-color: #4a8a9a; color: #a8d8e8; }
+    .btn-undo {
+      background: none;
+      border: 1px solid #555;
+      color: #ccc;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+    .btn-undo:hover:not(:disabled) { border-color: #4a8a9a; color: #a8d8e8; }
+    .btn-undo:disabled { opacity: 0.35; cursor: default; }
 
     /* === CONDITIONS DROPDOWN === */
     .conditions-dropdown-wrap { position: relative; }
@@ -1919,6 +1931,8 @@
   let state = loadState();
   let diceHistory = [];   // max 5 entries: { expr, total, detail }
   let attackRolls = {};   // { [attackId]: { hit?: string, dmg?: string } }
+  let undoStack = [];     // max 25 deep-clone snapshots for undo
+  let redoStack = [];     // max 25 deep-clone snapshots for redo
   let attackDescOpen = {};
   let attackDescEdit = null;
   let diceModifier = 0;
@@ -2017,7 +2031,28 @@
   if (state.powersOpen === undefined) state.powersOpen = true;
   if (state.spellsOpen === undefined) state.spellsOpen = true;
   function update(mutatorFn) {
+    undoStack.push(JSON.parse(JSON.stringify(state)));
+    if (undoStack.length > 25) undoStack.shift();
+    redoStack = [];
     mutatorFn(state);
+    saveState();
+    render();
+  }
+
+  function undo() {
+    if (!undoStack.length) return;
+    redoStack.push(JSON.parse(JSON.stringify(state)));
+    if (redoStack.length > 25) redoStack.shift();
+    state = undoStack.pop();
+    saveState();
+    render();
+  }
+
+  function redo() {
+    if (!redoStack.length) return;
+    undoStack.push(JSON.parse(JSON.stringify(state)));
+    if (undoStack.length > 25) undoStack.shift();
+    state = redoStack.pop();
     saveState();
     render();
   }
@@ -3131,6 +3166,8 @@
         <div class="dice-panel" id="dice-panel"></div>
       </div>
       <button class="formula-dropdown-btn" onclick="toggleLorePanel()" style="margin-left:4px;">📖 Lore</button>
+      <button class="btn-undo" onclick="undo()" ${undoStack.length === 0 ? 'disabled' : ''} title="Undo (Ctrl+Z)" style="margin-left:8px;">↩ Undo</button>
+      <button class="btn-undo" onclick="redo()" ${redoStack.length === 0 ? 'disabled' : ''} title="Redo (Ctrl+Y)">↪ Redo</button>
       <button class="btn-help" onclick="openHelp()" title="Quick Start Guide" style="margin-left:8px;">?</button>
     `;
   }
@@ -4758,6 +4795,11 @@
   render();
   initColHandles();
   window.addEventListener('resize', () => applyColWidths());
+  document.addEventListener('keydown', function(e) {
+    const mod = e.ctrlKey || e.metaKey;
+    if (mod && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    if (mod && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+  });
 </script>
   <div id="manage-powers-modal" style="display:none"></div>
   <div id="manifest-modal" style="display:none"></div>
