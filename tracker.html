@@ -1730,6 +1730,7 @@
     preparedSpellsOpen: true,
     loreBook: [],
     loreActiveId: null,
+    monsters: [],
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     hpEffects: {
       aid:            { active: false, value: 5 },
@@ -1864,6 +1865,7 @@
   if (state.preparedSpellsOpen === undefined) state.preparedSpellsOpen = true;
   if (!state.loreBook) state.loreBook = [];
   if (state.loreActiveId === undefined) state.loreActiveId = null;
+  if (!state.monsters) state.monsters = [];
   function update(mutatorFn) {
     undoStack.push(JSON.parse(JSON.stringify(state)));
     if (undoStack.length > 25) undoStack.shift();
