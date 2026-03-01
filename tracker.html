@@ -4750,6 +4750,109 @@
     return m;
   }
 
+  function abilMod(score) {
+    return Math.floor((score - 10) / 2);
+  }
+
+  function renderMonsterCard(m) {
+    const isOpen = !!monsterCardOpen[m.id];
+    const pct = m.maxHp > 0 ? (m.currentHp / m.maxHp) : 0;
+    const fillClass = pct <= 0.25 ? 'critical' : pct <= 0.5 ? 'wounded' : '';
+
+    const renderActionRows = (arr, label, prefix) => {
+      if (!arr.length) return '';
+      return `
+        <div class="monster-section-label">${label}</div>
+        ${arr.map((a, i) => {
+          const rollKey = `${m.id}-${prefix}${i}`;
+          const hitResult = monsterRolls[rollKey + '-hit'] || '';
+          const dmgResult = monsterRolls[rollKey + '-dmg'] || '';
+          return `
+            <div class="monster-action-row">
+              <div style="flex:1">
+                <span class="monster-action-name">${a.name}.</span>
+                <span class="monster-action-desc">${a.desc}</span>
+              </div>
+              <div class="monster-roll-btns">
+                ${a.isAttack ? `
+                  <button class="power-manifest-btn" style="font-size:0.65rem;padding:2px 5px;"
+                    onclick="rollMonsterHit('${m.id}','${prefix}',${i})">
+                    Hit ${a.attackBonus}
+                  </button>
+                  ${hitResult ? `<span class="monster-roll-result">${hitResult}</span>` : ''}
+                ` : ''}
+                ${a.damage ? `
+                  <button class="power-manifest-btn" style="font-size:0.65rem;padding:2px 5px;background:#1a2a1a;"
+                    onclick="rollMonsterDmg('${m.id}','${prefix}',${i})">
+                    Dmg ${a.damage}
+                  </button>
+                  ${dmgResult ? `<span class="monster-roll-result">${dmgResult}</span>` : ''}
+                ` : ''}
+                ${a.saveDC ? `
+                  <span class="monster-roll-result" style="color:#7a8a9a;">DC ${a.saveDC} ${a.saveType}</span>
+                ` : ''}
+              </div>
+            </div>`;
+        }).join('')}`;
+    };
+
+    const modStr = s => { const mod = abilMod(s); return (mod >= 0 ? '+' : '') + mod; };
+
+    return `
+      <div class="monster-card" id="mcard-${m.id}">
+        <div class="monster-card-header" onclick="toggleMonsterCard('${m.id}')">
+          <span class="monster-card-name">${m.name}${m.cr ? ` <span style="font-size:0.65rem;color:#2a5a6a;">CR ${m.cr}</span>` : ''}</span>
+          <span class="monster-card-ac">AC ${m.ac}</span>
+          <div class="monster-hp-bar-wrap">
+            <div class="monster-hp-bar">
+              <div class="monster-hp-fill ${fillClass}" style="width:${Math.max(0,pct*100).toFixed(1)}%"></div>
+            </div>
+            <span class="monster-hp-text">${m.currentHp}/${m.maxHp}</span>
+          </div>
+          <button class="monster-delete-btn" onclick="event.stopPropagation();deleteMonster('${m.id}')" title="Remove">✕</button>
+          <span style="font-size:0.65rem;color:#2a5a6a;padding-left:2px;">${isOpen ? '▲' : '▼'}</span>
+        </div>
+        ${isOpen ? `
+          <div class="monster-card-body">
+            <div class="monster-stats-row">
+              <span>🏃 ${m.speed}</span>
+              <span>STR ${m.str}(${modStr(m.str)})</span>
+              <span>DEX ${m.dex}(${modStr(m.dex)})</span>
+              <span>CON ${m.con}(${modStr(m.con)})</span>
+              <span>INT ${m.int}(${modStr(m.int)})</span>
+              <span>WIS ${m.wis}(${modStr(m.wis)})</span>
+              <span>CHA ${m.cha}(${modStr(m.cha)})</span>
+            </div>
+            ${m.resistances.length ? `<div class="monster-stats-row"><span style="color:#4a7a9a;">Resist: ${m.resistances.join(', ')}</span></div>` : ''}
+            ${m.immunities.length ? `<div class="monster-stats-row"><span style="color:#4a7a4a;">Immune: ${m.immunities.join(', ')}</span></div>` : ''}
+            ${m.vulnerabilities.length ? `<div class="monster-stats-row"><span style="color:#9a4a4a;">Vuln: ${m.vulnerabilities.join(', ')}</span></div>` : ''}
+            ${m.conditionImmunities.length ? `<div class="monster-stats-row"><span style="color:#6a5a9a;">Cond Immune: ${m.conditionImmunities.join(', ')}</span></div>` : ''}
+            <div class="monster-hp-controls">
+              <span style="font-size:0.72rem;color:#5a8a9a;">HP:</span>
+              <button class="btn-sm" onclick="adjustMonsterHp('${m.id}', -1)">−</button>
+              <input class="monster-hp-input" type="number" value="${m.currentHp}"
+                onchange="setMonsterHp('${m.id}', parseInt(this.value)||0)"
+                onclick="event.stopPropagation()">
+              <button class="btn-sm" onclick="adjustMonsterHp('${m.id}', 1)">+</button>
+              <input class="monster-hp-input" id="mhp-delta-${m.id}" type="number" placeholder="Δ"
+                style="width:36px;" onclick="event.stopPropagation()">
+              <button class="btn-sm" onclick="applyMonsterHpDelta('${m.id}')" title="Apply damage/heal">Apply</button>
+            </div>
+            <div class="monster-action-list">
+              ${m.traits.length ? `<div class="monster-section-label">Traits</div>
+                ${m.traits.map(t => `<div class="monster-action-row">
+                  <div style="flex:1"><span class="monster-action-name">${t.name}.</span>
+                  <span class="monster-action-desc">${t.desc}</span></div>
+                </div>`).join('')}` : ''}
+              ${renderActionRows(m.actions, 'Actions', 'a')}
+              ${renderActionRows(m.reactions, 'Reactions', 'r')}
+              ${renderActionRows(m.legendary, 'Legendary Actions', 'l')}
+            </div>
+          </div>
+        ` : ''}
+      </div>`;
+  }
+
   render();
   initColHandles();
   window.addEventListener('resize', () => applyColWidths());
