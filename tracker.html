@@ -1382,6 +1382,18 @@
     }
     .btn-undo:hover:not(:disabled) { border-color: #4a8a9a; color: #a8d8e8; }
     .btn-undo:disabled { opacity: 0.35; cursor: default; }
+    .btn-rarity {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-size: 0.65rem;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    }
+    .btn-rarity:hover { border-color: #2a5a6a; color: #8ab8c8; }
 
     /* === CONDITIONS DROPDOWN === */
     .conditions-dropdown-wrap { position: relative; }
@@ -1457,7 +1469,7 @@
     <h3>Status</h3>
     <p>Track active spells, HP Effects (Aid, Heroes' Feast, etc.), and conditions. Add them with the + buttons in the Status panel.</p>
     <h3>Inventory</h3>
-    <p>Use <strong>+ Item</strong> or <strong>+ Magic</strong> to add items. Expand an item to see its description — double-click the description to edit it. Magic items can be toggled Equipped or Attuned.</p>
+    <p>Use <strong>+ Item</strong> to add items. Expand an item to see its description and set its rarity — magic items show Equipped and Attuned toggles. Double-click the description to edit it.</p>
     <h3>Feats</h3>
     <p>Add feats with <strong>+ Feat</strong>. Expand a feat to view or edit its description — double-click the description text to edit it directly. Double-click the feat name to rename it.</p>
     <h3>Short Rest</h3>
@@ -1546,6 +1558,15 @@
 </div>
 <script>
   // === STATE ===
+  const RARITY_COLORS = {
+    common: '#aaaaaa', uncommon: '#1eff00', rare: '#0070dd',
+    'very-rare': '#a335ee', legendary: '#ff8000', artifact: '#e6cc80'
+  };
+  const RARITY_LABELS = {
+    none: 'None', common: 'Common', uncommon: 'Uncommon', rare: 'Rare',
+    'very-rare': 'Very Rare', legendary: 'Legendary', artifact: 'Artifact'
+  };
+
   const DEFAULTS = {
     characterName: 'Character',
     hp: { current: 100, max: 100, temp: 0 },
@@ -1693,6 +1714,8 @@
     if (i.attuned === undefined) i.attuned = false;
     if (i.chargeMax === undefined) i.chargeMax = 0;
     if (i.chargeCurrent === undefined) i.chargeCurrent = 0;
+    if (i.rarity === undefined) i.rarity = i.type === 'magic' ? 'uncommon' : 'none';
+    delete i.type;
   });
   if (state.characterName === undefined) state.characterName = 'Character';
   if (state.statusOpen === undefined) state.statusOpen = true;
@@ -3100,28 +3123,6 @@
     update(s => s.attunementMax = Math.max(attuned, s.attunementMax - 1));
   }
 
-  // === MAGIC ITEMS ===
-  function addMagicItem() {
-    const name = prompt('Magic item name:');
-    if (!name) return;
-    update(s => s.items.push({
-      id: String(Date.now()),
-      name: name.trim(),
-      qty: '1',
-      description: '',
-      type: 'magic',
-      equipped: false,
-      attuned: false,
-      chargeMax: 0,
-      chargeCurrent: 0
-    }));
-  }
-  function editMagicItemName(id) {
-    const item = state.items.find(i => i.id === id);
-    if (!item) return;
-    const name = prompt('Magic item name:', item.name);
-    if (name !== null && name.trim()) update(s => { const i = s.items.find(i => i.id === id); if (i) i.name = name.trim(); });
-  }
   function clickChargePip(id, idx) {
     update(s => {
       const item = s.items.find(i => i.id === id);
@@ -3149,6 +3150,19 @@
   }
   function toggleAttuned(id) {
     update(s => { const i = s.items.find(i => i.id === id); if (i) i.attuned = !i.attuned; });
+  }
+  function setItemRarity(id, rarity) {
+    update(s => {
+      const item = s.items.find(i => i.id === id);
+      if (!item) return;
+      item.rarity = rarity;
+      if (rarity === 'none') {
+        item.equipped = false;
+        item.attuned = false;
+        item.chargeMax = 0;
+        item.chargeCurrent = 0;
+      }
+    });
   }
 
   // === INVENTORY / ITEM DESC / QTY / CURRENCY ===
@@ -3206,9 +3220,11 @@
       name: name.trim(),
       qty: '1',
       description: '',
-      type: 'normal',
+      rarity: 'none',
       equipped: false,
-      attuned: false
+      attuned: false,
+      chargeMax: 0,
+      chargeCurrent: 0
     }));
   }
   function removeItem(id) {
@@ -3321,29 +3337,34 @@
   // === UNIFIED INVENTORY ===
   function renderInventory() {
     const { items, inventoryOpen, attunementMax, currency } = state;
-    const normalItems  = items.filter(i => i.type === 'normal');
-    const magicItems   = items.filter(i => i.type === 'magic');
     const attunedItems = items.filter(i => i.attuned);
     const attunedCount = attunedItems.length;
     const over = attunedCount > attunementMax;
 
-    function itemRow(i, isMagic) {
-      const qty = parseInt(i.qty) || 1;
+    function itemRow(i) {
+      const qty      = parseInt(i.qty) || 1;
       const descOpen = itemDescOpen[i.id];
       const editing  = itemDescEdit === i.id;
-      const editFn   = isMagic ? `editMagicItemName('${i.id}')` : `editInventoryItem('${i.id}')`;
+      const isMagic  = i.rarity !== 'none';
+      const color    = isMagic ? RARITY_COLORS[i.rarity] : null;
       return `
         <div>
           <div class="inventory-item">
             <button class="btn-sm" onclick="adjustItemQty('${i.id}',-1)" style="padding:0 5px;">−</button>
             <span style="font-size:0.75rem;color:#5a8a9a;min-width:24px;text-align:center;">×${qty}</span>
             <button class="btn-sm" onclick="adjustItemQty('${i.id}',1)" style="padding:0 5px;">+</button>
-            <span class="${isMagic ? 'magic-item-name' : 'inv-name'}" onclick="toggleItemDesc('${i.id}')" ondblclick="${editFn}" title="Click to expand · Double-click to rename" style="flex:1;margin-left:6px;cursor:pointer;">${i.name}</span>
+            <span class="${isMagic ? 'magic-item-name' : 'inv-name'}"
+              onclick="toggleItemDesc('${i.id}')"
+              ondblclick="editInventoryItem('${i.id}')"
+              title="Click to expand · Double-click to rename"
+              style="flex:1;margin-left:6px;cursor:pointer;${color ? `color:${color};` : ''}">
+              ${isMagic ? '✨ ' : ''}${i.name}
+            </span>
             ${isMagic ? `
               <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Eqp</button>
               <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Att</button>
             ` : ''}
-            <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${(i.description || isMagic) ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
+            <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${i.description || isMagic ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
             <button class="btn-remove-inv" onclick="removeItem('${i.id}')">✕</button>
           </div>
           ${isMagic && i.chargeMax > 0 ? `
@@ -3360,6 +3381,16 @@
           ` : ''}
           ${descOpen ? `
             <div style="padding:4px 6px 4px 10px;background:#0a1825;border-left:2px solid #1a3a4a;margin-bottom:4px;">
+              <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;">
+                ${['none','common','uncommon','rare','very-rare','legendary','artifact'].map(r => {
+                  const col = RARITY_COLORS[r];
+                  const sel = i.rarity === r;
+                  return `<button class="btn-rarity${sel ? ' selected' : ''}"
+                    onclick="setItemRarity('${i.id}','${r}')"
+                    style="${col ? `color:${col};border-color:${sel ? col : '#1a3a4a'};${sel ? `box-shadow:0 0 5px ${col}50;` : ''}` : sel ? 'border-color:#8ab8c8;color:#8ab8c8;' : ''}"
+                  >${RARITY_LABELS[r]}</button>`;
+                }).join('')}
+              </div>
               ${isMagic ? `
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
                   <span style="font-size:0.65rem;color:#c8904a;">⚡</span>
@@ -3405,27 +3436,19 @@
       </div>
     `;
 
-    const subHeader = label =>
-      `<div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:#2a5a6a;margin:8px 0 4px;border-bottom:1px solid #0f2535;padding-bottom:2px;">${label}</div>`;
-
     return `
       <div>
         <div class="panel-title collapsible-title" onclick="toggleInventory()" style="display:flex;align-items:center;justify-content:space-between;">
           <span>Inventory</span>
           <span style="display:flex;align-items:center;gap:6px;">
             <button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addInventoryItem()">+ Item</button>
-            <button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addMagicItem()">+ Magic</button>
             <span>${inventoryOpen ? '▲' : '▼'}</span>
           </span>
         </div>
         ${inventoryOpen ? `
-          ${subHeader('Items')}
-          ${normalItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">Empty</div>' : normalItems.map(i => itemRow(i, false)).join('')}
+          ${items.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">Empty</div>' : items.map(i => itemRow(i)).join('')}
 
-          ${subHeader('Magic Items')}
-          ${magicItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">None</div>' : magicItems.map(i => itemRow(i, true)).join('')}
-
-          ${subHeader('Attuned')}
+          <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:#2a5a6a;margin:8px 0 4px;border-bottom:1px solid #0f2535;padding-bottom:2px;">Attuned</div>
           <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px;">
             <div style="display:flex;gap:4px;flex-wrap:wrap;">${pips}</div>
             <div style="display:flex;align-items:center;gap:6px;">
