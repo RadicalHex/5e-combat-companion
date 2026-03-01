@@ -3352,6 +3352,8 @@
       <button class="formula-dropdown-btn" onclick="toggleLorePanel()" style="margin-left:4px;">📖 Lore</button>
       <button class="btn-undo" onclick="undo()" ${undoStack.length === 0 ? 'disabled' : ''} title="Undo (Ctrl+Z)" style="margin-left:8px;">↩ Undo</button>
       <button class="btn-undo" onclick="redo()" ${redoStack.length === 0 ? 'disabled' : ''} title="Redo (Ctrl+Y)">↪ Redo</button>
+      <button class="rest-menu-btn" style="font-size:0.75rem;padding:3px 8px;"
+        onclick="openMonstersModal()">⚔ Monsters</button>
       <button class="btn-help" onclick="openHelp()" title="Quick Start Guide" style="margin-left:8px;">?</button>
     `;
   }
