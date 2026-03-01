@@ -2604,7 +2604,7 @@
 
   // === CONDITIONS ===
   const CONDITION_NAMES = [
-    'Blinded','Charmed','Deafened','Exhaustion 1','Exhaustion 2','Exhaustion 3',
+    'Blinded','Charmed','Dazed','Deafened','Exhaustion 1','Exhaustion 2','Exhaustion 3',
     'Exhaustion 4','Exhaustion 5','Exhaustion 6',
     'Frightened','Grappled','Incapacitated','Invisible',
     'Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious',
@@ -3205,6 +3205,7 @@
   const CONDITIONS = [
     { name: 'Blinded',        effect: "Can't see; auto-fails sight-based checks. Attackers have advantage; creature has disadvantage on attacks." },
     { name: 'Charmed',        effect: "Can't attack the charmer or target them with harmful effects. Charmer has advantage on social checks with the creature." },
+    { name: 'Dazed',          effect: "Can only do one of the following on their turn: move, use an action, or use a bonus action. If dazed during their turn, their turn ends." },
     { name: 'Deafened',       effect: "Can't hear; auto-fails hearing-based checks." },
     { name: 'Exhaustion',     effect: "Level 1: Disadvantage on ability checks. Level 2: Speed halved. Level 3: Disadvantage on attacks and saves. Level 4: HP max halved. Level 5: Speed = 0. Level 6: Death. Each long rest removes one level." },
     { name: 'Frightened',     effect: "Disadvantage on ability checks and attack rolls while the source is in sight. Can't willingly move closer to the source." },
