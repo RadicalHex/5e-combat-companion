@@ -1448,6 +1448,7 @@
     <p>Drag a PDF or image onto the page to load a stat block. Drag the viewer panel to reposition it.</p>
     <h3>Saving</h3>
     <p>Everything saves automatically to this browser. Use Export / Import (in the Rests menu) to back up or transfer your character.</p>
+    <p style="margin-top:16px;font-size:0.72rem;color:#2a4a5a;border-top:1px solid #0f2535;padding-top:12px;">Built for D&D 5e (2016 legacy rules). Game rules and conditions sourced from the SRD 5.1, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" style="color:#4a7a8a;">CC-BY 4.0</a> — Wizards of the Coast.</p>
   </div>
 </div>
 <div id="short-rest-overlay" class="help-overlay hidden" onclick="srCloseOnBackdrop(event)">
@@ -3493,7 +3494,7 @@
     const { attacks } = state;
     return `
       <div id="attacks-section">
-        <div class="panel-title">Attacks</div>
+        <div class="panel-title">Actions</div>
         ${attacks.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:8px;">None defined</div>' : ''}
         ${attacks.map(a => {
           const r = attackRolls[a.id] || {};
@@ -3521,7 +3522,7 @@
             </div>
           `;
         }).join('')}
-        <button class="btn-add-attack" onclick="addAttack()">+ Add Attack</button>
+        <button class="btn-add-attack" onclick="addAttack()">+ Add Action</button>
       </div>
     `;
   }

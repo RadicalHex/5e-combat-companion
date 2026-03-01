@@ -2,6 +2,8 @@
 
 A single-file D&D 5e combat tracker for experienced players. No install, no server, no account — just open `tracker.html` in any browser.
 
+> Built for **D&D 5e (2016 legacy rules)**. Game rules and SRD content sourced from the [SRD 5.1](https://dnd.wizards.com/resources/systems-reference-document), licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) — Wizards of the Coast.
+
 ## Features
 
 **Character & HP**
@@ -51,7 +53,7 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Double-click feat name to rename; double-click description to edit inline
 
 **Combat**
-- Custom Attacks (name, to-hit, damage, notes)
+- Custom Actions (name, to-hit, damage, notes)
 - Dice roller with modifier and history
 
 **Lore Book**
