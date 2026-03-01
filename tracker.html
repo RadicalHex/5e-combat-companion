@@ -824,9 +824,7 @@
 
     /* === ACTIVE SPELLS === */
     .active-spell {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      display: block;
       padding: 4px 6px;
       border-radius: 4px;
       font-size: 0.72rem;
@@ -834,7 +832,17 @@
       margin-bottom: 4px;
       border: 1px solid #0f2535;
     }
+    .active-spell-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
     .spell-name { flex: 1; color: #c8dde8; }
+    .power-conc-toggle {
+      font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; cursor: pointer;
+      border: 1px solid #1a3a4a; background: none; color: #4a7a8a;
+    }
+    .power-conc-toggle.active { border-color: #FF4DA6; color: #FF4DA6; }
     .conc-badge {
       font-size: 0.58rem;
       padding: 1px 4px;
@@ -1605,6 +1613,8 @@
   let state = loadState();
   let diceHistory = [];   // max 5 entries: { expr, total, detail }
   let attackRolls = {};   // { [attackId]: { hit?: string, dmg?: string } }
+  let attackDescOpen = {};
+  let attackDescEdit = null;
   let diceModifier = 0;
   let diceCount = 1;
   let diceMenuOpen = false;
@@ -1619,6 +1629,11 @@
   if (!state.resistances) state.resistances = [];
   if (state.immResOpen === undefined) state.immResOpen = false;
   if (!state.activeSpells) state.activeSpells = [];
+  state.activeSpells.forEach((sp, i) => {
+    if (!sp.id) sp.id = 'sp_' + Date.now() + '_' + i;
+    if (sp.description === undefined) sp.description = '';
+  });
+  if (state.hpFxOpen === undefined) state.hpFxOpen = true;
   if (!state.conditions) state.conditions = [];
   if (!state.layout) state.layout = { leftW: 260, rightW: 300 };
   if (state.stats.levelLabel === undefined) state.stats.levelLabel = '1 Fighter';
@@ -1632,6 +1647,8 @@
   if (!state.senses) state.senses = { truesight: 0, blindsight: 0, tremorsense: 0 };
   if (state.sensesOpen === undefined) state.sensesOpen = false;
   if (!state.attacks) state.attacks = [];
+  if (state.attacksOpen === undefined) state.attacksOpen = true;
+  state.attacks.forEach(a => { if (a.description === undefined) a.description = ''; });
   // Migrate from old inventory/magicItems to unified items
   if (state.items === undefined) {
     state.items = [
@@ -1810,7 +1827,7 @@
 
       ${state.charOpen ? `
       <div class="hp-section">
-        <div class="hp-label">Base Form</div>
+        <div class="hp-label">HP</div>
         <div class="hp-bar-track"><div class="hp-bar-fill ${hpCls}" style="width:${basePct}%"></div></div>
         ${isHP ? `
           <div class="stat-row"><span class="stat-label">Current HP</span><input class="edit-input-sm" id="edit-hp-current" type="number" min="0" value="${hp.current}"></div>
@@ -3469,7 +3486,27 @@
   }
   function removeAttack(id) {
     delete attackRolls[id];
+    delete attackDescOpen[id];
+    if (attackDescEdit === id) attackDescEdit = null;
     update(s => s.attacks = s.attacks.filter(a => a.id !== id));
+  }
+  function toggleAttackDesc(id) {
+    attackDescOpen[id] = !attackDescOpen[id];
+    if (!attackDescOpen[id] && attackDescEdit === id) attackDescEdit = null;
+    document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
+  }
+  function startEditAttackDesc(id) {
+    attackDescEdit = id;
+    document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
+  }
+  function cancelEditAttackDesc() {
+    attackDescEdit = null;
+    document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
+  }
+  function saveAttackDesc(id) {
+    const val = document.getElementById('atk-desc-' + id)?.value ?? '';
+    update(s => { const a = s.attacks.find(a => a.id === id); if (a) a.description = val; });
+    attackDescEdit = null;
   }
   function editAttack(id) {
     const atk = state.attacks.find(a => a.id === id);
@@ -3490,11 +3527,16 @@
       a.notes = (notes ?? atk.notes).trim();
     });
   }
+  function toggleAttacksOpen() { update(s => s.attacksOpen = !s.attacksOpen); }
   function renderAttacks() {
-    const { attacks } = state;
+    const { attacks, attacksOpen } = state;
     return `
       <div id="attacks-section">
-        <div class="panel-title">Actions</div>
+        <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Actions</span>
+          <button class="btn-sm" onclick="toggleAttacksOpen()" style="padding:0 6px;">${attacksOpen ? '▲' : '▼'}</button>
+        </div>
+        ${attacksOpen ? `
         ${attacks.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:8px;">None defined</div>' : ''}
         ${attacks.map(a => {
           const r = attackRolls[a.id] || {};
@@ -3506,7 +3548,10 @@
             <div class="attack-entry">
               <div class="attack-entry-header">
                 <span class="attack-name" onclick="editAttack('${a.id}')" title="Click to edit">${a.name}</span>
-                <button class="btn-remove-attack" onclick="removeAttack('${a.id}')">✕</button>
+                <span style="display:flex;gap:4px;align-items:center;">
+                  <button class="btn-sm" onclick="toggleAttackDesc('${a.id}')" style="padding:0 5px;">${attackDescOpen[a.id] ? '▲' : '▼'}</button>
+                  <button class="btn-remove-attack" onclick="removeAttack('${a.id}')">✕</button>
+                </span>
               </div>
               <div class="attack-stats">${a.hit} to hit &nbsp;·&nbsp; ${a.dmg || '—'}</div>
               ${a.notes ? `<div class="attack-notes">${a.notes}</div>` : ''}
@@ -3519,10 +3564,26 @@
                   ${r.hit ? `<span class="${r.nat === 'crit' ? 'atk-result-crit' : r.nat === 'fumble' ? 'atk-result-fumble' : 'atk-result-hit'}">${r.nat === 'crit' ? '⚔️ ' : r.nat === 'fumble' ? '💀 ' : ''}Hit: ${r.hit}</span>` : ''}
                   ${r.dmg ? `<span class="atk-result-dmg">Dmg: ${r.dmg}</span>` : ''}
                 </div>` : ''}
+              ${attackDescOpen[a.id] ? `
+                <div style="padding:4px 0 2px 0;margin-top:4px;border-top:1px solid #0f2535;">
+                  ${attackDescEdit === a.id ? `
+                    <textarea id="atk-desc-${a.id}"
+                      style="width:100%;min-height:60px;background:#0a1a24;color:#c8dde8;border:1px solid #1a3a4a;border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;">${a.description}</textarea>
+                    <div style="display:flex;gap:4px;margin-top:4px;">
+                      <button class="edit-save-btn" onclick="saveAttackDesc('${a.id}')">Save</button>
+                      <button class="edit-cancel-btn" onclick="cancelEditAttackDesc()">✕</button>
+                    </div>
+                  ` : `
+                    <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                      ondblclick="startEditAttackDesc('${a.id}')"
+                      title="Double-click to edit">${a.description || '<em style="color:#2a4a5a;">No description — double-click to add</em>'}</div>
+                  `}
+                </div>` : ''}
             </div>
           `;
         }).join('')}
         <button class="btn-add-attack" onclick="addAttack()">+ Add Action</button>
+        ` : ''}
       </div>
     `;
   }
@@ -3686,40 +3747,77 @@
       </div>
       ${spellsOpen ? `
         ${spells.length === 0 ? '<div class="no-spells">None active</div>' : ''}
-        ${spells.map((sp, i) => `
-          <div class="active-spell">
-            <span class="spell-name">${sp.name}</span>
-            ${sp.concentration ? '<span class="conc-badge">C</span>' : ''}
-            <button class="spell-remove" onclick="removeActiveSpell(${i})" title="End spell">✕</button>
-          </div>
-        `).join('')}
+        ${spells.map(sp => {
+          const descOpen   = spellDescOpen[sp.id];
+          const editing    = spellDescEdit === sp.id;
+          const namEditing = spellNameEdit === sp.id;
+          return `
+            <div class="active-spell">
+              <div class="active-spell-header">
+                ${namEditing ? `
+                  <input id="spell-name-input-${sp.id}" class="edit-input-sm" value="${sp.name}"
+                    style="width:110px;font-size:0.72rem;text-align:left;"
+                    onkeydown="if(event.key==='Enter')saveSpellName('${sp.id}');if(event.key==='Escape')cancelEditSpellName();">
+                  <button class="edit-save-btn" onclick="saveSpellName('${sp.id}')">Save</button>
+                  <button class="edit-cancel-btn" onclick="cancelEditSpellName()">✕</button>
+                ` : `
+                  <span class="spell-name" ondblclick="startEditSpellName('${sp.id}')" title="Double-click to rename">${sp.name}</span>
+                  <button class="power-conc-toggle ${sp.concentration ? 'active' : ''}"
+                    onclick="toggleActiveSpellConc('${sp.id}')" title="Toggle concentration">C</button>
+                  <button class="btn-sm" onclick="toggleSpellDesc('${sp.id}')" style="padding:0 5px;">${descOpen ? '▲' : '▼'}</button>
+                  <button class="spell-remove" onclick="removeActiveSpell('${sp.id}')" title="End spell">✕</button>
+                `}
+              </div>
+              ${descOpen ? `
+                <div style="padding:4px 0 2px;margin-top:4px;border-top:1px solid #0f2535;">
+                  ${editing ? `
+                    <textarea id="spell-desc-${sp.id}"
+                      style="width:100%;min-height:60px;background:#0a1a24;color:#c8dde8;border:1px solid #1a3a4a;border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;">${sp.description}</textarea>
+                    <div style="display:flex;gap:4px;margin-top:4px;">
+                      <button class="edit-save-btn" onclick="saveSpellDesc('${sp.id}')">Save</button>
+                      <button class="edit-cancel-btn" onclick="cancelEditSpellDesc()">✕</button>
+                    </div>
+                  ` : `
+                    <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                      ondblclick="startEditSpellDesc('${sp.id}')"
+                      title="Double-click to edit">${sp.description || '<em style="color:#2a4a5a;">No description — double-click to add</em>'}</div>
+                  `}
+                </div>` : ''}
+            </div>`;
+        }).join('')}
       ` : ''}
     `;
 
     const fx = state.hpEffects;
+    const hpFxOpen = state.hpFxOpen;
     const hpFxBody = `
       <div style="border-top:1px solid #0f2535;margin:10px 0 8px;"></div>
-      <div style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">HP Effects</div>
-      ${[
-        { key: 'aid',            label: 'Aid',           color: '#2a8a6a' },
-        { key: 'heroesFeast',    label: "Heroes' Feast",  color: '#2a8a6a' },
-        { key: 'maxHpReduction', label: 'Max HP −',      color: '#8a2a2a' },
-      ].map(({ key, label, color }) => {
-        const ef = fx[key];
-        return `
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-            <span style="flex:1;font-size:0.8rem;color:#8ab8c8;">${label}</span>
-            <input type="number" min="0" value="${ef.value}"
-              onchange="setHpEffectValue('${key}', this.value)"
-              ${ef.active ? 'disabled' : ''}
-              style="width:42px;background:${ef.active ? '#0a1e2a' : '#0f2535'};border:1px solid #1a3a4a;color:${ef.active ? '#4a7a8a' : '#8ab8c8'};padding:2px 4px;border-radius:3px;font-size:0.8rem;text-align:right;">
-            <button class="btn-sm" onclick="toggleHpEffect('${key}')"
-              style="padding:2px 8px;background:${ef.active ? color : 'transparent'};border:1px solid ${color};color:${ef.active ? '#fff' : color};border-radius:3px;font-size:0.75rem;cursor:pointer;">
-              ${ef.active ? 'ON' : 'OFF'}
-            </button>
-          </div>
-        `;
-      }).join('')}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${hpFxOpen ? '6px' : '0'};">
+        <span style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;">HP Effects</span>
+        <button class="btn-sm" onclick="toggleHpFxSection()" style="padding:0 5px;">${hpFxOpen ? '▲' : '▼'}</button>
+      </div>
+      ${hpFxOpen ? `
+        ${[
+          { key: 'aid',            label: 'Aid',           color: '#2a8a6a' },
+          { key: 'heroesFeast',    label: "Heroes' Feast",  color: '#2a8a6a' },
+          { key: 'maxHpReduction', label: 'Max HP −',      color: '#8a2a2a' },
+        ].map(({ key, label, color }) => {
+          const ef = fx[key];
+          return `
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="flex:1;font-size:0.8rem;color:#8ab8c8;">${label}</span>
+              <input type="number" min="0" value="${ef.value}"
+                onchange="setHpEffectValue('${key}', this.value)"
+                ${ef.active ? 'disabled' : ''}
+                style="width:42px;background:${ef.active ? '#0a1e2a' : '#0f2535'};border:1px solid #1a3a4a;color:${ef.active ? '#4a7a8a' : '#8ab8c8'};padding:2px 4px;border-radius:3px;font-size:0.8rem;text-align:right;">
+              <button class="btn-sm" onclick="toggleHpEffect('${key}')"
+                style="padding:2px 8px;background:${ef.active ? color : 'transparent'};border:1px solid ${color};color:${ef.active ? '#fff' : color};border-radius:3px;font-size:0.75rem;cursor:pointer;">
+                ${ef.active ? 'ON' : 'OFF'}
+              </button>
+            </div>
+          `;
+        }).join('')}
+      ` : ''}
     `;
 
     const condsBody = `
@@ -3735,25 +3833,69 @@
       ${open ? spellsBody + hpFxBody + condsBody : ''}
     `;
   }
+  let spellDescOpen = {};
+  let spellDescEdit = null;
+  let spellNameEdit = null;
+
   function addActiveSpell() {
-    const name = prompt('Spell name:');
-    if (!name || !name.trim()) return;
-    const isConc = confirm(`Is ${name.trim()} a Concentration spell?`);
-    if (isConc) {
-      const existing = state.activeSpells.findIndex(s => s.concentration);
-      if (existing >= 0) {
-        if (!confirm(`Drop ${state.activeSpells[existing].name} and concentrate on ${name.trim()}?`)) return;
-        update(s => {
-          s.activeSpells.splice(existing, 1);
-          s.activeSpells.push({ name: name.trim(), concentration: true });
-        });
-        return;
-      }
-    }
-    update(s => s.activeSpells.push({ name: name.trim(), concentration: isConc }));
+    const id = String(Date.now());
+    spellDescOpen[id] = true;
+    spellNameEdit = id;
+    update(s => s.activeSpells.push({ id, name: 'New Effect', concentration: false, description: '' }));
+    const input = document.getElementById('spell-name-input-' + id);
+    if (input) { input.focus(); input.select(); }
   }
-  function removeActiveSpell(idx) {
-    update(s => s.activeSpells.splice(idx, 1));
+  function removeActiveSpell(id) {
+    delete spellDescOpen[id];
+    if (spellDescEdit === id) spellDescEdit = null;
+    if (spellNameEdit === id) spellNameEdit = null;
+    update(s => s.activeSpells = s.activeSpells.filter(sp => sp.id !== id));
+  }
+  function startEditSpellName(id) {
+    spellNameEdit = id;
+    renderStatus();
+    const input = document.getElementById('spell-name-input-' + id);
+    if (input) { input.focus(); input.select(); }
+  }
+  function saveSpellName(id) {
+    const val = document.getElementById('spell-name-input-' + id)?.value.trim();
+    spellNameEdit = null;
+    if (val) update(s => { const sp = s.activeSpells.find(sp => sp.id === id); if (sp) sp.name = val; });
+    else renderStatus();
+  }
+  function cancelEditSpellName() {
+    spellNameEdit = null;
+    renderStatus();
+  }
+  function toggleActiveSpellConc(id) {
+    update(s => {
+      const sp = s.activeSpells.find(sp => sp.id === id);
+      if (!sp) return;
+      const turningOn = !sp.concentration;
+      if (turningOn) s.activeSpells.forEach(sp => sp.concentration = false);
+      sp.concentration = turningOn;
+    });
+  }
+  function toggleSpellDesc(id) {
+    spellDescOpen[id] = !spellDescOpen[id];
+    if (!spellDescOpen[id] && spellDescEdit === id) spellDescEdit = null;
+    renderStatus();
+  }
+  function startEditSpellDesc(id) {
+    spellDescEdit = id;
+    renderStatus();
+  }
+  function cancelEditSpellDesc() {
+    spellDescEdit = null;
+    renderStatus();
+  }
+  function saveSpellDesc(id) {
+    const val = document.getElementById('spell-desc-' + id)?.value ?? '';
+    spellDescEdit = null;
+    update(s => { const sp = s.activeSpells.find(sp => sp.id === id); if (sp) sp.description = val; });
+  }
+  function toggleHpFxSection() {
+    update(s => s.hpFxOpen = !s.hpFxOpen);
   }
 
   // === COLUMN DRAG STATE ===
