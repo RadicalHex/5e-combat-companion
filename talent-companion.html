@@ -3641,8 +3641,9 @@
                 <div style="padding:4px 0;border-bottom:1px solid #0f2535;">
                   <div style="display:flex;align-items:center;justify-content:space-between;">
                     <span style="font-size:0.8rem;color:#8ab8c8;cursor:pointer;"
+                      onclick="toggleFeatDesc('${f.id}')"
                       ondblclick="editFeatName('${f.id}')"
-                      title="Double-click to rename">${f.name}</span>
+                      title="Click to expand · Double-click to rename">${f.name}</span>
                     <span style="display:flex;gap:4px;">
                       <button class="btn-sm" onclick="toggleFeatDesc('${f.id}')" style="padding:0 5px;">${open ? '▲' : '▼'}</button>
                       <button class="btn-sm" onclick="removeFeat('${f.id}')" style="padding:0 5px;color:#a05050;">✕</button>
