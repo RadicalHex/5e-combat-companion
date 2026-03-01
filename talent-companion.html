@@ -1500,6 +1500,72 @@
       color: #6a9aaa;
       line-height: 1.45;
     }
+    .feat-modal {
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 8px;
+      max-width: 540px;
+      width: 92%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .feat-modal-header {
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid #0f2535;
+      flex-shrink: 0;
+    }
+    .feat-modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      color: #a8d8e8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .feat-modal-search {
+      width: 100%;
+      background: #0f2535;
+      border: 1px solid #1a3a4a;
+      color: #8ab8c8;
+      padding: 7px 10px;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    .feat-cat-row { display: flex; flex-wrap: wrap; gap: 5px; }
+    .feat-cat-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      border-radius: 3px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .feat-cat-btn.active { border-color: #2a8a9a; color: #2a8a9a; background: #0a2535; }
+    .feat-modal-body { flex: 1; overflow-y: auto; padding: 4px 18px; }
+    .feat-pick-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #0a1825;
+    }
+    .feat-pick-name { flex: 1; font-size: 0.88rem; color: #8ab8c8; }
+    .feat-pick-cat { font-size: 0.72rem; color: #3a6a7a; letter-spacing: 0.04em; text-transform: uppercase; }
+    .feat-modal-footer {
+      padding: 10px 18px;
+      border-top: 1px solid #0f2535;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .feat-custom-row { display: flex; gap: 6px; }
   </style>
 </head>
 <body>
@@ -1546,7 +1612,7 @@
     <h3>Inventory</h3>
     <p>Use <strong>+ Item</strong> or <strong>+ Magic</strong> to add items. Expand an item to see its description — double-click the description to edit it. Magic items can be toggled Equipped or Attuned.</p>
     <h3>Feats</h3>
-    <p>Add feats with <strong>+ Feat</strong>. Expand a feat to view or edit its description — double-click the description text to edit it directly. Double-click the feat name to rename it.</p>
+    <p>Click <strong>⚙ Manage Feats</strong> to browse the feat catalogue (SRD 5.1 + Psionic feats from The Talent). Check a feat to add it — its description pre-fills and is fully editable. Custom feats can be added from the modal footer. Expand a feat in the panel to edit its description or double-click the name to rename it.</p>
     <h3>Short Rest</h3>
     <p>Open the Rests menu and click <strong>Short Rest</strong>. Choose how many hit dice to spend, then click Roll to see individual results (each die + CON modifier). Click Heal to apply the total to your HP and spend the dice. Cancel at any point to do nothing.</p>
     <h3>Lore Book</h3>
@@ -1630,7 +1696,64 @@
     <div class="drop-hint-strip">Drop files here</div>
   </div>
 </div>
+<div id="manage-feats-overlay" class="help-overlay hidden" onclick="closeFeatModalOnBackdrop(event)">
+  <div class="feat-modal"></div>
+</div>
 <script>
+  // === FEAT CATALOGUE DATA ===
+  const FEAT_DATA = [
+    // === COMBAT ===
+    { id: 'charger',            name: 'Charger',            category: 'Combat',  description: 'When you use your action to Dash, you can use a bonus action to make one melee weapon attack or shove a creature. If you move at least 10 ft in a straight line before the attack, add +5 to the damage roll or push the target 10 ft (if shoving).' },
+    { id: 'crossbow-expert',    name: 'Crossbow Expert',    category: 'Combat',  description: 'Ignore the loading quality of crossbows you are proficient with. Being within 5 ft of a hostile creature doesn\'t impose disadvantage on your ranged attack rolls. When you use the Attack action with a one-handed weapon, you can use a bonus action to attack with a hand crossbow you are holding.' },
+    { id: 'defensive-duelist',  name: 'Defensive Duelist',  category: 'Combat',  description: 'Prerequisite: DEX 13+. When you are wielding a finesse weapon and another creature hits you with a melee attack, you can use your reaction to add your proficiency bonus to your AC for that attack, potentially causing it to miss.' },
+    { id: 'dual-wielder',       name: 'Dual Wielder',       category: 'Combat',  description: '+1 to AC while wielding a separate melee weapon in each hand. You can use two-weapon fighting even when the one-handed melee weapons aren\'t light. You can draw or stow two one-handed weapons when you would normally draw or stow only one.' },
+    { id: 'grappler',           name: 'Grappler',           category: 'Combat',  description: 'Prerequisite: STR 13+. Advantage on attack rolls against a creature you are grappling. You can use your action to try to pin a grappled creature — make another grapple check; on success, both of you are restrained until the grapple ends.' },
+    { id: 'great-weapon-master', name: 'Great Weapon Master', category: 'Combat', description: 'Before a melee attack with a heavy weapon you are proficient with, you can choose to take a \u20135 penalty to hit for +10 damage. When you score a critical hit with a melee weapon or reduce a creature to 0 HP with one, you can make one melee weapon attack as a bonus action.' },
+    { id: 'heavy-armor-master', name: 'Heavy Armor Master', category: 'Combat',  description: 'Prerequisite: proficiency with heavy armor. Increase STR by 1 (max 20). While wearing heavy armor, bludgeoning, piercing, and slashing damage from nonmagical weapons is reduced by 3.' },
+    { id: 'mage-slayer',        name: 'Mage Slayer',        category: 'Combat',  description: 'When a creature within 5 ft of you casts a spell, you can use your reaction to make a melee weapon attack against it. When you damage a concentrating creature, it has disadvantage on its concentration save. Advantage on saves against spells cast by creatures within 5 ft.' },
+    { id: 'martial-adept',      name: 'Martial Adept',      category: 'Combat',  description: 'Learn two maneuvers from the Battle Master fighter archetype. Save DC = 8 + proficiency bonus + STR or DEX modifier. Gain one superiority die (d6) that refreshes on a short or long rest.' },
+    { id: 'mobile',             name: 'Mobile',             category: 'Combat',  description: 'Speed increases by 10 ft. When you Dash, difficult terrain doesn\'t cost extra movement. When you make a melee attack against a creature, you don\'t provoke opportunity attacks from it for the rest of the turn, whether or not the attack hits.' },
+    { id: 'mounted-combatant',  name: 'Mounted Combatant',  category: 'Combat',  description: 'Advantage on melee attacks against unmounted creatures smaller than your mount. You can force attacks targeted at your mount to target you instead. Your mount takes no damage on a successful DEX save, and half on a failure.' },
+    { id: 'polearm-master',     name: 'Polearm Master',     category: 'Combat',  description: 'When you take the Attack action with a glaive, halberd, pike, or quarterstaff, you can use a bonus action to attack with the butt end (1d4 bludgeoning). Creatures provoke opportunity attacks from you when they enter your reach while you wield these weapons.' },
+    { id: 'savage-attacker',    name: 'Savage Attacker',    category: 'Combat',  description: 'Once per turn when you roll damage for a melee weapon attack, you can reroll the weapon\'s damage dice and use either total.' },
+    { id: 'sentinel',           name: 'Sentinel',           category: 'Combat',  description: 'When you hit a creature with an opportunity attack, its speed becomes 0 for the rest of the turn. Creatures provoke opportunity attacks from you even if they take the Disengage action. When a creature within 5 ft attacks a target other than you, you can use your reaction to make a melee weapon attack against it.' },
+    { id: 'sharpshooter',       name: 'Sharpshooter',       category: 'Combat',  description: 'Attacking at long range doesn\'t impose disadvantage on your ranged weapon attack rolls. Ranged weapon attacks ignore half cover and three-quarters cover. Before a ranged attack, you can choose to take a \u20135 penalty to hit for +10 damage.' },
+    { id: 'shield-master',      name: 'Shield Master',      category: 'Combat',  description: 'If you take the Attack action, you can use a bonus action to shove a creature within 5 ft with your shield. You can add your shield\'s AC bonus to DEX saves against spells and harmful effects. If you succeed a DEX save for half damage, you instead take no damage (reaction).' },
+    { id: 'tavern-brawler',     name: 'Tavern Brawler',     category: 'Combat',  description: 'Increase STR or CON by 1 (max 20). Proficient with improvised weapons and unarmed strikes. Your unarmed strike uses a d4 for damage. When you hit with an unarmed strike or improvised weapon, you can attempt to grapple the target as a bonus action.' },
+    // === SKILL ===
+    { id: 'alert',              name: 'Alert',              category: 'Skill',   description: '+5 to initiative. You can\'t be surprised while conscious. Other creatures don\'t gain advantage on attack rolls against you as a result of being hidden from you.' },
+    { id: 'athlete',            name: 'Athlete',            category: 'Skill',   description: 'Increase STR or DEX by 1 (max 20). Standing up costs only 5 ft of movement. Climbing doesn\'t cost extra movement. A running long jump requires only 5 ft of movement beforehand.' },
+    { id: 'durable',            name: 'Durable',            category: 'Skill',   description: 'Increase CON by 1 (max 20). When you roll a Hit Die to regain HP, the minimum number of HP you regain equals twice your CON modifier (minimum of 2).' },
+    { id: 'healer',             name: 'Healer',             category: 'Skill',   description: 'When you use a healer\'s kit to stabilize a dying creature, it also regains 1 HP. As an action, spend one healer\'s kit use to restore 1d6 + 4 HP + the creature\'s max number of Hit Dice. A creature can\'t benefit from this again until it finishes a short or long rest.' },
+    { id: 'inspiring-leader',   name: 'Inspiring Leader',   category: 'Skill',   description: 'Prerequisite: CHA 13+. Spend 10 minutes inspiring up to 6 friendly creatures within 30 ft. Each gains temporary HP equal to your level + CHA modifier. Can\'t benefit again until they finish a short or long rest.' },
+    { id: 'keen-mind',          name: 'Keen Mind',          category: 'Skill',   description: 'Increase INT by 1 (max 20). You always know which way is north. You always know the hours left until the next sunrise or sunset. You can accurately recall anything you have seen or heard within the past month.' },
+    { id: 'linguist',           name: 'Linguist',           category: 'Skill',   description: 'Increase INT by 1 (max 20). Learn three languages of your choice. You can create written ciphers; others must succeed on an INT check (DC = your INT score + proficiency bonus) to decipher them.' },
+    { id: 'lucky',              name: 'Lucky',              category: 'Skill',   description: 'You have 3 luck points per long rest. Spend a point before an attack roll, ability check, or saving throw to roll an extra d20 and choose which to use. You can also spend a point to force a reroll on an attack made against you.' },
+    { id: 'observant',          name: 'Observant',          category: 'Skill',   description: 'Increase INT or WIS by 1 (max 20). If you can see a creature\'s mouth while it speaks a language you understand, you can read its lips. +5 bonus to your passive Perception and passive Investigation scores.' },
+    { id: 'resilient',          name: 'Resilient',          category: 'Skill',   description: 'Choose one ability score \u2014 increase it by 1 (max 20) and gain proficiency in saving throws using that ability.' },
+    { id: 'skilled',            name: 'Skilled',            category: 'Skill',   description: 'Gain proficiency in any combination of three skills or tools of your choice.' },
+    { id: 'skulker',            name: 'Skulker',            category: 'Skill',   description: 'Prerequisite: DEX 13+. You can try to hide when lightly obscured from a creature. Missing with a ranged attack while hidden doesn\'t reveal your position. Dim light doesn\'t impose disadvantage on your Perception checks.' },
+    { id: 'tough',              name: 'Tough',              category: 'Skill',   description: 'Your HP maximum increases by an amount equal to twice your level when you gain this feat. Your HP maximum increases by an additional 2 HP whenever you gain a level thereafter.' },
+    // === MAGIC ===
+    { id: 'elemental-adept',    name: 'Elemental Adept',    category: 'Magic',   description: 'Prerequisite: spellcasting ability. Choose a damage type: acid, cold, fire, lightning, or thunder. Spells you cast ignore resistance to that type. When rolling damage of that type, treat any 1 on a damage die as a 2. Can be taken multiple times for different damage types.' },
+    { id: 'magic-initiate',     name: 'Magic Initiate',     category: 'Magic',   description: 'Choose a class: bard, cleric, druid, sorcerer, warlock, or wizard. Learn two cantrips and one 1st-level spell from that class\'s list. Cast the 1st-level spell once per long rest without a slot (or with slots if you have them). Choose INT, WIS, or CHA as your spellcasting ability.' },
+    { id: 'ritual-caster',      name: 'Ritual Caster',      category: 'Magic',   description: 'Prerequisite: INT or WIS 13+. Acquire a ritual book with two 1st-level spells with the ritual tag (from bard, cleric, druid, sorcerer, warlock, or wizard). Cast those spells as rituals. You can add ritual spells found during adventures.' },
+    { id: 'spell-sniper',       name: 'Spell Sniper',       category: 'Magic',   description: 'Prerequisite: spellcasting ability. The range of spells requiring attack rolls is doubled. Ranged spell attacks ignore half cover and three-quarters cover. Learn one attack-roll cantrip from any class list.' },
+    { id: 'war-caster',         name: 'War Caster',         category: 'Magic',   description: 'Prerequisite: spellcasting ability. Advantage on CON saves to maintain concentration when taking damage. Can perform somatic components while holding weapons or a shield. Can cast a 1-action spell as an opportunity attack reaction.' },
+    // === GENERAL ===
+    { id: 'actor',              name: 'Actor',              category: 'General', description: 'Increase CHA by 1 (max 20). Advantage on Deception and Performance checks when trying to pass as a different person. You can mimic another person\'s speech or creature sounds you\'ve heard for at least 1 minute (DC 14 Insight to detect).' },
+    { id: 'dungeon-delver',     name: 'Dungeon Delver',     category: 'General', description: 'Advantage on Perception and Investigation checks to detect secret doors. Advantage on saves against traps. Resistance to trap damage. Searching for traps while traveling at a fast pace doesn\'t impose disadvantage on your Perception checks.' },
+    { id: 'heavily-armored',    name: 'Heavily Armored',    category: 'General', description: 'Prerequisite: proficiency with medium armor. Increase STR by 1 (max 20). Gain proficiency with heavy armor.' },
+    { id: 'lightly-armored',    name: 'Lightly Armored',    category: 'General', description: 'Increase STR or DEX by 1 (max 20). Gain proficiency with light armor.' },
+    { id: 'medium-armor-master', name: 'Medium Armor Master', category: 'General', description: 'Prerequisite: proficiency with medium armor. Wearing medium armor doesn\'t impose disadvantage on Stealth checks. The maximum DEX bonus you can apply to AC while wearing medium armor increases to +3.' },
+    { id: 'moderately-armored', name: 'Moderately Armored', category: 'General', description: 'Prerequisite: proficiency with light armor. Increase STR or DEX by 1 (max 20). Gain proficiency with medium armor and shields.' },
+    { id: 'weapon-master',      name: 'Weapon Master',      category: 'General', description: 'Increase STR or DEX by 1 (max 20). Gain proficiency with four weapons of your choice (each must be a simple or martial weapon).' },
+    // === PSIONIC (The Talent — MCDM) ===
+    { id: 'psionic-adept',      name: 'Psionic Adept',      category: 'Psionic', description: 'You have a nascent psionic gift. Choose one 1st-order power from the Talent power list. You can manifest that power once per short or long rest. Your Manifestation Score for this power equals your Proficiency Bonus. You gain Strain as normal when you manifest it.' },
+    { id: 'psionic-warrior',    name: 'Psionic Warrior',    category: 'Psionic', description: 'Prerequisite: STR or DEX 13+. Your psionic ability enhances your martial prowess. When you hit a creature with a weapon attack, you can use a bonus action to manifest a 1st-order Talent power that has a range of touch or self, without spending your action. You can use this feature once per short or long rest.' },
+    { id: 'greater-psionic-adept', name: 'Greater Psionic Adept', category: 'Psionic', description: 'Prerequisite: Psionic Adept. Your psionic potential deepens. You learn one additional 1st-order power from the Talent list. You can use each power learned from Psionic Adept and Greater Psionic Adept once per short or long rest. Your Manifestation Score for these powers equals your Proficiency Bonus.' },
+  ];
+
   // === POWERS LIBRARY (not persisted to localStorage) ===
   const POWERS_DATA = [
     // CHRONOPATHY (15)
@@ -2003,6 +2126,7 @@
   if (state.featsOpen === undefined) state.featsOpen = true;
   state.feats.forEach(f => {
     if (f.description === undefined) f.description = '';
+    if (f.srdId === undefined) f.srdId = null;
   });
   if (state.layout.rightW < 340) state.layout.rightW = 360;
   if (!state.saveProfs) state.saveProfs = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
@@ -3373,15 +3497,96 @@
       i.qty = (qty ?? item.qty).trim();
     });
   }
+  // === FEAT CATALOGUE MODAL ===
+  let manageFeatFilter = { search: '', category: '' };
+
+  function openManageFeats() {
+    document.getElementById('manage-feats-overlay').classList.remove('hidden');
+    renderManageFeatsModal();
+  }
+  function closeManageFeats() {
+    document.getElementById('manage-feats-overlay').classList.add('hidden');
+    manageFeatFilter = { search: '', category: '' };
+  }
+  function closeFeatModalOnBackdrop(event) {
+    if (event.target === document.getElementById('manage-feats-overlay')) closeManageFeats();
+  }
+  function manageFeatSearch(val) {
+    manageFeatFilter.search = val;
+    renderManageFeatsModal();
+  }
+  function manageFeatCat(val) {
+    manageFeatFilter.category = val;
+    renderManageFeatsModal();
+  }
+  function toggleKnownFeat(srdId, checked) {
+    const feat = FEAT_DATA.find(f => f.id === srdId);
+    if (!feat) return;
+    update(s => {
+      if (checked && !s.feats.some(f => f.srdId === srdId)) {
+        s.feats.push({ id: String(Date.now()), name: feat.name, description: feat.description, srdId });
+      }
+      if (!checked) s.feats = s.feats.filter(f => f.srdId !== srdId);
+    });
+    renderManageFeatsModal();
+    document.getElementById('feats-wrap').innerHTML = renderFeats();
+  }
+  function addCustomFeat() {
+    const input = document.getElementById('custom-feat-name');
+    const name = input?.value.trim();
+    if (!name) return;
+    update(s => s.feats.push({ id: String(Date.now()), name, description: '', srdId: null }));
+    input.value = '';
+    document.getElementById('feats-wrap').innerHTML = renderFeats();
+  }
+  function renderManageFeatsModal() {
+    const modal = document.getElementById('manage-feats-overlay').querySelector('.feat-modal');
+    const { search, category } = manageFeatFilter;
+    const cats = ['Combat', 'Skill', 'Magic', 'General', 'Psionic'];
+    const filtered = FEAT_DATA.filter(f =>
+      (!search || f.name.toLowerCase().includes(search.toLowerCase())) &&
+      (!category || f.category === category)
+    ).sort((a, b) => a.name.localeCompare(b.name));
+    const rows = filtered.map(f => {
+      const known = state.feats.some(sf => sf.srdId === f.id);
+      return `
+        <div class="feat-pick-row">
+          <input type="checkbox" ${known ? 'checked' : ''} onchange="toggleKnownFeat('${f.id}', this.checked)">
+          <span class="feat-pick-name">${f.name}</span>
+          <span class="feat-pick-cat">${f.category}</span>
+        </div>`;
+    }).join('');
+    modal.innerHTML = `
+      <div class="feat-modal-header">
+        <div class="feat-modal-title">
+          Manage Feats
+          <button class="help-close" onclick="closeManageFeats()">✕</button>
+        </div>
+        <input class="feat-modal-search" placeholder="Search feats..."
+          value="${search}" oninput="manageFeatSearch(this.value)">
+        <div class="feat-cat-row">
+          <button class="feat-cat-btn ${!category ? 'active' : ''}" onclick="manageFeatCat('')">All</button>
+          ${cats.map(c => `<button class="feat-cat-btn ${category === c ? 'active' : ''}" onclick="manageFeatCat('${c}')">${c}</button>`).join('')}
+        </div>
+      </div>
+      <div class="feat-modal-body">
+        ${rows || '<div style="color:#2a5a6a;text-align:center;padding:20px;">No feats match</div>'}
+      </div>
+      <div class="feat-modal-footer">
+        <div class="feat-custom-row">
+          <input id="custom-feat-name" placeholder="Custom feat name..."
+            style="flex:1;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px 8px;border-radius:4px;font-size:0.88rem;"
+            onkeydown="if(event.key==='Enter')addCustomFeat()">
+          <button class="btn-sm" onclick="addCustomFeat()" style="white-space:nowrap;">+ Add Custom</button>
+        </div>
+        <button class="btn-sm" onclick="closeManageFeats()" style="width:100%;padding:5px;">Done</button>
+      </div>`;
+  }
+
   // === FEATS ===
   let featDescOpen = {};
   let featDescEdit = null;
 
-  function addFeat() {
-    const name = prompt('Feat name:');
-    if (!name) return;
-    update(s => s.feats.push({ id: String(Date.now()), name: name.trim(), description: '' }));
-  }
   function removeFeat(id) {
     featDescOpen[id] = false;
     if (featDescEdit === id) featDescEdit = null;
@@ -3419,7 +3624,7 @@
       <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
         <span>Feats</span>
         <span style="display:flex;gap:4px;align-items:center;">
-          ${featsOpen ? `<button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addFeat()">+ Feat</button>` : ''}
+          ${featsOpen ? `<button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();openManageFeats()">⚙ Manage Feats</button>` : ''}
           <button class="btn-sm" onclick="toggleFeatsSection()" style="padding:0 6px;">${featsOpen ? '▲' : '▼'}</button>
         </span>
       </div>
