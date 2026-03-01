@@ -4916,6 +4916,32 @@
     renderMonstersModal();
   }
 
+  function adjustMonsterHp(id, delta) {
+    update(s => {
+      const m = s.monsters.find(x => x.id === id);
+      if (!m) return;
+      m.currentHp = Math.max(0, Math.min(m.maxHp, m.currentHp + delta));
+    });
+    renderMonstersModal();
+  }
+  function setMonsterHp(id, val) {
+    update(s => {
+      const m = s.monsters.find(x => x.id === id);
+      if (!m) return;
+      m.currentHp = Math.max(0, Math.min(m.maxHp, val));
+    });
+    renderMonstersModal();
+  }
+  function applyMonsterHpDelta(id) {
+    const input = document.getElementById('mhp-delta-' + id);
+    if (!input) return;
+    const delta = parseInt(input.value);
+    if (isNaN(delta)) return;
+    input.value = '';
+    // Positive delta = damage (subtract), negative = heal (add)
+    adjustMonsterHp(id, -delta);
+  }
+
   render();
   initColHandles();
   window.addEventListener('resize', () => applyColWidths());
