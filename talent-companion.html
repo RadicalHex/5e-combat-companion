@@ -4381,6 +4381,35 @@
     const { knownPowers, concentration, powersOpen } = state;
     const activePowers = POWERS_DATA.filter(p => knownPowers.includes(p.id));
 
+    const formatPowerDesc = raw => {
+      if (!raw) return '';
+      const ioIdx = raw.indexOf('Increased Order:');
+      const base = ioIdx !== -1 ? raw.slice(0, ioIdx).trim() : raw;
+      const io   = ioIdx !== -1 ? raw.slice(ioIdx + 16).trim() : null;
+      const skip = new Set([
+        'The','A','An','If','For','When','While','As','You','Your','They','Their',
+        'It','Its','In','On','At','By','With','From','To','Of','This','These','Any',
+        'Each','All','No','Not','Once','After','Before','Until','Since','However',
+        'Additionally','But','And','Or','Yet','So','That','Which','Who','Whenever',
+        'Wherever','Whatever','Otherwise','Moreover','Therefore','Where','Whether',
+        'Upon','During','Rather','Because','Although','Though'
+      ]);
+      const text = base.replace(
+        /\b([A-Z][a-z']+(?:\s+[A-Z][a-z']+){0,3})\.\s+(?=[A-Z])/g,
+        (match, phrase) => {
+          if (phrase.split(/\s+/).length === 1 && skip.has(phrase)) return match;
+          return `<br><strong>${phrase}.</strong> `;
+        }
+      );
+      let html = text;
+      if (io) {
+        html += `<div style="margin-top:7px;padding:5px 8px;border-left:2px solid #2a6a7a;background:rgba(42,106,122,0.12);border-radius:0 3px 3px 0;">` +
+          `<span style="color:#4a9aaa;font-weight:bold;">Increased Order:</span>` +
+          `<span style="color:#6ab0c0;"> ${io}</span></div>`;
+      }
+      return html;
+    };
+
     const makeCard = p => {
       const isConc = concentration.includes(p.id);
       const isOpen = !!powerCardOpen[p.id];
@@ -4399,7 +4428,7 @@
           <div style="display:flex;align-items:center;gap:6px;padding:7px 8px;cursor:pointer;" onclick="togglePowerCard('${p.id}')">
             <span class="power-name">
               ${p.name}
-              <span class="power-school">${p.school} · ${timeLabel}${p.concentration ? ' · C' : ''}</span>
+              <span class="power-school">${p.school} · ${timeLabel}${p.concentration ? ' · C' : ''} · ${p.duration}</span>
             </span>
             ${p.concentration ? `
               <button class="power-conc-toggle ${isConc ? 'active' : ''}"
@@ -4410,8 +4439,8 @@
             <span style="font-size:0.65rem;color:#2a5a6a;padding-left:2px;">${isOpen ? '▲' : '▼'}</span>
           </div>
           ${isOpen && desc ? `
-            <div style="border-top:1px solid #0f2535;padding:7px 10px 8px;font-size:0.75rem;color:#7ab8c8;line-height:1.5;">
-              ${desc}
+            <div style="border-top:1px solid #0f2535;padding:7px 10px 8px;font-size:0.75rem;color:#7ab8c8;line-height:1.6;">
+              ${formatPowerDesc(desc)}
             </div>
           ` : ''}
         </div>`;
