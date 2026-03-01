@@ -4417,7 +4417,7 @@
     };
 
     const cards = [1, 2, 3, 4, 5, 6].map(order => {
-      const group = activePowers.filter(p => p.order === order);
+      const group = activePowers.filter(p => p.order === order).sort((a, b) => a.name.localeCompare(b.name));
       if (!group.length) return '';
       const ordinal = ['', '1st', '2nd', '3rd', '4th', '5th', '6th'][order];
       return `
