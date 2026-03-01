@@ -1461,6 +1461,187 @@
     }
     .feat-custom-row { display: flex; gap: 6px; }
 
+    /* === MONSTER MODAL === */
+    .monster-modal {
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 8px;
+      width: 96%;
+      max-width: 680px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .monster-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px 8px;
+      border-bottom: 1px solid #0f2535;
+      flex-shrink: 0;
+    }
+    .monster-modal-title {
+      font-size: 1rem;
+      color: #8ab8c8;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .monster-modal-body {
+      overflow-y: auto;
+      flex: 1;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .monster-modal-footer {
+      border-top: 1px solid #0f2535;
+      padding: 8px 12px;
+      flex-shrink: 0;
+    }
+    .monster-card {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .monster-card-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      cursor: pointer;
+    }
+    .monster-card-name {
+      font-size: 0.88rem;
+      color: #8ab8c8;
+      font-weight: 600;
+      flex: 1;
+    }
+    .monster-card-ac {
+      font-size: 0.72rem;
+      color: #5a8a9a;
+      padding: 0 4px;
+    }
+    .monster-hp-bar-wrap {
+      flex: 1;
+      max-width: 140px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .monster-hp-bar {
+      flex: 1;
+      height: 6px;
+      background: #0f2535;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .monster-hp-fill {
+      height: 100%;
+      background: #2a7a4a;
+      border-radius: 3px;
+      transition: width 0.2s;
+    }
+    .monster-hp-fill.wounded { background: #7a6a2a; }
+    .monster-hp-fill.critical { background: #7a2a2a; }
+    .monster-hp-text {
+      font-size: 0.68rem;
+      color: #5a8a9a;
+      white-space: nowrap;
+    }
+    .monster-card-body {
+      padding: 6px 10px 8px;
+      border-top: 1px solid #0f2535;
+    }
+    .monster-stats-row {
+      display: flex;
+      gap: 10px;
+      font-size: 0.72rem;
+      color: #5a8a9a;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .monster-action-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .monster-action-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .monster-action-name {
+      font-size: 0.78rem;
+      color: #8ab8c8;
+      font-weight: 600;
+      flex-shrink: 0;
+      min-width: 80px;
+    }
+    .monster-action-desc {
+      font-size: 0.72rem;
+      color: #5a8a9a;
+      line-height: 1.4;
+      flex: 1;
+    }
+    .monster-roll-btns {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    .monster-roll-result {
+      font-size: 0.7rem;
+      color: #c8a84a;
+      padding: 0 3px;
+    }
+    .monster-hp-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .monster-hp-input {
+      width: 48px;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #8ab8c8;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      padding: 2px 4px;
+      text-align: center;
+    }
+    .monster-paste-area {
+      width: 100%;
+      min-height: 120px;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #8ab8c8;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      padding: 8px;
+      font-family: monospace;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    .monster-section-label {
+      font-size: 0.65rem;
+      color: #2a5a6a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 6px 0 3px;
+    }
+    .monster-delete-btn {
+      background: none;
+      border: none;
+      color: #3a5a6a;
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0 2px;
+    }
+    .monster-delete-btn:hover { color: #c84a4a; }
+
     /* === CONDITIONS DROPDOWN === */
     .conditions-dropdown-wrap { position: relative; }
     .conditions-panel {
