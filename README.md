@@ -30,10 +30,13 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Spell Save DC and Spell Attack (auto-calculated, manual override available)
 - Spellcasting Ability selector (INT / WIS / CHA)
 - Spell slots for all 9 levels with collapsible panel — DC/Atk/pips all hide together
-- Active spells tracker with Concentration handling, independently collapsible
+- Active effects tracker — independently collapsible, with per-effect expandable descriptions
+- Click **+** to instantly create a new effect inline; double-click the name to rename
+- **C pip** on each effect toggles Concentration — activating one auto-clears any other
 
 **Status**
 - Conditions tracker
+- **HP Effects** (Aid, Heroes' Feast, Max HP −) in a collapsible sub-section
 - Immunities & Resistances
 - Optional Senses panel (Truesight, Blindsight, Tremorsense)
 - Conditions reference dropdown (header) — all 15 SRD conditions with mechanical effects
@@ -53,7 +56,8 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Double-click feat name to rename; double-click description to edit inline
 
 **Combat**
-- Custom Actions (name, to-hit, damage, notes)
+- Custom **Actions** (name, to-hit, damage, notes) — section is collapsible
+- Per-action expandable description — double-click to edit inline
 - Dice roller with modifier and history
 
 **Lore Book**

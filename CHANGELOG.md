@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.6.0 — 2026-02-28
+
+### Active Effects — Full Overhaul (both trackers)
+- **No more popups** — clicking **+** instantly creates a "New Effect" card with the name field pre-selected and ready to type; no prompt dialog anywhere in the flow
+- Double-click any effect name to rename it inline (Enter / Escape to confirm or cancel)
+- Each effect card now has an expandable **description** section — click **▼** to open, double-click the text to edit in a textarea, Save / ✕ to confirm or discard
+- **C pip button** replaces the concentration confirm dialog — toggle concentration on/off per effect; activating one automatically clears concentration from any other effect
+- Descriptions persist to localStorage; existing effects are migrated automatically with empty descriptions
+- **HP Effects** (Aid, Heroes' Feast, Max HP −) now live under their own collapsible sub-header, independently collapsible from the Manual Effects list
+
+### Actions Section (both trackers)
+- Actions section now has a **collapse chevron** — click the header to hide all action cards
+- Each action card now has an expandable **description** — click **▼** to open, double-click to edit inline, same pattern as feats and inventory
+- `talent-companion.html`: section label corrected from "Attacks" to "Actions"
+
+### Polish
+- `tracker.html`: HP bar label corrected from "Base Form" to "HP"
+
+---
+
 ## v1.5.0 — 2026-02-28
 
 ### Attack Dice Roller
