@@ -4942,6 +4942,38 @@
     adjustMonsterHp(id, -delta);
   }
 
+  function rollMonsterHit(mId, prefix, idx) {
+    const m = state.monsters.find(x => x.id === mId);
+    if (!m) return;
+    const arr = prefix === 'a' ? m.actions : prefix === 'r' ? m.reactions : m.legendary;
+    const action = arr[idx];
+    if (!action || !action.attackBonus) return;
+    const mod = parseInt(action.attackBonus);
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const total = roll + mod;
+    const nat = roll === 20 ? 'crit' : roll === 1 ? 'fumble' : null;
+    const key = `${mId}-${prefix}${idx}-hit`;
+    monsterRolls[key] = nat === 'crit' ? `⚔ CRIT! (${total})` : nat === 'fumble' ? `💀 MISS (${total})` : String(total);
+    if (nat) showRollToast(nat);
+    renderMonstersModal();
+  }
+  function rollMonsterDmg(mId, prefix, idx) {
+    const m = state.monsters.find(x => x.id === mId);
+    if (!m) return;
+    const arr = prefix === 'a' ? m.actions : prefix === 'r' ? m.reactions : m.legendary;
+    const action = arr[idx];
+    if (!action || !action.damage) return;
+    const parsed = parseDiceExpr(action.damage);
+    if (!parsed) return;
+    const rolls = Array.from({ length: parsed.count }, () => Math.floor(Math.random() * parsed.sides) + 1);
+    const total = rolls.reduce((a, b) => a + b, 0) + parsed.modifier;
+    const breakdown = parsed.count > 1 ? `[${rolls.join('+')}]` : String(rolls[0]);
+    const modStr = parsed.modifier > 0 ? `+${parsed.modifier}` : parsed.modifier < 0 ? String(parsed.modifier) : '';
+    const key = `${mId}-${prefix}${idx}-dmg`;
+    monsterRolls[key] = `${breakdown}${modStr}=${total} ${action.damageType}`;
+    renderMonstersModal();
+  }
+
   render();
   initColHandles();
   window.addEventListener('resize', () => applyColWidths());
