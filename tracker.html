@@ -4853,6 +4853,69 @@
       </div>`;
   }
 
+  function openMonstersModal() {
+    document.getElementById('monsters-overlay').classList.remove('hidden');
+    renderMonstersModal();
+  }
+  function closeMonstersModal() {
+    document.getElementById('monsters-overlay').classList.add('hidden');
+  }
+  function closeMonsterModalOnBackdrop(e) {
+    if (e.target === document.getElementById('monsters-overlay')) closeMonstersModal();
+  }
+  function toggleMonsterCard(id) {
+    monsterCardOpen[id] = !monsterCardOpen[id];
+    renderMonstersModal();
+  }
+
+  function renderMonstersModal() {
+    const overlay = document.getElementById('monsters-overlay');
+    if (overlay.classList.contains('hidden')) return;
+    overlay.querySelector('.monster-modal').innerHTML = `
+      <div class="monster-modal-header">
+        <span class="monster-modal-title">⚔ Monsters & Companions</span>
+        <button class="btn-sm" onclick="closeMonstersModal()">✕ Close</button>
+      </div>
+      <div class="monster-modal-body">
+        ${state.monsters.length === 0
+          ? '<div style="color:#2a5a6a;font-size:0.8rem;text-align:center;padding:16px 0;">No monsters added. Paste a stat block below to add one.</div>'
+          : state.monsters.map(renderMonsterCard).join('')
+        }
+      </div>
+      <div class="monster-modal-footer">
+        <div style="font-size:0.75rem;color:#5a8a9a;margin-bottom:4px;">Add Monster — paste stat block:</div>
+        <textarea id="monster-paste" class="monster-paste-area"
+          placeholder="Paste a 5e stat block here (from SRD, D&D Beyond, etc.)…"></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="power-manifest-btn" onclick="addMonsterFromPaste()">+ Add Monster</button>
+          <button class="btn-sm" style="margin-left:auto;" onclick="clearAllMonsters()">Clear All</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function addMonsterFromPaste() {
+    const text = document.getElementById('monster-paste')?.value?.trim();
+    if (!text) return;
+    const monster = parseStatBlock(text);
+    update(s => s.monsters.push(monster));
+    document.getElementById('monster-paste').value = '';
+    renderMonstersModal();
+  }
+  function deleteMonster(id) {
+    update(s => { s.monsters = s.monsters.filter(m => m.id !== id); });
+    delete monsterRolls[id];
+    delete monsterCardOpen[id];
+    renderMonstersModal();
+  }
+  function clearAllMonsters() {
+    if (!confirm('Remove all monsters?')) return;
+    update(s => { s.monsters = []; });
+    Object.keys(monsterRolls).forEach(k => delete monsterRolls[k]);
+    Object.keys(monsterCardOpen).forEach(k => delete monsterCardOpen[k]);
+    renderMonstersModal();
+  }
+
   render();
   initColHandles();
   window.addEventListener('resize', () => applyColWidths());
