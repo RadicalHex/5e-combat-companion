@@ -1949,6 +1949,8 @@
   let state = loadState();
   let diceHistory = [];   // max 5 entries: { expr, total, detail }
   let attackRolls = {};   // { [attackId]: { hit?: string, dmg?: string } }
+  const monsterRolls = {};   // { 'monsterId-actionIdx-type': result string }
+  const monsterCardOpen = {}; // { monsterId: bool }
   let undoStack = [];     // max 25 deep-clone snapshots for undo
   let redoStack = [];     // max 25 deep-clone snapshots for redo
   let attackDescOpen = {};
@@ -4622,6 +4624,130 @@
     document.getElementById('skills-wrap').innerHTML = renderSkills();
     applyColWidths();
     renderLorePanel();
+  }
+
+  // === MONSTERS ===
+
+  function parseAction(text) {
+    const nameMatch = text.match(/^([^.]+)\./);
+    if (!nameMatch) return null;
+    const name = nameMatch[1].trim();
+    const desc = text.slice(nameMatch[0].length).trim();
+    const action = {
+      name, desc,
+      isAttack: false, attackBonus: null,
+      damage: null, damageType: '',
+      saveDC: null, saveType: ''
+    };
+    // Attack bonus
+    const atkMatch = desc.match(/(Melee|Ranged)[^:]+:\s*([+-]\d+)\s*to hit/i);
+    if (atkMatch) { action.isAttack = true; action.attackBonus = atkMatch[2]; }
+    // Hit damage — "Hit: 5 (1d6 + 2) slashing damage"
+    const dmgMatch = desc.match(/Hit:\s*\d+\s*\(([^)]+)\)\s*(\w+)\s*damage/i);
+    if (dmgMatch) {
+      action.damage = dmgMatch[1].replace(/\s+/g, '');
+      action.damageType = dmgMatch[2];
+    }
+    // Saving throw DC
+    const saveMatch = desc.match(/DC\s*(\d+)\s*(\w+)\s*saving throw/i);
+    if (saveMatch) { action.saveDC = parseInt(saveMatch[1]); action.saveType = saveMatch[2]; }
+    return action;
+  }
+
+  function parseStatBlock(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const id = 'monster-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+    const m = {
+      id, name: 'Unknown', ac: 10, maxHp: 1, currentHp: 1, speed: '',
+      str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, cr: '',
+      traits: [], actions: [], reactions: [], legendary: [],
+      resistances: [], immunities: [], vulnerabilities: [],
+      conditionImmunities: [], conditions: [], notes: '',
+    };
+
+    // Name: first non-blank line
+    m.name = lines[0] || 'Unknown';
+
+    // AC
+    const acM = text.match(/armor class\s+(\d+)/i);
+    if (acM) m.ac = parseInt(acM[1]);
+
+    // HP
+    const hpM = text.match(/hit points\s+(\d+)/i);
+    if (hpM) { m.maxHp = parseInt(hpM[1]); m.currentHp = m.maxHp; }
+
+    // Speed (grab whole phrase)
+    const spdM = text.match(/speed\s+([^\n]+)/i);
+    if (spdM) m.speed = spdM[1].trim();
+
+    // Ability scores — "10 (+0)" pattern for all 6
+    const ablM = text.match(
+      /(\d+)\s*\([+-]\d+\)\s+(\d+)\s*\([+-]\d+\)\s+(\d+)\s*\([+-]\d+\)\s+(\d+)\s*\([+-]\d+\)\s+(\d+)\s*\([+-]\d+\)\s+(\d+)\s*\([+-]\d+\)/
+    );
+    if (ablM) {
+      [m.str, m.dex, m.con, m.int, m.wis, m.cha] = ablM.slice(1, 7).map(Number);
+    } else {
+      // Fallback: six consecutive bare numbers after STR/DEX/CON/INT/WIS/CHA header
+      const bareM = text.match(/STR[^\d]*(\d+)[^\d]+(\d+)[^\d]+(\d+)[^\d]+(\d+)[^\d]+(\d+)[^\d]+(\d+)/i);
+      if (bareM) [m.str, m.dex, m.con, m.int, m.wis, m.cha] = bareM.slice(1, 7).map(Number);
+    }
+
+    // CR
+    const crM = text.match(/challenge\s+([^\s(]+)/i);
+    if (crM) m.cr = crM[1];
+
+    // Resistances / immunities / vulnerabilities / condition immunities
+    const resM  = text.match(/damage resistances?\s+([^\n]+)/i);
+    const immM  = text.match(/damage immunities?\s+([^\n]+)/i);
+    const vulM  = text.match(/damage vulnerabilities?\s+([^\n]+)/i);
+    const cimM  = text.match(/condition immunities?\s+([^\n]+)/i);
+    const split = s => s.split(/[,;]/).map(x => x.trim()).filter(Boolean);
+    if (resM) m.resistances         = split(resM[1]);
+    if (immM) m.immunities          = split(immM[1]);
+    if (vulM) m.vulnerabilities     = split(vulM[1]);
+    if (cimM) m.conditionImmunities = split(cimM[1]);
+
+    // Section indices
+    const actIdx  = text.search(/^ACTIONS\s*$/mi);
+    const reactIdx = text.search(/^REACTIONS\s*$/mi);
+    const legIdx  = text.search(/^LEGENDARY ACTIONS\s*$/mi);
+    const traitsEnd = actIdx !== -1 ? actIdx : text.length;
+
+    // Traits — between abilities block and ACTIONS header
+    const crIdx = text.search(/challenge\s+/i);
+    if (crIdx !== -1) {
+      const traitBlock = text.slice(crIdx, traitsEnd);
+      const traitLines = traitBlock.split('\n').filter(l => /^[A-Z][^a-z]*\./.test(l.trim()) || l.includes('. '));
+      traitLines.forEach(line => {
+        const tm = line.trim().match(/^([^.]+)\.\s*(.*)/);
+        if (tm && tm[1].length < 60) m.traits.push({ name: tm[1].trim(), desc: tm[2].trim() });
+      });
+    }
+
+    // Actions
+    if (actIdx !== -1) {
+      const end = reactIdx !== -1 ? reactIdx : legIdx !== -1 ? legIdx : text.length;
+      const block = text.slice(actIdx, end);
+      const parts = block.split(/\n(?=[A-Z][^\n]*\.)/).slice(1);
+      m.actions = parts.map(parseAction).filter(Boolean);
+    }
+
+    // Reactions
+    if (reactIdx !== -1) {
+      const end = legIdx !== -1 ? legIdx : text.length;
+      const block = text.slice(reactIdx, end);
+      const parts = block.split(/\n(?=[A-Z][^\n]*\.)/).slice(1);
+      m.reactions = parts.map(parseAction).filter(Boolean);
+    }
+
+    // Legendary actions
+    if (legIdx !== -1) {
+      const block = text.slice(legIdx);
+      const parts = block.split(/\n(?=[A-Z][^\n]*\.)/).slice(1);
+      m.legendary = parts.map(parseAction).filter(Boolean);
+    }
+
+    return m;
   }
 
   render();
