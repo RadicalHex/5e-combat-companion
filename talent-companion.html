@@ -1651,7 +1651,6 @@
       <hr class="divider">
       <div id="strain-section"></div>
       <hr class="divider">
-      <div id="quick-roll-bar-section"></div>
       <div id="powers-section"></div>
     </div>
     <div class="panel" id="panel-right">
@@ -4067,6 +4066,31 @@
             </div>
           `;
         }).join('')}
+        ${(() => {
+          const activeRollable = state.activeActionIds
+            .map(id => POWERS_DATA.find(p => p.id === id))
+            .filter(p => p && state.knownPowers.includes(p.id));
+          const buttons = activeRollable.map(p => {
+            const exprs = scanDiceExprs(POWER_DESCRIPTIONS[p.id] || '');
+            const selOrder = powerManifestOrder[p.id] || p.order;
+            return `<button class="quick-roll-btn"
+              onclick="openManifestModal('${p.id}',${selOrder})"
+              title="${p.name} — ${exprs.join(', ')}">
+              <span class="qr-name">${p.name}</span>
+              <span class="qr-dice">${exprs.join(' / ')}</span>
+            </button>`;
+          }).join('');
+          const emptyMsg = !activeRollable.length
+            ? `<div style="color:#2a5a6a;font-size:0.75rem;padding:4px 0">No active powers — use Manage to add some.</div>`
+            : '';
+          return `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #1a3a4a;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:0.7rem;color:#4a7a8a;letter-spacing:0.05em;text-transform:uppercase;">⚡ Power Actions</span>
+              <button class="btn-sm" onclick="openManageActions()" style="padding:0 6px;font-size:0.7rem;">Manage</button>
+            </div>
+            <div class="quick-roll-bar">${buttons}${emptyMsg}</div>
+          </div>`;
+        })()}
         <button class="btn-add-attack" onclick="addAttack()">+ Add Attack</button>
         ` : ''}
       </div>
@@ -4473,42 +4497,6 @@
       }
     });
     renderStatus();
-  }
-
-  // === QUICK ROLL BAR ===
-  function renderQuickRollBar() {
-    const activeRollable = state.activeActionIds
-      .map(id => POWERS_DATA.find(p => p.id === id))
-      .filter(p => p && state.knownPowers.includes(p.id));
-    const isOpen = state.quickRollOpen;
-    const buttons = isOpen && activeRollable.length
-      ? activeRollable.map(p => {
-          const exprs = scanDiceExprs(POWER_DESCRIPTIONS[p.id] || '');
-          const selOrder = powerManifestOrder[p.id] || p.order;
-          return `<button class="quick-roll-btn"
-            onclick="openManifestModal('${p.id}',${selOrder})"
-            title="${p.name} — ${exprs.join(', ')}">
-            <span class="qr-name">${p.name}</span>
-            <span class="qr-dice">${exprs.join(' / ')}</span>
-          </button>`;
-        }).join('')
-      : '';
-    const emptyMsg = isOpen && !activeRollable.length
-      ? `<div style="color:#2a5a6a;font-size:0.8rem;padding:4px 0">No active actions — use Manage to add some.</div>`
-      : '';
-    const section = document.getElementById('quick-roll-bar-section');
-    if (!section) return;
-    section.innerHTML = `<div class="quick-roll-section">
-      <div class="section-header" onclick="toggleQuickRoll()" style="cursor:pointer">
-        <span class="section-label">⚡ Quick Actions ${isOpen ? '▾' : '▸'}</span>
-        <button class="btn btn-sm" style="margin-left:auto" onclick="event.stopPropagation();openManageActions()">Manage</button>
-      </div>
-      ${isOpen ? `<div class="quick-roll-bar">${buttons}${emptyMsg}</div>` : ''}
-    </div>`;
-  }
-
-  function toggleQuickRoll() {
-    update(s => s.quickRollOpen = !s.quickRollOpen);
   }
 
   // === ACTIVE POWERS ===
@@ -5293,7 +5281,6 @@
     renderHeader();
     renderHP();
     renderStrain();
-    renderQuickRollBar();
     renderActivePowers();
     renderStatus();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
