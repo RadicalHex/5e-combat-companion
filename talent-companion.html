@@ -880,6 +880,52 @@
     }
     .powers-manage-btn:hover { border-color: #a8d8e8; color: #a8d8e8; }
 
+    /* === MANAGE ACTIONS MODAL === */
+    .action-manage-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-bottom: 1px solid #1a3a4a; gap: 12px;
+    }
+    .action-manage-row.action-active { background: #0a2030; }
+    .action-manage-info { display: flex; flex-direction: column; gap: 2px; }
+    .action-manage-name { font-weight: 600; color: #b0e0ea; font-size: 0.9rem; }
+    .action-manage-meta { font-size: 0.75rem; color: #4a8a9a; }
+    .action-manage-dice { font-size: 0.78rem; color: #7ecfdf; font-family: monospace; }
+    .action-toggle-btn {
+      flex-shrink: 0; padding: 5px 12px; border-radius: 4px;
+      border: 1px solid #2a5a6a; background: #0d2a36;
+      color: #4a8a9a; cursor: pointer; font-size: 0.8rem; white-space: nowrap;
+    }
+    .action-toggle-btn.active { border-color: #2a8a6a; color: #4adfaa; background: #0a2a1a; }
+    .action-toggle-btn:hover { opacity: 0.85; }
+
+    /* === QUICK ROLL BAR === */
+    .quick-roll-section { margin-bottom: 8px; }
+    .quick-roll-bar {
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px;
+      background: #061820; border: 1px solid #1a3a4a;
+      border-top: none; border-radius: 0 0 6px 6px; min-height: 36px;
+    }
+    .quick-roll-btn {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 5px 12px; background: #0d2a36;
+      border: 1px solid #2a6a7a; border-radius: 5px; cursor: pointer; gap: 1px;
+    }
+    .quick-roll-btn:hover { background: #1a3a4a; }
+    .qr-name { font-size: 0.78rem; color: #b0e0ea; font-weight: 600; }
+    .qr-dice { font-size: 0.7rem; color: #4a9aaa; font-family: monospace; }
+
+    /* === MANIFEST ACTION DICE === */
+    .manifest-action-section {
+      background: #061820; border: 1px solid #1a3a4a;
+      border-radius: 6px; padding: 10px 14px; margin-bottom: 12px;
+    }
+    .manifest-section-label {
+      font-size: 0.75rem; color: #4a8a9a; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 8px;
+    }
+    .manifest-action-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .manifest-action-result { font-size: 0.9rem; color: #b0e0ea; }
+
     /* === MANAGE POWERS MODAL === */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.8);
@@ -1605,6 +1651,7 @@
       <hr class="divider">
       <div id="strain-section"></div>
       <hr class="divider">
+      <div id="quick-roll-bar-section"></div>
       <div id="powers-section"></div>
     </div>
     <div class="panel" id="panel-right">
@@ -2046,6 +2093,7 @@
     loreBook: [],
     loreActiveId: null,
     activeActionIds: [],
+    quickRollOpen: true,
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     hpEffects: {
       aid:            { active: false, value: 5 },
@@ -2174,6 +2222,7 @@
   if (!state.loreBook) state.loreBook = [];
   if (state.loreActiveId === undefined) state.loreActiveId = null;
   if (!Array.isArray(state.activeActionIds)) state.activeActionIds = [];
+  if (state.quickRollOpen === undefined) state.quickRollOpen = true;
   if (!state.strain) state.strain = { body: 0, mind: 0, soul: 0 };
   if (state.strainMax === undefined) state.strainMax = 16;
   if (!state.manifestDie) state.manifestDie = 'd6';
@@ -4426,6 +4475,42 @@
     renderStatus();
   }
 
+  // === QUICK ROLL BAR ===
+  function renderQuickRollBar() {
+    const activeRollable = state.activeActionIds
+      .map(id => POWERS_DATA.find(p => p.id === id))
+      .filter(p => p && state.knownPowers.includes(p.id));
+    const isOpen = state.quickRollOpen;
+    const buttons = isOpen && activeRollable.length
+      ? activeRollable.map(p => {
+          const exprs = scanDiceExprs(POWER_DESCRIPTIONS[p.id] || '');
+          const selOrder = powerManifestOrder[p.id] || p.order;
+          return `<button class="quick-roll-btn"
+            onclick="openManifestModal('${p.id}',${selOrder})"
+            title="${p.name} — ${exprs.join(', ')}">
+            <span class="qr-name">${p.name}</span>
+            <span class="qr-dice">${exprs.join(' / ')}</span>
+          </button>`;
+        }).join('')
+      : '';
+    const emptyMsg = isOpen && !activeRollable.length
+      ? `<div style="color:#2a5a6a;font-size:0.8rem;padding:4px 0">No active actions — use Manage to add some.</div>`
+      : '';
+    const section = document.getElementById('quick-roll-bar-section');
+    if (!section) return;
+    section.innerHTML = `<div class="quick-roll-section">
+      <div class="section-header" onclick="toggleQuickRoll()" style="cursor:pointer">
+        <span class="section-label">⚡ Quick Actions ${isOpen ? '▾' : '▸'}</span>
+        <button class="btn btn-sm" style="margin-left:auto" onclick="event.stopPropagation();openManageActions()">Manage</button>
+      </div>
+      ${isOpen ? `<div class="quick-roll-bar">${buttons}${emptyMsg}</div>` : ''}
+    </div>`;
+  }
+
+  function toggleQuickRoll() {
+    update(s => s.quickRollOpen = !s.quickRollOpen);
+  }
+
   // === ACTIVE POWERS ===
   function renderActivePowers() {
     const { knownPowers, concentration, powersOpen } = state;
@@ -4655,11 +4740,87 @@
     managePowersFilter = { search: '', school: '' };
   }
 
+  // === MANAGE ACTIONS MODAL ===
+  function openManageActions() {
+    document.getElementById('manage-actions-modal').style.display = 'flex';
+    renderManageActionsModal();
+  }
+
+  function closeManageActions() {
+    document.getElementById('manage-actions-modal').style.display = 'none';
+  }
+
+  function renderManageActionsModal() {
+    const modal = document.getElementById('manage-actions-modal');
+    const rollable = state.knownPowers
+      .map(id => POWERS_DATA.find(p => p.id === id))
+      .filter(p => p && scanDiceExprs(POWER_DESCRIPTIONS[p.id] || '').length > 0);
+
+    if (!rollable.length) {
+      modal.innerHTML = `
+        <div class="modal-box">
+          <div class="modal-header">
+            <div class="modal-title">Manage Actions
+              <button class="modal-close" onclick="closeManageActions()">✕</button>
+            </div>
+          </div>
+          <div class="modal-body" style="padding:20px;color:#4a7a8a;text-align:center">
+            No rollable powers in your known powers list.
+          </div>
+          <div class="modal-footer">
+            <button class="powers-manage-btn" onclick="closeManageActions()" style="width:100%;margin:0">Done</button>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const rows = rollable.map(p => {
+      const exprs = scanDiceExprs(POWER_DESCRIPTIONS[p.id] || '');
+      const isActive = state.activeActionIds.includes(p.id);
+      const ordinal = ['','1st','2nd','3rd','4th','5th','6th'][p.order];
+      return `
+        <div class="action-manage-row ${isActive ? 'action-active' : ''}">
+          <div class="action-manage-info">
+            <span class="action-manage-name">${p.name}</span>
+            <span class="action-manage-meta">${ordinal} · ${p.school}</span>
+            <span class="action-manage-dice">${exprs.join(', ')}</span>
+          </div>
+          <button class="action-toggle-btn ${isActive ? 'active' : ''}" onclick="toggleActionId('${p.id}')">
+            ${isActive ? '◉ Active' : '◎ Inactive'}
+          </button>
+        </div>`;
+    }).join('');
+
+    modal.innerHTML = `
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">Manage Actions
+            <button class="modal-close" onclick="closeManageActions()">✕</button>
+          </div>
+        </div>
+        <div class="modal-body">${rows}</div>
+        <div class="modal-footer">
+          <button class="powers-manage-btn" onclick="closeManageActions()" style="width:100%;margin:0">Done</button>
+        </div>
+      </div>`;
+  }
+
   // === MANIFESTATION RESOLVER ===
-  let manifestState = { power: null, selectedOrder: 1, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
+  let manifestState = { power: null, selectedOrder: 1, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 }, actionRolls: {} };
 
   function renderManifestModal(power, selectedOrder) {
-    manifestState = { power, selectedOrder: selectedOrder || power.order, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 } };
+    manifestState = { power, selectedOrder: selectedOrder || power.order, step: 1, roll: null, strainGained: 0, allocated: { body: 0, mind: 0, soul: 0 }, actionRolls: {} };
+    _drawManifestModal();
+  }
+
+  function rollManifestActionDice(expr) {
+    const parsed = parseDiceExpr(expr);
+    if (!parsed) return;
+    const rolls = Array.from({ length: parsed.count }, () =>
+      Math.floor(Math.random() * parsed.sides) + 1
+    );
+    const total = rolls.reduce((a, b) => a + b, 0) + parsed.modifier;
+    manifestState.actionRolls[expr] = { total, rolls, mod: parsed.modifier };
     _drawManifestModal();
   }
 
@@ -4675,12 +4836,29 @@
     const dieLabel = state.manifestDie.toUpperCase();
 
     if (selectedOrder === 1) {
+      const firstExprs = scanDiceExprs(POWER_DESCRIPTIONS[power.id] || '');
+      const firstActionSection = firstExprs.length ? `
+        <div class="manifest-action-section" style="margin-bottom:10px">
+          <div class="manifest-section-label">Action Dice</div>
+          ${firstExprs.map(expr => {
+            const res = manifestState.actionRolls[expr];
+            const modStr = res && res.mod !== 0 ? (res.mod > 0 ? `+${res.mod}` : String(res.mod)) : '';
+            const resultHtml = res
+              ? `<span class="manifest-action-result">→ <strong>${res.total}</strong> <span class="roll-detail">(${res.rolls.join('+')}${modStr})</span></span>`
+              : '';
+            return `<div class="manifest-action-row">
+              <button class="resolver-roll-btn" onclick="rollManifestActionDice('${expr}')">${res ? '↺ Reroll' : 'Roll'} ${expr}</button>
+              ${resultHtml}
+            </div>`;
+          }).join('')}
+        </div>` : '';
       modal.className = 'modal-overlay';
       modal.innerHTML = `
         <div class="modal-box resolver-box">
           <div class="modal-title">${power.name} <button class="modal-close" onclick="closeManifestModal()">✕</button></div>
-          <div style="text-align:center;padding:16px">
-            <div style="font-size:0.8rem;color:#4a7a8a;margin-bottom:8px">1st-order — no manifestation test required.</div>
+          <div style="padding:12px 0">
+            ${firstActionSection}
+            <div style="font-size:0.8rem;color:#4a7a8a;margin-bottom:8px;text-align:center">1st-order — no manifestation test required.</div>
             <div class="resolver-result success">✓ Power manifested. No strain.</div>
             <button class="resolver-confirm-btn" style="margin-top:12px" onclick="closeManifestModal()">Done</button>
           </div>
@@ -4748,6 +4926,27 @@
       }
     }
 
+    const actionExprs = scanDiceExprs(POWER_DESCRIPTIONS[power.id] || '');
+    const actionSection = actionExprs.length ? `
+      <div class="manifest-action-section">
+        <div class="manifest-section-label">Action Dice</div>
+        ${actionExprs.map(expr => {
+          const res = manifestState.actionRolls[expr];
+          const modStr = res && res.mod !== 0
+            ? (res.mod > 0 ? `+${res.mod}` : String(res.mod))
+            : '';
+          const resultHtml = res
+            ? `<span class="manifest-action-result">→ <strong>${res.total}</strong> <span class="roll-detail">(${res.rolls.join('+')}${modStr})</span></span>`
+            : '';
+          return `<div class="manifest-action-row">
+            <button class="resolver-roll-btn" onclick="rollManifestActionDice('${expr}')">
+              ${res ? '↺ Reroll' : 'Roll'} ${expr}
+            </button>
+            ${resultHtml}
+          </div>`;
+        }).join('')}
+      </div>` : '';
+
     modal.className = 'modal-overlay';
     modal.innerHTML = `
       <div class="modal-box resolver-box">
@@ -4759,6 +4958,7 @@
           ${power.school} &bull; ${ordinalLabel} Order${upcasting ? `<span style="color:#2ab8d0"> ${upcasting}</span>` : ''}
           ${power.concentration ? ' &bull; <span style="color:#FF4DA6">Concentration</span>' : ''}
         </div>
+        ${actionSection}
         ${body}
       </div>`;
   }
@@ -5093,6 +5293,7 @@
     renderHeader();
     renderHP();
     renderStrain();
+    renderQuickRollBar();
     renderActivePowers();
     renderStatus();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
@@ -5113,6 +5314,7 @@
   });
 </script>
   <div id="manage-powers-modal" style="display:none"></div>
+  <div id="manage-actions-modal" style="display:none" class="modal-overlay"></div>
   <div id="manifest-modal" style="display:none"></div>
 </body>
 </html>
