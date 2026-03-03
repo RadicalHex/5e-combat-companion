@@ -850,6 +850,29 @@
       background: #0a1e2a; border: 1px solid #1a4a6a; color: #a8d8e8;
     }
     .power-manifest-btn:hover { background: #1a3a4a; }
+    .power-roll-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 6px 12px 10px;
+      border-top: 1px solid #1a3a4a;
+    }
+    .power-roll-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .power-roll-btn {
+      background: #0d2a36;
+      border: 1px solid #2a6a7a;
+      color: #7ecfdf;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .power-roll-btn:hover { background: #1a3a4a; }
+    .roll-detail { color: #4a8a9a; font-size: 0.8rem; }
     .powers-manage-btn {
       width: 100%; font-size: 0.7rem; padding: 6px; margin-top: 4px;
       background: none; border: 1px dashed #1a3a4a; border-radius: 4px;
@@ -4463,11 +4486,26 @@
             <button class="power-manifest-btn" onclick="event.stopPropagation();openManifestModal('${p.id}',${selOrder})">Manifest</button>
             <span style="font-size:0.65rem;color:#2a5a6a;padding-left:2px;">${isOpen ? '▲' : '▼'}</span>
           </div>
-          ${isOpen && desc ? `
-            <div style="border-top:1px solid #0f2535;padding:7px 10px 8px;font-size:0.75rem;color:#7ab8c8;line-height:1.6;">
+          ${isOpen && desc ? (() => {
+            const exprs = scanDiceExprs(desc);
+            const rollBtns = exprs.map(expr => {
+              const res = powerRollResults[p.id]?.[expr];
+              const modStr = res && res.mod !== 0
+                ? (res.mod > 0 ? `+${res.mod}` : String(res.mod))
+                : '';
+              const detail = res
+                ? ` → <strong>${res.total}</strong> <span class="roll-detail">(${res.rolls.join('+')}${modStr})</span>`
+                : '';
+              return `<span class="power-roll-wrap">
+                <button class="btn btn-sm power-roll-btn" onclick="event.stopPropagation();rollPowerDice('${p.id}','${expr}')">Roll ${expr}</button>
+                ${detail}
+              </span>`;
+            }).join('');
+            return `<div style="border-top:1px solid #0f2535;padding:7px 10px 8px;font-size:0.75rem;color:#7ab8c8;line-height:1.6;">
               ${formatPowerDesc(desc)}
             </div>
-          ` : ''}
+            ${exprs.length ? `<div class="power-roll-row">${rollBtns}</div>` : ''}`;
+          })() : ''}
         </div>`;
     };
 
