@@ -2056,6 +2056,7 @@
   let state = loadState();
   let diceHistory = [];   // max 5 entries: { expr, total, detail }
   let attackRolls = {};   // { [attackId]: { hit?: string, dmg?: string } }
+  let powerRollResults = {}; // { [powerId]: { [expr]: { total, rolls, mod } } }
   let undoStack = [];     // max 25 deep-clone snapshots for undo
   let redoStack = [];     // max 25 deep-clone snapshots for redo
   let attackDescOpen = {};
@@ -3865,6 +3866,17 @@
     if (!attackRolls[id]) attackRolls[id] = {};
     attackRolls[id].dmg = label;
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
+  }
+  function rollPowerDice(powerId, expr) {
+    const parsed = parseDiceExpr(expr);
+    if (!parsed) return;
+    const rolls = Array.from({ length: parsed.count }, () =>
+      Math.floor(Math.random() * parsed.sides) + 1
+    );
+    const total = rolls.reduce((a, b) => a + b, 0) + parsed.modifier;
+    if (!powerRollResults[powerId]) powerRollResults[powerId] = {};
+    powerRollResults[powerId][expr] = { total, rolls, mod: parsed.modifier };
+    renderActivePowers();
   }
 
   // === CUSTOM ATTACKS ===
