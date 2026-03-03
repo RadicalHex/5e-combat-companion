@@ -2045,6 +2045,7 @@
     featsOpen: true,
     loreBook: [],
     loreActiveId: null,
+    activeActionIds: [],
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     hpEffects: {
       aid:            { active: false, value: 5 },
@@ -2172,6 +2173,7 @@
   ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => { if (state.stats[k] === undefined) state.stats[k] = 0; });
   if (!state.loreBook) state.loreBook = [];
   if (state.loreActiveId === undefined) state.loreActiveId = null;
+  if (!Array.isArray(state.activeActionIds)) state.activeActionIds = [];
   if (!state.strain) state.strain = { body: 0, mind: 0, soul: 0 };
   if (state.strainMax === undefined) state.strainMax = 16;
   if (!state.manifestDie) state.manifestDie = 'd6';
@@ -4627,6 +4629,15 @@
       }
     });
     renderActivePowers();
+  }
+
+  function toggleActionId(powerId) {
+    update(s => {
+      const idx = s.activeActionIds.indexOf(powerId);
+      if (idx === -1) s.activeActionIds.push(powerId);
+      else s.activeActionIds.splice(idx, 1);
+    });
+    renderManageActionsModal();
   }
 
   function managePowersSearch(val) {
