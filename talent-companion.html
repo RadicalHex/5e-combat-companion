@@ -3819,6 +3819,18 @@
       suffix:   dice[4].trim()
     };
   }
+  // Returns array of unique dice expression strings found in text (e.g. ["1d4", "2d6+3"])
+  function scanDiceExprs(text) {
+    if (!text) return [];
+    const found = [];
+    const re = /\b(\d+)d(\d+)([+-]\d+)?\b/gi;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const expr = m[0].toLowerCase();
+      if (!found.includes(expr)) found.push(expr);
+    }
+    return found;
+  }
   function showRollToast(type) {
     const toast = document.createElement('div');
     toast.className = `roll-toast ${type}`;
