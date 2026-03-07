@@ -2184,7 +2184,7 @@
     const sectionMap = {
       status:         'status-section',
       attacks:        'attacks-section-wrap',
-      spells:         'slots-section',
+      spells:         'slot-pips-wrap',
       preparedSpells: 'prepared-spells-wrap',
       inventory:      'inventory-wrap',
       feats:          'feats-wrap',
@@ -2198,6 +2198,22 @@
       const el = document.getElementById(sectionMap[key]);
       if (el) el.style.display = 'none';
     });
+    // Hide #slots-section (the title + wrapper) only when both sub-sections are hidden.
+    // If the section is collapsed (slotsVisible=false), sub-sections aren't rendered
+    // at all, so always keep the title visible in that case.
+    const slotsSection = document.getElementById('slots-section');
+    if (slotsSection) {
+      if (!state.slotsVisible) {
+        slotsSection.style.display = '';
+      } else {
+        const pips = document.getElementById('slot-pips-wrap');
+        const prep = document.getElementById('prepared-spells-wrap');
+        const bothHidden =
+          (!pips || pips.style.display === 'none') &&
+          (!prep || prep.style.display === 'none');
+        slotsSection.style.display = bothHidden ? 'none' : '';
+      }
+    }
     // Smart dividers: hide <hr class="divider"> with no visible content on one side
     ['panel-resources', 'panel-right'].forEach(panelId => {
       const panel = document.getElementById(panelId);
@@ -3061,46 +3077,48 @@
         }
       </div>
       ${visible ? `
-        ${isSpells ? `
-          <div class="stat-row" style="margin-bottom:4px;">
-            <span class="stat-label">Spell Ability</span>
-            <select onchange="setSpellcastingAbility(this.value)" style="background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.8rem;">
-              ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
-            </select>
-          </div>
-          <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
-          <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
-          <hr class="divider">
-          <div class="stat-row" style="margin-bottom:3px;"><span class="stat-label">Slot Max per Level</span></div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px;">
-            ${['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'].map((lbl, i) => `
-              <div style="display:flex;align-items:center;gap:4px;">
-                <span style="font-size:0.62rem;color:var(--c-dim);width:24px;">${lbl}</span>
-                <input type="number" min="0" max="9" class="edit-input-sm" id="edit-slotmax-${i}" value="${state.slotMax[i]}" style="width:32px;text-align:center;">
-              </div>
-            `).join('')}
-          </div>
-        ` : `
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
-            <div class="stat-row" style="flex:1;min-width:80px;">
-              <span class="stat-label">Ability</span>
+        <div id="slot-pips-wrap">
+          ${isSpells ? `
+            <div class="stat-row" style="margin-bottom:4px;">
+              <span class="stat-label">Spell Ability</span>
               <select onchange="setSpellcastingAbility(this.value)" style="background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.8rem;">
                 ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
               </select>
             </div>
-            <div class="stat-row" style="flex:1;min-width:60px;">
-              <span class="stat-label">DC</span>
-              <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:var(--c-dim);">✎</span>' : ''}</span>
+            <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
+            <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
+            <hr class="divider">
+            <div class="stat-row" style="margin-bottom:3px;"><span class="stat-label">Slot Max per Level</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px;">
+              ${['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'].map((lbl, i) => `
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <span style="font-size:0.62rem;color:var(--c-dim);width:24px;">${lbl}</span>
+                  <input type="number" min="0" max="9" class="edit-input-sm" id="edit-slotmax-${i}" value="${state.slotMax[i]}" style="width:32px;text-align:center;">
+                </div>
+              `).join('')}
             </div>
-            <div class="stat-row" style="flex:1;min-width:60px;">
-              <span class="stat-label">Atk</span>
-              <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:var(--c-dim);">✎</span>' : ''}</span>
+          ` : `
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+              <div class="stat-row" style="flex:1;min-width:80px;">
+                <span class="stat-label">Ability</span>
+                <select onchange="setSpellcastingAbility(this.value)" style="background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+                  ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
+                </select>
+              </div>
+              <div class="stat-row" style="flex:1;min-width:60px;">
+                <span class="stat-label">DC</span>
+                <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:var(--c-dim);">✎</span>' : ''}</span>
+              </div>
+              <div class="stat-row" style="flex:1;min-width:60px;">
+                <span class="stat-label">Atk</span>
+                <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:var(--c-dim);">✎</span>' : ''}</span>
+              </div>
             </div>
-          </div>
-          <hr class="divider">
-        `}
-        ${renderPactMagicBlock()}
-        ${renderSlotsBody()}
+            <hr class="divider">
+          `}
+          ${renderPactMagicBlock()}
+          ${renderSlotsBody()}
+        </div>
         <div id="prepared-spells-wrap">
           <hr style="border:none;border-top:1px solid var(--c-bd-dark);margin:8px 0;">
           ${renderPreparedSpells()}
