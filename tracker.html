@@ -6,14 +6,31 @@
   <title>Material Companion</title>
   <link rel="stylesheet" href="fonts.css">
   <style>
+    /* === ACCENT COLOR PALETTE (controlled by --h hue, 0–360) === */
+    :root {
+      --h: 195;
+      --c-base:    hsl(var(--h), 75%, 5%);    /* body bg         */
+      --c-panel:   hsl(var(--h), 73%, 7%);    /* panel bg        */
+      --c-header:  hsl(var(--h), 62%, 9%);    /* header/modal bg */
+      --c-modal:   hsl(var(--h), 73%, 5%);    /* deep modal bg   */
+      --c-well:    hsl(var(--h), 55%, 11%);   /* inner areas     */
+      --c-bd-dark: hsl(var(--h), 57%, 14%);   /* dark border     */
+      --c-bd:      hsl(var(--h), 47%, 19%);   /* standard border */
+      --c-dim:     hsl(var(--h), 30%, 40%);   /* dim labels      */
+      --c-mid:     hsl(var(--h), 33%, 63%);   /* mid text        */
+      --c-text:    hsl(var(--h), 36%, 85%);   /* primary text    */
+      --c-head:    hsl(var(--h), 55%, 78%);   /* headings        */
+      --c-vivid:   hsl(var(--h), 66%, 49%);   /* vivid accent    */
+    }
+
     /* === RESET & BASE === */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { zoom: 0.9; }
+    html { /* zoom controlled by applyFontSize() */ }
     body { overflow-y: auto; }
     body {
       font-family: 'Inter', sans-serif;
-      background: #050d14;
-      color: #c8dde8;
+      background: var(--c-base);
+      color: var(--c-text);
     }
 
     /* === LAYOUT === */
@@ -23,8 +40,8 @@
       min-height: 100vh;
     }
     header {
-      background: linear-gradient(180deg, #071824 0%, #050d14 100%);
-      border-bottom: 1px solid #1a3a4a;
+      background: linear-gradient(180deg, var(--c-header) 0%, var(--c-base) 100%);
+      border-bottom: 1px solid var(--c-bd);
       padding: 10px 24px;
       display: flex;
       align-items: center;
@@ -33,33 +50,33 @@
     header h1 {
       font-family: 'Cinzel', serif;
       font-size: 1.5rem;
-      color: #a8d8e8;
+      color: var(--c-head);
       letter-spacing: 0.1em;
     }
     .columns {
       display: grid;
       grid-template-columns: 260px 1fr 300px;
       gap: 1px;
-      background: #0a1a24;
+      background: var(--c-well);
       align-items: start;
       position: relative;
     }
     .panel {
-      background: #060f18;
+      background: var(--c-panel);
       padding: 16px;
     }
     .panel + .panel {
-      border-left: 1px solid #0f2535;
+      border-left: 1px solid var(--c-bd-dark);
     }
     .panel-title {
       font-family: 'Cinzel', serif;
       font-size: 0.7rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: #4a7a8a;
+      color: var(--c-dim);
       margin-bottom: 12px;
       padding-bottom: 6px;
-      border-bottom: 1px solid #0f2535;
+      border-bottom: 1px solid var(--c-bd-dark);
     }
 
     /* === HP BARS === */
@@ -68,16 +85,16 @@
       font-size: 0.7rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #4a7a8a;
+      color: var(--c-dim);
       margin-bottom: 4px;
     }
     .hp-bar-track {
       height: 10px;
-      background: #0a1e2a;
+      background: var(--c-well);
       border-radius: 5px;
       overflow: hidden;
       margin-bottom: 6px;
-      border: 1px solid #0f2535;
+      border: 1px solid var(--c-bd-dark);
     }
     .hp-bar-fill {
       height: 100%;
@@ -93,11 +110,11 @@
       gap: 6px;
       margin-bottom: 4px;
     }
-    .hp-display { font-size: 1.1rem; color: #e8f4f8; min-width: 80px; }
+    .hp-display { font-size: 1.1rem; color: var(--c-text); min-width: 80px; }
     .btn-sm {
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #8ab8c8;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-mid);
       padding: 3px 10px;
       border-radius: 4px;
       cursor: pointer;
@@ -105,10 +122,10 @@
       font-family: 'Inter', sans-serif;
       transition: all 0.15s;
     }
-    .btn-sm:hover { background: #0f2d40; border-color: #2ab8d0; color: #c8dde8; }
-    .temp-hp { font-size: 0.75rem; color: #7ab0c0; margin-top: 2px; }
+    .btn-sm:hover { background: var(--c-well); border-color: var(--c-vivid); color: var(--c-text); }
+    .temp-hp { font-size: 0.75rem; color: var(--c-mid); margin-top: 2px; }
 
-    .divider { border: none; border-top: 1px solid #0f2535; margin: 16px 0; }
+    .divider { border: none; border-top: 1px solid var(--c-bd-dark); margin: 16px 0; }
 
     /* === SAVES === */
     .saves-grid {
@@ -122,16 +139,16 @@
       font-size: 0.8rem;
       padding: 2px 0;
     }
-    .save-name { color: #4a7a8a; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; }
-    .save-val  { color: #a8d8e8; font-weight: 500; }
+    .save-name { color: var(--c-dim); text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; }
+    .save-val  { color: var(--c-head); font-weight: 500; }
     .stat-row {
       display: flex;
       justify-content: space-between;
       font-size: 0.82rem;
       padding: 3px 0;
-      border-bottom: 1px solid #0a1e2a;
+      border-bottom: 1px solid var(--c-well);
     }
-    .stat-label { color: #4a7a8a; }
+    .stat-label { color: var(--c-dim); }
     .stat-value { color: #d4a843; font-weight: 600; }
 
     /* === SPELL SLOTS === */
@@ -144,7 +161,7 @@
     .slot-group { }
     .slot-level-label {
       font-size: 0.65rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       margin-bottom: 4px;
@@ -156,35 +173,35 @@
       border-radius: 50%;
       cursor: pointer;
       transition: all 0.15s;
-      border: 1px solid #1a3a4a;
+      border: 1px solid var(--c-bd);
     }
-    .pip.full  { background: #2ab8d0; box-shadow: 0 0 5px #2ab8d060; }
-    .pip.empty { background: #0a1e2a; }
+    .pip.full  { background: var(--c-vivid); box-shadow: 0 0 5px color-mix(in srgb, var(--c-vivid) 38%, transparent); }
+    .pip.empty { background: var(--c-well); }
     .pip:hover { transform: scale(1.2); }
     /* === PROFICIENCY PIPS === */
     .prof-pip {
       width: 11px; height: 11px;
       border-radius: 50%;
-      border: 1.5px solid #2a6a7a;
-      background: #0a1e2a;
+      border: 1.5px solid var(--c-dim);
+      background: var(--c-well);
       cursor: pointer; flex-shrink: 0;
       transition: all 0.15s;
       display: inline-block;
     }
     .prof-pip:hover { transform: scale(1.25); }
-    .prof-pip.prof { background: #2ab8d0; border-color: #2ab8d0; }
+    .prof-pip.prof { background: var(--c-vivid); border-color: var(--c-vivid); }
     .prof-pip.expertise {
-      background: #2ab8d0; border-color: #2ab8d0;
-      box-shadow: 0 0 0 2px #050d14, 0 0 0 4px #2ab8d0;
+      background: var(--c-vivid); border-color: var(--c-vivid);
+      box-shadow: 0 0 0 2px var(--c-base), 0 0 0 4px var(--c-vivid);
     }
     .rest-buttons { display: flex; gap: 8px; margin-top: 8px; }
     .btn-rest {
       flex: 1;
       padding: 6px;
       border-radius: 6px;
-      border: 1px solid #1a3a4a;
-      background: #0a1e2a;
-      color: #8ab8c8;
+      border: 1px solid var(--c-bd);
+      background: var(--c-well);
+      color: var(--c-mid);
       font-family: 'Inter', sans-serif;
       font-size: 0.75rem;
       cursor: pointer;
@@ -192,25 +209,25 @@
       letter-spacing: 0.05em;
       transition: all 0.15s;
     }
-    .btn-rest:hover { background: #0f2d40; border-color: #2ab8d0; color: #c8dde8; }
+    .btn-rest:hover { background: var(--c-well); border-color: var(--c-vivid); color: var(--c-text); }
     .btn-rest.long { border-color: #d4a84340; color: #d4a843; }
     .btn-rest.long:hover { background: #1a1000; border-color: #d4a843; }
 
     /* === POLISH === */
     header {
-      box-shadow: 0 2px 20px #2ab8d010;
+      box-shadow: 0 2px 20px color-mix(in srgb, var(--c-vivid) 6%, transparent);
     }
     body::before {
       content: '';
       position: fixed;
       top: 0; left: 0; right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, #2ab8d0, #d4a843, #2ab8d0, transparent);
+      background: linear-gradient(90deg, transparent, var(--c-vivid), #d4a843, var(--c-vivid), transparent);
       z-index: 100;
     }
     .panel::-webkit-scrollbar { width: 4px; }
     .panel::-webkit-scrollbar-track { background: transparent; }
-    .panel::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+    .panel::-webkit-scrollbar-thumb { background: var(--c-bd); border-radius: 2px; }
 
     /* Danger flash on enemy card at 0 HP */
     .enemy-card.dead {
@@ -229,8 +246,8 @@
       height: 860px;
       display: none;
       flex-direction: column;
-      background: #040b12;
-      border: 1px solid #1a3a4a;
+      background: var(--c-modal);
+      border: 1px solid var(--c-bd);
       border-radius: 6px 6px 3px 3px;
       overflow: hidden;
       box-shadow: 0 8px 40px rgba(0,0,0,0.7);
@@ -245,8 +262,8 @@
       justify-content: space-between;
       padding: 0 10px;
       height: 38px;
-      background: #071824;
-      border-bottom: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border-bottom: 1px solid var(--c-bd);
       cursor: grab;
       user-select: none;
       flex-shrink: 0;
@@ -255,14 +272,14 @@
     .stat-panel-title {
       font-family: 'Cinzel', serif;
       font-size: 0.62rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
       text-transform: uppercase;
       letter-spacing: 0.12em;
     }
     #stat-close-btn {
       background: none;
-      border: 1px solid #1a3a4a;
-      color: #4a7a8a;
+      border: 1px solid var(--c-bd);
+      color: var(--c-dim);
       width: 20px;
       height: 20px;
       font-size: 0.75rem;
@@ -278,8 +295,8 @@
     #stat-panel.minimized { height: 38px !important; }
     #stat-minimize-btn {
       background: none;
-      border: 1px solid #1a3a4a;
-      color: #4a7a8a;
+      border: 1px solid var(--c-bd);
+      color: var(--c-dim);
       width: 20px;
       height: 20px;
       font-size: 0.75rem;
@@ -292,7 +309,7 @@
       line-height: 1;
       padding-bottom: 2px;
     }
-    #stat-minimize-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    #stat-minimize-btn:hover { border-color: var(--c-vivid); color: var(--c-vivid); }
     #drag-shield {
       display: none;
       position: fixed;
@@ -314,15 +331,15 @@
       align-items: center;
       gap: 8px;
       padding: 4px 14px;
-      background: #050d14;
-      border-bottom: 1px solid #0a1e2a;
+      background: var(--c-base);
+      border-bottom: 1px solid var(--c-well);
       flex-shrink: 0;
     }
     #stat-zoom-controls.visible { display: flex; }
-    .stat-tab-btn.active { border-color: #2ab8d0; color: #2ab8d0; background: #071824; }
+    .stat-tab-btn.active { border-color: var(--c-vivid); color: var(--c-vivid); background: var(--c-header); }
     .zoom-label {
       font-size: 0.65rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       min-width: 36px;
@@ -336,11 +353,11 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 8px 12px;
-      background: #040b12;
+      background: var(--c-modal);
       min-height: 0;
     }
     #stat-preview::-webkit-scrollbar { width: 4px; }
-    #stat-preview::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+    #stat-preview::-webkit-scrollbar-thumb { background: var(--c-bd); border-radius: 2px; }
     #stat-preview img {
       max-width: 100%;
       height: auto;
@@ -361,32 +378,32 @@
       text-align: center;
       transition: color 0.2s;
     }
-    .stat-preview-hint.drag-over { color: #2ab8d0; }
+    .stat-preview-hint.drag-over { color: var(--c-vivid); }
     #stat-thumbs {
-      border-top: 1px solid #0a1e2a;
+      border-top: 1px solid var(--c-well);
       display: flex;
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
       overflow-x: auto;
-      background: #060f18;
+      background: var(--c-panel);
       flex-shrink: 0;
       height: 110px;
     }
     #stat-thumbs::-webkit-scrollbar { height: 3px; }
-    #stat-thumbs::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+    #stat-thumbs::-webkit-scrollbar-thumb { background: var(--c-bd); border-radius: 2px; }
     .drop-hint-strip {
       font-size: 0.65rem;
-      color: #1e3a4a;
+      color: var(--c-bd);
       text-transform: uppercase;
       letter-spacing: 0.1em;
       white-space: nowrap;
       padding: 6px 12px;
-      border: 1px dashed #0f2535;
+      border: 1px dashed var(--c-bd-dark);
       border-radius: 6px;
       transition: all 0.2s;
     }
-    .drop-hint-strip.drag-over { border-color: #2ab8d0; color: #2ab8d0; background: #071824; }
+    .drop-hint-strip.drag-over { border-color: var(--c-vivid); color: var(--c-vivid); background: var(--c-header); }
     .stat-card {
       flex-shrink: 0;
       width: 56px;
@@ -399,9 +416,9 @@
       width: 56px;
       height: 68px;
       border-radius: 5px;
-      border: 1px solid #1a3a4a;
+      border: 1px solid var(--c-bd);
       overflow: hidden;
-      background: #071824;
+      background: var(--c-header);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -409,16 +426,16 @@
       margin-bottom: 3px;
       transition: border-color 0.15s;
     }
-    .stat-card.active .stat-card-thumb { border-color: #2ab8d0; box-shadow: 0 0 8px #2ab8d040; }
-    .stat-card:hover .stat-card-thumb { border-color: #2ab8d060; }
+    .stat-card.active .stat-card-thumb { border-color: var(--c-vivid); box-shadow: 0 0 8px color-mix(in srgb, var(--c-vivid) 25%, transparent); }
+    .stat-card:hover .stat-card-thumb { border-color: color-mix(in srgb, var(--c-vivid) 38%, transparent); }
     .stat-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
     .pdf-icon-thumb { font-size: 1.4rem; opacity: 0.5; }
     .stat-card-remove {
       position: absolute;
       top: 2px; right: 2px;
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #4a7a8a;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-dim);
       border-radius: 50%;
       width: 15px; height: 15px;
       font-size: 0.5rem;
@@ -432,7 +449,7 @@
     .stat-card-remove:hover { color: #d04040; border-color: #d04040; }
     .stat-card-name {
       font-size: 0.52rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -445,8 +462,8 @@
     }
     .rest-menu-btn {
       background: none;
-      border: 1px solid #1a3a4a;
-      color: #5a8a9a;
+      border: 1px solid var(--c-bd);
+      color: var(--c-mid);
       font-family: 'Inter', sans-serif;
       font-size: 0.7rem;
       letter-spacing: 0.06em;
@@ -455,13 +472,13 @@
       cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
-    .rest-menu-btn:hover { border-color: #2ab8d0; color: #a8d8e8; }
+    .rest-menu-btn:hover { border-color: var(--c-vivid); color: var(--c-head); }
     .rest-menu {
       position: absolute;
       top: calc(100% + 4px);
       left: 0;
-      background: #071824;
-      border: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 4px;
       min-width: 130px;
       z-index: 200;
@@ -474,40 +491,40 @@
       width: 100%;
       background: none;
       border: none;
-      color: #a8d8e8;
+      color: var(--c-head);
       font-family: 'Inter', sans-serif;
       font-size: 0.72rem;
       padding: 8px 14px;
       text-align: left;
       cursor: pointer;
-      border-bottom: 1px solid #0f2535;
+      border-bottom: 1px solid var(--c-bd-dark);
       transition: background 0.1s;
     }
     .rest-menu button:last-child { border-bottom: none; }
-    .rest-menu button:hover { background: #0f2535; }
+    .rest-menu button:hover { background: var(--c-bd-dark); }
 
     /* === INVENTORY & MAGIC ITEMS === */
     .inventory-item {
       display: flex; align-items: center; gap: 6px;
-      padding: 4px 0; border-bottom: 1px solid #0a1e2a;
-      font-size: 0.8rem; color: #c8dde8;
+      padding: 4px 0; border-bottom: 1px solid var(--c-well);
+      font-size: 0.8rem; color: var(--c-text);
     }
     .inventory-item:last-child { border-bottom: none; }
     .inv-name { flex: 1; cursor: pointer; }
-    .inv-name:hover { color: #2ab8d0; }
-    .inv-qty { color: #4a7a8a; font-size: 0.75rem; min-width: 28px; text-align: right; }
+    .inv-name:hover { color: var(--c-vivid); }
+    .inv-qty { color: var(--c-dim); font-size: 0.75rem; min-width: 28px; text-align: right; }
     .btn-remove-inv {
-      background: none; border: none; color: #2a4a5a;
+      background: none; border: none; color: var(--c-dim);
       cursor: pointer; font-size: 0.8rem; padding: 0 2px;
     }
     .btn-remove-inv:hover { color: #d05050; }
     .btn-add-inv {
       width: 100%; margin-top: 6px;
-      background: #071824; border: 1px dashed #1a3a4a;
-      color: #4a7a8a; border-radius: 4px; padding: 5px;
+      background: var(--c-header); border: 1px dashed var(--c-bd);
+      color: var(--c-dim); border-radius: 4px; padding: 5px;
       cursor: pointer; font-size: 0.75rem; letter-spacing: 0.05em;
     }
-    .btn-add-inv:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .btn-add-inv:hover { border-color: var(--c-vivid); color: var(--c-vivid); }
     .collapsible-title {
       display: flex; align-items: center; justify-content: space-between;
       cursor: pointer; user-select: none;
@@ -515,20 +532,20 @@
 
     /* === MAGIC ITEMS === */
     .magic-item {
-      background: #071824; border: 1px solid #0f2535;
+      background: var(--c-header); border: 1px solid var(--c-bd-dark);
       border-radius: 4px; padding: 7px 10px; margin-bottom: 6px;
     }
     .magic-item-header {
       display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
     }
     .magic-item-name {
-      flex: 1; font-size: 0.8rem; color: #a8d8e8; cursor: pointer;
+      flex: 1; font-size: 0.8rem; color: var(--c-head); cursor: pointer;
     }
-    .magic-item-name:hover { color: #2ab8d0; }
+    .magic-item-name:hover { color: var(--c-vivid); }
     .magic-item-actions { display: flex; gap: 4px; }
     .btn-toggle {
-      background: #0a1e2a; border: 1px solid #1a3a4a;
-      color: #4a7a8a; font-size: 0.65rem; letter-spacing: 0.05em;
+      background: var(--c-well); border: 1px solid var(--c-bd);
+      color: var(--c-dim); font-size: 0.65rem; letter-spacing: 0.05em;
       padding: 2px 7px; border-radius: 3px; cursor: pointer;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
       text-transform: uppercase;
@@ -536,7 +553,7 @@
     .btn-toggle.active-equipped { background: #0a2a1a; border-color: #20a850; color: #20a850; }
     .btn-toggle.active-attuned  { background: #1a1a2a; border-color: #7070d8; color: #9090e8; }
     .btn-remove-magic {
-      background: none; border: none; color: #2a4a5a; cursor: pointer; font-size: 0.8rem;
+      background: none; border: none; color: var(--c-dim); cursor: pointer; font-size: 0.8rem;
     }
     .btn-remove-magic:hover { color: #d05050; }
 
@@ -546,8 +563,8 @@
     .attuned-counter.over { color: #d05050; }
     .attuned-item-row {
       display: flex; align-items: center; gap: 6px;
-      padding: 3px 0; font-size: 0.78rem; color: #a8d8e8;
-      border-bottom: 1px solid #0a1e2a;
+      padding: 3px 0; font-size: 0.78rem; color: var(--c-head);
+      border-bottom: 1px solid var(--c-well);
     }
     .attuned-item-row:last-child { border-bottom: none; }
     .attuned-dot { width: 6px; height: 6px; border-radius: 50%; background: #7070d8; flex-shrink: 0; }
@@ -562,9 +579,9 @@
     /* === FORMULA DROPDOWN === */
     .formula-dropdown-wrap { position: relative; }
     .formula-dropdown-btn {
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #8ab8c8;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-mid);
       font-family: 'Inter', sans-serif;
       font-size: 0.75rem;
       padding: 5px 10px;
@@ -572,31 +589,31 @@
       cursor: pointer;
       letter-spacing: 0.04em;
     }
-    .formula-dropdown-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .formula-dropdown-btn:hover { border-color: var(--c-vivid); color: var(--c-vivid); }
     .formula-panel {
       display: none;
       position: absolute;
       top: calc(100% + 4px);
       right: 0;
-      background: #071824;
-      border: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 4px;
       padding: 10px 14px;
       z-index: 100;
       min-width: 280px;
       font-size: 0.75rem;
       line-height: 1.8;
-      color: #8ab8c8;
+      color: var(--c-mid);
       white-space: nowrap;
     }
     .formula-panel.open { display: block; }
     .formula-row { display: flex; gap: 8px; }
-    .formula-lhs { color: #4a7a8a; min-width: 90px; }
+    .formula-lhs { color: var(--c-dim); min-width: 90px; }
 
     /* === CUSTOM ATTACKS === */
     .attack-entry {
-      background: #071824;
-      border: 1px solid #0f2535;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd-dark);
       border-radius: 4px;
       padding: 8px 10px;
       margin-bottom: 8px;
@@ -610,33 +627,33 @@
     .attack-name {
       font-family: 'Cinzel', serif;
       font-size: 0.8rem;
-      color: #a8d8e8;
+      color: var(--c-head);
       cursor: pointer;
     }
-    .attack-name:hover { color: #2ab8d0; }
-    .attack-stats { font-size: 0.75rem; color: #8ab8c8; margin-bottom: 3px; }
-    .attack-notes { font-size: 0.7rem; color: #4a7a8a; font-style: italic; }
+    .attack-name:hover { color: var(--c-vivid); }
+    .attack-stats { font-size: 0.75rem; color: var(--c-mid); margin-bottom: 3px; }
+    .attack-notes { font-size: 0.7rem; color: var(--c-dim); font-style: italic; }
     .btn-remove-attack {
-      background: none; border: none; color: #3a6a7a;
+      background: none; border: none; color: var(--c-dim);
       cursor: pointer; font-size: 0.85rem; padding: 0 4px;
     }
     .btn-remove-attack:hover { color: #d05050; }
     .btn-add-attack {
       width: 100%; margin-top: 6px;
-      background: #071824; border: 1px dashed #1a3a4a;
-      color: #4a7a8a; border-radius: 4px; padding: 6px;
+      background: var(--c-header); border: 1px dashed var(--c-bd);
+      color: var(--c-dim); border-radius: 4px; padding: 6px;
       cursor: pointer; font-size: 0.75rem; letter-spacing: 0.05em;
     }
-    .btn-add-attack:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .btn-add-attack:hover { border-color: var(--c-vivid); color: var(--c-vivid); }
     .attack-roll-row {
       display: flex;
       gap: 6px;
       margin-top: 7px;
     }
     .btn-atk-roll {
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #8ab8c8;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-mid);
       font-family: 'Inter', sans-serif;
       font-size: 0.65rem;
       padding: 3px 8px;
@@ -645,7 +662,7 @@
       transition: border-color 0.15s, color 0.15s;
       letter-spacing: 0.03em;
     }
-    .btn-atk-roll:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .btn-atk-roll:hover { border-color: var(--c-vivid); color: var(--c-vivid); }
     .attack-roll-results {
       display: flex;
       gap: 14px;
@@ -655,7 +672,7 @@
     .atk-result-hit  { color: #d4a843; }
     .atk-result-crit { color: #f0c040; font-weight: 600; }
     .atk-result-fumble { color: #d05050; }
-    .atk-result-dmg  { color: #2ab8d0; }
+    .atk-result-dmg  { color: var(--c-vivid); }
     @keyframes toastPop {
       0%   { opacity: 0; transform: translateX(-50%) translateY(-12px); }
       15%  { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -681,7 +698,7 @@
       font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #4a7a8a;
+      color: var(--c-dim);
     }
     .prep-level-group {
       margin-bottom: 8px;
@@ -690,7 +707,7 @@
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #2a5a6a;
+      color: var(--c-dim);
       margin-bottom: 3px;
     }
     .prep-spell-row {
@@ -698,29 +715,29 @@
       align-items: center;
       gap: 6px;
       padding: 3px 0;
-      border-bottom: 1px solid #0c2535;
+      border-bottom: 1px solid var(--c-bd-dark);
     }
     .prep-spell-name {
       flex: 1;
       font-size: 0.8rem;
-      color: #8ab8c8;
+      color: var(--c-mid);
       cursor: pointer;
       user-select: none;
     }
-    .prep-spell-name:hover { color: #a8d8e8; }
+    .prep-spell-name:hover { color: var(--c-head); }
     .prep-spell-expanded {
       padding: 4px 0 6px 6px;
-      border-bottom: 1px solid #0c2535;
+      border-bottom: 1px solid var(--c-bd-dark);
     }
     .prep-spell-notes {
       font-size: 0.75rem;
-      color: #6a9aaa;
+      color: var(--c-mid);
       line-height: 1.5;
       min-height: 20px;
       cursor: text;
       white-space: pre-wrap;
     }
-    .prep-spell-notes.empty { color: #2a5a6a; font-style: italic; }
+    .prep-spell-notes.empty { color: var(--c-dim); font-style: italic; }
 
     /* === MANAGE SPELLS === */
     .spell-tag {
@@ -729,19 +746,19 @@
     }
     .spell-tag-c { background: #1a2a4a; color: #6a9ae8; border: 1px solid #2a4a8a; }
     .spell-tag-r { background: #1a3a2a; color: #5ac88a; border: 1px solid #2a6a4a; }
-    .spell-school-badge { font-size: 0.6rem; color: #4a7a8a; padding: 0 2px; }
+    .spell-school-badge { font-size: 0.6rem; color: var(--c-dim); padding: 0 2px; }
     .prep-spell-desc {
-      font-size: 0.74rem; color: #5a8a9a; line-height: 1.55; white-space: pre-wrap;
-      border-bottom: 1px solid #0c1e2a; padding-bottom: 6px; margin-bottom: 5px;
+      font-size: 0.74rem; color: var(--c-mid); line-height: 1.55; white-space: pre-wrap;
+      border-bottom: 1px solid var(--c-well); padding-bottom: 6px; margin-bottom: 5px;
     }
     .prep-spell-meta {
       display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px;
     }
-    .prep-spell-meta-item { font-size: 0.65rem; color: #4a7a8a; }
-    .prep-spell-meta-item span { color: #2a5a6a; }
+    .prep-spell-meta-item { font-size: 0.65rem; color: var(--c-dim); }
+    .prep-spell-meta-item span { color: var(--c-dim); }
     .prep-spell-notes-label {
       font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em;
-      color: #2a5a6a; margin-bottom: 2px;
+      color: var(--c-dim); margin-bottom: 2px;
     }
     .manage-spells-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -750,42 +767,42 @@
     }
     .manage-spells-overlay.hidden { display: none; }
     .manage-spells-modal {
-      background: #071520; border: 1px solid #1a4a5a; border-radius: 6px;
+      background: var(--c-header); border: 1px solid var(--c-bd); border-radius: 6px;
       width: min(620px, 96vw); height: 88vh; max-height: 88vh;
       display: flex; flex-direction: column; overflow: hidden;
     }
     #manage-spells-inner { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
     .manage-spells-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px; border-bottom: 1px solid #1a3a4a;
+      padding: 10px 14px; border-bottom: 1px solid var(--c-bd);
       font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em;
-      color: #4a8a9a; font-weight: 600; flex-shrink: 0;
+      color: var(--c-dim); font-weight: 600; flex-shrink: 0;
     }
     .manage-spells-body { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 14px; }
     .spell-add-form {
-      background: #0c1e2a; border: 1px solid #1a3a4a; border-radius: 4px;
+      background: var(--c-well); border: 1px solid var(--c-bd); border-radius: 4px;
       padding: 10px; margin-bottom: 12px;
     }
     .spell-add-form-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 8px; font-size: 0.7rem; text-transform: uppercase;
-      letter-spacing: 0.08em; color: #4a7a8a;
+      letter-spacing: 0.08em; color: var(--c-dim);
     }
     .spell-form-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 7px; align-items: flex-end; }
     .spell-form-field { display: flex; flex-direction: column; gap: 2px; }
-    .spell-form-label { font-size: 0.62rem; color: #4a7a8a; text-transform: uppercase; letter-spacing: 0.05em; }
+    .spell-form-label { font-size: 0.62rem; color: var(--c-dim); text-transform: uppercase; letter-spacing: 0.05em; }
     .spell-form-input {
-      background: #071520; border: 1px solid #1a3a4a; border-radius: 3px;
-      color: #c8dde8; padding: 4px 6px; font-size: 0.78rem;
+      background: var(--c-header); border: 1px solid var(--c-bd); border-radius: 3px;
+      color: var(--c-text); padding: 4px 6px; font-size: 0.78rem;
     }
     .spell-form-input:focus { outline: none; border-color: #2a6a8a; }
     .spell-form-select {
-      background: #071520; border: 1px solid #1a3a4a; border-radius: 3px;
-      color: #8ab8c8; padding: 4px 6px; font-size: 0.78rem;
+      background: var(--c-header); border: 1px solid var(--c-bd); border-radius: 3px;
+      color: var(--c-mid); padding: 4px 6px; font-size: 0.78rem;
     }
     .spell-form-textarea {
-      background: #071520; border: 1px solid #1a3a4a; border-radius: 3px;
-      color: #8ab8c8; padding: 6px; font-size: 0.75rem;
+      background: var(--c-header); border: 1px solid var(--c-bd); border-radius: 3px;
+      color: var(--c-mid); padding: 6px; font-size: 0.75rem;
       width: 100%; min-height: 80px; resize: vertical; font-family: inherit; line-height: 1.5;
       box-sizing: border-box;
     }
@@ -794,38 +811,38 @@
     .srd-notfound-label { font-size: 0.65rem; color: #e87a5a; }
     .spell-list-level-hdr {
       font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
-      color: #2a5a6a; padding: 3px 0; margin: 6px 0 3px; border-bottom: 1px solid #0c2535;
+      color: var(--c-dim); padding: 3px 0; margin: 6px 0 3px; border-bottom: 1px solid var(--c-bd-dark);
     }
-    .spell-list-item { display: flex; align-items: center; gap: 5px; padding: 5px 2px; border-bottom: 1px solid #0c1e2a; }
+    .spell-list-item { display: flex; align-items: center; gap: 5px; padding: 5px 2px; border-bottom: 1px solid var(--c-well); }
     .spell-list-name { flex: 1; font-size: 0.82rem; color: #a8c8d8; }
     .spell-list-tags { display: flex; gap: 3px; align-items: center; flex-shrink: 0; }
     .spell-search-dropdown {
       position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
-      background: #0c1e2a; border: 1px solid #2a6a8a; border-top: none;
+      background: var(--c-well); border: 1px solid #2a6a8a; border-top: none;
       border-radius: 0 0 4px 4px; max-height: 220px; overflow-y: auto;
       box-shadow: 0 4px 16px rgba(0,0,0,0.6);
     }
     .spell-search-dropdown.hidden { display: none; }
     .spell-search-result {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 6px 8px; cursor: pointer; border-bottom: 1px solid #0c1520;
+      padding: 6px 8px; cursor: pointer; border-bottom: 1px solid var(--c-well);
       font-size: 0.78rem;
     }
-    .spell-search-result:hover { background: #1a3a4a; }
-    .spell-search-result-name { color: #c8dde8; }
-    .spell-search-result-meta { color: #4a8a9a; font-size: 0.68rem; flex-shrink: 0; margin-left: 8px; }
-    .spell-browse-filters { padding: 6px 0 10px; border-bottom: 1px solid #0c2535; margin-bottom: 8px; }
+    .spell-search-result:hover { background: var(--c-bd); }
+    .spell-search-result-name { color: var(--c-text); }
+    .spell-search-result-meta { color: var(--c-dim); font-size: 0.68rem; flex-shrink: 0; margin-left: 8px; }
+    .spell-browse-filters { padding: 6px 0 10px; border-bottom: 1px solid var(--c-bd-dark); margin-bottom: 8px; }
     .spell-browse-filter-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-bottom: 5px; }
-    .spell-browse-filter-label { font-size: 0.6rem; color: #2a5a6a; text-transform: uppercase; letter-spacing: 0.08em; width: 38px; flex-shrink: 0; }
-    .spell-browse-pill { font-size: 0.65rem; padding: 2px 7px; border-radius: 10px; border: 1px solid #1a3a4a; background: #071520; color: #6a9aaa; cursor: pointer; }
-    .spell-browse-pill:hover { border-color: #2a6a8a; color: #a8d8e8; }
-    .spell-browse-pill.active { background: #1a3a5a; border-color: #3a8aaa; color: #c8e8f8; font-weight: 600; }
-    .spell-browse-item { display: flex; align-items: center; gap: 5px; padding: 5px 4px; border-bottom: 1px solid #0c1e2a; cursor: pointer; border-radius: 3px; }
-    .spell-browse-item:hover { background: #0c1e2a; }
+    .spell-browse-filter-label { font-size: 0.6rem; color: var(--c-dim); text-transform: uppercase; letter-spacing: 0.08em; width: 38px; flex-shrink: 0; }
+    .spell-browse-pill { font-size: 0.65rem; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--c-bd); background: var(--c-header); color: var(--c-mid); cursor: pointer; }
+    .spell-browse-pill:hover { border-color: #2a6a8a; color: var(--c-head); }
+    .spell-browse-pill.active { background: #1a3a5a; border-color: #3a8aaa; color: var(--c-text); font-weight: 600; }
+    .spell-browse-item { display: flex; align-items: center; gap: 5px; padding: 5px 4px; border-bottom: 1px solid var(--c-well); cursor: pointer; border-radius: 3px; }
+    .spell-browse-item:hover { background: var(--c-well); }
     .spell-browse-name { flex: 1; font-size: 0.82rem; color: #a8c8d8; }
-    .spell-browse-meta { font-size: 0.65rem; color: #4a7a8a; flex-shrink: 0; }
-    .spell-browse-count { font-size: 0.63rem; color: #2a5a6a; margin-bottom: 5px; font-style: italic; }
-    .spell-browse-filter-section { padding: 10px 14px 6px; border-bottom: 1px solid #0c2535; flex-shrink: 0; }
+    .spell-browse-meta { font-size: 0.65rem; color: var(--c-dim); flex-shrink: 0; }
+    .spell-browse-count { font-size: 0.63rem; color: var(--c-dim); margin-bottom: 5px; font-style: italic; }
+    .spell-browse-filter-section { padding: 10px 14px 6px; border-bottom: 1px solid var(--c-bd-dark); flex-shrink: 0; }
     .spell-browse-level-hdr {
       font-size: 0.76rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em;
       color: #5ac8d8; padding: 6px 6px 5px 9px; margin: 14px 0 3px;
@@ -842,8 +859,8 @@
       width: 680px;
       height: 860px;
       flex-direction: column;
-      background: #040b12;
-      border: 1px solid #1a3a4a;
+      background: var(--c-modal);
+      border: 1px solid var(--c-bd);
       border-radius: 6px 6px 3px 3px;
       overflow: hidden;
       box-shadow: 0 8px 40px rgba(0,0,0,0.7);
@@ -859,8 +876,8 @@
       justify-content: space-between;
       padding: 0 10px;
       height: 38px;
-      background: #071824;
-      border-bottom: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border-bottom: 1px solid var(--c-bd);
       cursor: grab;
       user-select: none;
       flex-shrink: 0;
@@ -871,15 +888,15 @@
       font-size: 0.62rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #4a8a9a;
+      color: var(--c-dim);
     }
     #lore-subheader {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 6px 10px;
-      border-bottom: 1px solid #0c2535;
-      background: #050f1a;
+      border-bottom: 1px solid var(--c-bd-dark);
+      background: var(--c-modal);
       flex-shrink: 0;
     }
     #lore-content {
@@ -891,7 +908,7 @@
     }
     #lore-empty {
       font-size: 0.8rem;
-      color: #2a5a6a;
+      color: var(--c-dim);
       text-align: center;
       margin-top: 40px;
       font-style: italic;
@@ -901,7 +918,7 @@
       background: transparent;
       border: none;
       outline: none;
-      color: #8ab8c8;
+      color: var(--c-mid);
       font-size: 0.82rem;
       line-height: 1.7;
       resize: none;
@@ -912,14 +929,14 @@
       display: flex;
       gap: 8px;
       padding: 8px 10px;
-      border-top: 1px solid #0c2535;
-      background: #050f1a;
+      border-top: 1px solid var(--c-bd-dark);
+      background: var(--c-modal);
       flex-shrink: 0;
     }
     .stat-panel-btn {
       background: none;
-      border: 1px solid #1a3a4a;
-      color: #4a7a8a;
+      border: 1px solid var(--c-bd);
+      color: var(--c-dim);
       width: 20px;
       height: 20px;
       font-size: 0.75rem;
@@ -932,7 +949,7 @@
       line-height: 1;
       padding: 0;
     }
-    .stat-panel-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .stat-panel-btn:hover { border-color: var(--c-vivid); color: var(--c-vivid); }
 
     /* === ACTIVE SPELLS === */
     .active-spell {
@@ -940,19 +957,19 @@
       padding: 4px 6px;
       border-radius: 4px;
       font-size: 0.72rem;
-      background: #0a1a24;
+      background: var(--c-well);
       margin-bottom: 4px;
-      border: 1px solid #0f2535;
+      border: 1px solid var(--c-bd-dark);
     }
     .active-spell-header {
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .spell-name { flex: 1; color: #c8dde8; }
+    .spell-name { flex: 1; color: var(--c-text); }
     .power-conc-toggle {
       font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; cursor: pointer;
-      border: 1px solid #1a3a4a; background: none; color: #4a7a8a;
+      border: 1px solid var(--c-bd); background: none; color: var(--c-dim);
     }
     .power-conc-toggle.active { border-color: #FF4DA6; color: #FF4DA6; }
     .conc-badge {
@@ -968,7 +985,7 @@
     .spell-remove {
       background: none;
       border: none;
-      color: #3a5a6a;
+      color: var(--c-dim);
       cursor: pointer;
       font-size: 0.75rem;
       padding: 0 2px;
@@ -977,7 +994,7 @@
     .spell-remove:hover { color: #d04040; }
     .no-spells {
       font-size: 0.65rem;
-      color: #1e3a4a;
+      color: var(--c-bd);
       font-style: italic;
       text-align: center;
       padding: 6px 0 2px;
@@ -986,10 +1003,10 @@
     /* === EDITABLE STATS === */
     .editable-stat {
       cursor: pointer;
-      border-bottom: 1px dashed #3a5a6a;
+      border-bottom: 1px dashed var(--c-dim);
       transition: color 0.15s, border-color 0.15s;
     }
-    .editable-stat:hover { color: #7ad4e8; border-bottom-color: #7ad4e8; }
+    .editable-stat:hover { color: var(--c-mid); border-bottom-color: var(--c-mid); }
 
     /* === SENSES PANEL === */
     .senses-grid { margin-top: 8px; }
@@ -1003,7 +1020,7 @@
     }
     .imm-row-label {
       font-size: 0.62rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
       text-transform: uppercase;
       letter-spacing: 0.05em;
       padding-top: 2px;
@@ -1017,13 +1034,13 @@
     }
     .imm-tag.imm { background: #3a1a1a; color: #e87070; border: 1px solid #7a3030; }
     .imm-tag.res { background: #1a2a3a; color: #70aae8; border: 1px solid #305070; }
-    .imm-none { font-size: 0.62rem; color: #3a5a6a; font-style: italic; }
+    .imm-none { font-size: 0.62rem; color: var(--c-dim); font-style: italic; }
     .imm-picker {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2px 8px;
       background: #0e1e28;
-      border: 1px solid #1e3a4a;
+      border: 1px solid var(--c-bd);
       border-radius: 4px;
       padding: 8px;
       margin-top: 4px;
@@ -1031,11 +1048,11 @@
     }
     .imm-col-head {
       font-size: 0.6rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
       text-transform: uppercase;
       letter-spacing: 0.06em;
       padding-bottom: 4px;
-      border-bottom: 1px solid #1e3a4a;
+      border-bottom: 1px solid var(--c-bd);
       margin-bottom: 2px;
     }
     .imm-check {
@@ -1050,7 +1067,7 @@
       transition: background 0.1s;
     }
     .imm-check:hover { background: #1a3040; }
-    .imm-check input { accent-color: #4a9ab0; cursor: pointer; }
+    .imm-check input { accent-color: var(--c-dim); cursor: pointer; }
     .imm-check.active-imm { color: #e87070; }
     .imm-check.active-res { color: #70aae8; }
 
@@ -1063,9 +1080,9 @@
     }
     .cond-add-row select {
       flex: 1;
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #c8dde8;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-text);
       padding: 4px 6px;
       border-radius: 4px;
       font-size: 0.75rem;
@@ -1073,23 +1090,23 @@
       appearance: none;
       cursor: pointer;
     }
-    .cond-add-row select:focus { outline: none; border-color: #2ab8d0; }
+    .cond-add-row select:focus { outline: none; border-color: var(--c-vivid); }
     .cond-dur-input {
       width: 44px;
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #c8dde8;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-text);
       padding: 4px 6px;
       border-radius: 4px;
       font-size: 0.75rem;
       font-family: 'Inter', sans-serif;
       text-align: center;
     }
-    .cond-dur-input:focus { outline: none; border-color: #2ab8d0; }
+    .cond-dur-input:focus { outline: none; border-color: var(--c-vivid); }
     .btn-cond-add {
-      background: #071824;
-      border: 1px solid #1a4a5a;
-      color: #2ab8d0;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
+      color: var(--c-vivid);
       padding: 4px 10px;
       border-radius: 4px;
       font-size: 0.75rem;
@@ -1098,7 +1115,7 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    .btn-cond-add:hover { background: #0a2535; border-color: #2ab8d0; }
+    .btn-cond-add:hover { background: var(--c-well); border-color: var(--c-vivid); }
     .cond-custom-row {
       display: none;
       gap: 4px;
@@ -1112,27 +1129,27 @@
       gap: 5px;
       padding: 3px 6px;
       border-radius: 4px;
-      background: #0a1a24;
-      border: 1px solid #0f2535;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd-dark);
       margin-bottom: 3px;
       font-size: 0.72rem;
     }
     .cond-name {
       flex: 1;
-      color: #c8dde8;
+      color: var(--c-text);
       font-weight: 500;
     }
     .cond-dur {
       font-size: 0.65rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
       min-width: 28px;
       text-align: right;
     }
-    .cond-dur.permanent { color: #2ab8d0; }
+    .cond-dur.permanent { color: var(--c-vivid); }
     .cond-remove {
       background: none;
       border: none;
-      color: #3a5a6a;
+      color: var(--c-dim);
       cursor: pointer;
       font-size: 0.72rem;
       padding: 0 2px;
@@ -1142,7 +1159,7 @@
     .cond-remove:hover { color: #d04040; }
     .no-conds {
       font-size: 0.65rem;
-      color: #1e3a4a;
+      color: var(--c-bd);
       font-style: italic;
       text-align: center;
       padding: 4px 0 2px;
@@ -1150,10 +1167,10 @@
     .btn-next-turn {
       width: 100%;
       padding: 6px;
-      background: #071824;
-      border: 1px solid #1a4a5a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 4px;
-      color: #4a7a8a;
+      color: var(--c-dim);
       font-family: 'Inter', sans-serif;
       font-size: 0.72rem;
       cursor: pointer;
@@ -1162,7 +1179,7 @@
       transition: all 0.15s;
       margin-top: 2px;
     }
-    .btn-next-turn:hover { background: #0a2535; border-color: #2ab8d0; color: #2ab8d0; }
+    .btn-next-turn:hover { background: var(--c-well); border-color: var(--c-vivid); color: var(--c-vivid); }
 
     /* === COLUMN DRAG HANDLES === */
     .col-handle {
@@ -1182,17 +1199,17 @@
       top: 0;
       width: 2px;
       height: 100%;
-      background: #0f2535;
+      background: var(--c-bd-dark);
       transition: background 0.15s;
     }
     .col-handle:hover::after,
-    .col-handle.dragging::after { background: #2ab8d0; }
+    .col-handle.dragging::after { background: var(--c-vivid); }
 
     /* === SECTION EDIT MODE === */
     .edit-pencil-btn {
       background: none;
       border: none;
-      color: #2a5a6a;
+      color: var(--c-dim);
       cursor: pointer;
       font-size: 0.7rem;
       padding: 0 4px;
@@ -1200,7 +1217,7 @@
       transition: opacity 0.15s, color 0.15s;
       line-height: 1;
     }
-    .edit-pencil-btn:hover { opacity: 1; color: #2ab8d0; }
+    .edit-pencil-btn:hover { opacity: 1; color: var(--c-vivid); }
     .section-edit-controls { display: flex; gap: 4px; align-items: center; }
     .edit-save-btn {
       font-family: 'Inter', sans-serif;
@@ -1226,10 +1243,10 @@
     }
     .edit-cancel-btn:hover { border-color: #c04040; color: #c04040; }
     .edit-input-sm {
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      border-bottom-color: #2ab8d0;
-      color: #c8dde8;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      border-bottom-color: var(--c-vivid);
+      color: var(--c-text);
       font-family: 'Inter', sans-serif;
       font-size: 0.85rem;
       padding: 1px 4px;
@@ -1237,15 +1254,15 @@
       width: 54px;
       text-align: center;
     }
-    .edit-input-sm:focus { outline: none; border-color: #2ab8d0; }
+    .edit-input-sm:focus { outline: none; border-color: var(--c-vivid); }
     .edit-input-wide { width: 110px; text-align: left; }
 
     /* === DICE ROLLER === */
     .dice-dropdown-wrap { position: relative; }
     .dice-dropdown-btn {
       background: none;
-      border: 1px solid #1a3a4a;
-      color: #a8d8e8;
+      border: 1px solid var(--c-bd);
+      color: var(--c-head);
       font-family: 'Inter', sans-serif;
       font-size: 0.75rem;
       padding: 5px 12px;
@@ -1254,15 +1271,15 @@
       transition: border-color 0.15s, color 0.15s;
       letter-spacing: 0.04em;
     }
-    .dice-dropdown-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .dice-dropdown-btn:hover { border-color: var(--c-vivid); color: var(--c-vivid); }
     .dice-panel {
       position: absolute;
       top: calc(100% + 4px);
       left: 0;
       z-index: 200;
       min-width: 260px;
-      background: #071824;
-      border: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 5px;
       padding: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
@@ -1276,9 +1293,9 @@
       margin-bottom: 10px;
     }
     .btn-die {
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #a8d8e8;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-head);
       font-family: 'Inter', sans-serif;
       font-size: 0.7rem;
       padding: 5px 8px;
@@ -1287,19 +1304,19 @@
       transition: border-color 0.15s, color 0.15s, background 0.15s;
       letter-spacing: 0.03em;
     }
-    .btn-die:hover { border-color: #2ab8d0; color: #2ab8d0; background: #0d2535; }
+    .btn-die:hover { border-color: var(--c-vivid); color: var(--c-vivid); background: var(--c-well); }
     .dice-controls-row {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-bottom: 10px;
       font-size: 0.7rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
     }
     .dice-controls-row input {
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #c8dde8;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-text);
       font-family: 'Inter', sans-serif;
       font-size: 0.7rem;
       padding: 3px 6px;
@@ -1312,7 +1329,7 @@
       font-size: 0.6rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #4a7a8a;
+      color: var(--c-dim);
       margin-bottom: 2px;
     }
     .dice-result-value {
@@ -1323,18 +1340,18 @@
     }
     .dice-result-detail {
       font-size: 0.65rem;
-      color: #4a7a8a;
+      color: var(--c-dim);
       margin-top: 2px;
     }
-    .dice-history { border-top: 1px solid #0f2535; padding-top: 8px; margin-top: 4px; }
+    .dice-history { border-top: 1px solid var(--c-bd-dark); padding-top: 8px; margin-top: 4px; }
     .dice-history-item {
       display: flex;
       justify-content: space-between;
       font-size: 0.65rem;
       padding: 2px 0;
-      color: #3a6a7a;
+      color: var(--c-dim);
     }
-    .dice-hist-expr { color: #4a7a8a; }
+    .dice-hist-expr { color: var(--c-dim); }
     .dice-hist-val { color: #2a8a8a; }
 
     /* === MATERIALS DROPDOWN === */
@@ -1343,8 +1360,8 @@
       position: absolute;
       top: calc(100% + 4px);
       left: 0;
-      background: #071824;
-      border: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 4px;
       min-width: 180px;
       z-index: 100;
@@ -1358,8 +1375,8 @@
       padding: 7px 12px;
       background: none;
       border: none;
-      border-bottom: 1px solid #0f2535;
-      color: #8ab8c8;
+      border-bottom: 1px solid var(--c-bd-dark);
+      color: var(--c-mid);
       cursor: pointer;
       font-size: 0.8rem;
       font-family: 'Inter', sans-serif;
@@ -1368,9 +1385,9 @@
       text-overflow: ellipsis;
     }
     .materials-menu button:last-child { border-bottom: none; }
-    .materials-menu button:hover { background: #0f2535; color: #a8d8e8; }
-    .materials-menu button.mat-active { color: #2ab8d0; }
-    .materials-menu .mat-divider { border: none; border-top: 1px solid #0f2535; margin: 2px 0; }
+    .materials-menu button:hover { background: var(--c-bd-dark); color: var(--c-head); }
+    .materials-menu button.mat-active { color: var(--c-vivid); }
+    .materials-menu .mat-divider { border: none; border-top: 1px solid var(--c-bd-dark); margin: 2px 0; }
 
     /* === HELP MODAL === */
     .help-overlay {
@@ -1384,8 +1401,8 @@
     }
     .help-overlay.hidden { display: none; }
     .sr-modal {
-      background: #071824;
-      border: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 8px;
       padding: 24px;
       max-width: 360px;
@@ -1394,7 +1411,7 @@
     }
     .sr-dice-count {
       font-size: 0.85rem;
-      color: #8ab8c8;
+      color: var(--c-mid);
       margin-bottom: 14px;
     }
     .sr-picker {
@@ -1406,14 +1423,14 @@
     .sr-picker-val {
       font-size: 1.3rem;
       font-weight: 700;
-      color: #a8d8e8;
+      color: var(--c-head);
       min-width: 28px;
       text-align: center;
     }
     .sr-roll-list {
       margin-bottom: 14px;
       font-size: 0.82rem;
-      color: #8ab8c8;
+      color: var(--c-mid);
       line-height: 2;
     }
     .sr-roll-row {
@@ -1423,7 +1440,7 @@
     .sr-total {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #a8d8e8;
+      color: var(--c-head);
       margin-bottom: 16px;
     }
     .sr-actions {
@@ -1431,8 +1448,8 @@
       gap: 8px;
     }
     .help-modal {
-      background: #071824;
-      border: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 8px;
       padding: 24px;
       max-width: 480px;
@@ -1444,7 +1461,7 @@
     .help-modal h2 {
       font-family: 'Cinzel', serif;
       font-size: 1rem;
-      color: #a8d8e8;
+      color: var(--c-head);
       margin-bottom: 16px;
       padding-right: 24px;
     }
@@ -1452,12 +1469,12 @@
       font-size: 0.72rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #4a8a9a;
+      color: var(--c-dim);
       margin: 14px 0 4px;
     }
     .help-modal p {
       font-size: 0.8rem;
-      color: #8ab8c8;
+      color: var(--c-mid);
       line-height: 1.5;
     }
     .help-close {
@@ -1466,22 +1483,22 @@
       right: 14px;
       background: none;
       border: none;
-      color: #4a7a8a;
+      color: var(--c-dim);
       font-size: 1.1rem;
       cursor: pointer;
     }
-    .help-close:hover { color: #a8d8e8; }
+    .help-close:hover { color: var(--c-head); }
     .btn-help {
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #5a8a9a;
+      background: var(--c-well);
+      border: 1px solid var(--c-bd);
+      color: var(--c-mid);
       border-radius: 4px;
       padding: 5px 10px;
       cursor: pointer;
       font-size: 0.8rem;
       font-family: 'Inter', sans-serif;
     }
-    .btn-help:hover { border-color: #4a8a9a; color: #a8d8e8; }
+    .btn-help:hover { border-color: var(--c-dim); color: var(--c-head); }
     .btn-undo {
       background: none;
       border: 1px solid #555;
@@ -1492,12 +1509,12 @@
       cursor: pointer;
       margin-left: 4px;
     }
-    .btn-undo:hover:not(:disabled) { border-color: #4a8a9a; color: #a8d8e8; }
+    .btn-undo:hover:not(:disabled) { border-color: var(--c-dim); color: var(--c-head); }
     .btn-undo:disabled { opacity: 0.35; cursor: default; }
     .btn-rarity {
       background: none;
-      border: 1px solid #1a3a4a;
-      color: #4a7a8a;
+      border: 1px solid var(--c-bd);
+      color: var(--c-dim);
       border-radius: 3px;
       padding: 2px 6px;
       font-size: 0.65rem;
@@ -1505,10 +1522,10 @@
       letter-spacing: 0.03em;
       transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
     }
-    .btn-rarity:hover { border-color: #2a5a6a; color: #8ab8c8; }
+    .btn-rarity:hover { border-color: var(--c-dim); color: var(--c-mid); }
     .feat-modal {
-      background: #071824;
-      border: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 8px;
       max-width: 540px;
       width: 92%;
@@ -1519,13 +1536,13 @@
     }
     .feat-modal-header {
       padding: 18px 18px 12px;
-      border-bottom: 1px solid #0f2535;
+      border-bottom: 1px solid var(--c-bd-dark);
       flex-shrink: 0;
     }
     .feat-modal-title {
       font-family: 'Cinzel', serif;
       font-size: 1.1rem;
-      color: #a8d8e8;
+      color: var(--c-head);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1533,9 +1550,9 @@
     }
     .feat-modal-search {
       width: 100%;
-      background: #0f2535;
-      border: 1px solid #1a3a4a;
-      color: #8ab8c8;
+      background: var(--c-bd-dark);
+      border: 1px solid var(--c-bd);
+      color: var(--c-mid);
       padding: 7px 10px;
       border-radius: 4px;
       font-size: 0.88rem;
@@ -1545,27 +1562,27 @@
     .feat-cat-row { display: flex; flex-wrap: wrap; gap: 5px; }
     .feat-cat-btn {
       background: none;
-      border: 1px solid #1a3a4a;
-      color: #4a7a8a;
+      border: 1px solid var(--c-bd);
+      color: var(--c-dim);
       border-radius: 3px;
       padding: 3px 10px;
       font-size: 0.78rem;
       cursor: pointer;
     }
-    .feat-cat-btn.active { border-color: #2a8a9a; color: #2a8a9a; background: #0a2535; }
+    .feat-cat-btn.active { border-color: var(--c-dim); color: var(--c-dim); background: var(--c-well); }
     .feat-modal-body { flex: 1; overflow-y: auto; padding: 4px 18px; }
     .feat-pick-row {
       display: flex;
       align-items: center;
       gap: 10px;
       padding: 7px 0;
-      border-bottom: 1px solid #0a1825;
+      border-bottom: 1px solid var(--c-well);
     }
-    .feat-pick-name { flex: 1; font-size: 0.88rem; color: #8ab8c8; }
-    .feat-pick-cat { font-size: 0.72rem; color: #3a6a7a; letter-spacing: 0.04em; text-transform: uppercase; }
+    .feat-pick-name { flex: 1; font-size: 0.88rem; color: var(--c-mid); }
+    .feat-pick-cat { font-size: 0.72rem; color: var(--c-dim); letter-spacing: 0.04em; text-transform: uppercase; }
     .feat-modal-footer {
       padding: 10px 16px;
-      border-top: 1px solid #0f2535;
+      border-top: 1px solid var(--c-bd-dark);
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
@@ -1579,8 +1596,8 @@
       position: absolute;
       top: calc(100% + 4px);
       left: 0;
-      background: #071824;
-      border: 1px solid #1a3a4a;
+      background: var(--c-header);
+      border: 1px solid var(--c-bd);
       border-radius: 4px;
       width: 300px;
       max-height: 420px;
@@ -1591,18 +1608,18 @@
     .conditions-panel.hidden { display: none; }
     .condition-entry {
       padding: 8px 12px;
-      border-bottom: 1px solid #0f2535;
+      border-bottom: 1px solid var(--c-bd-dark);
     }
     .condition-entry:last-child { border-bottom: none; }
     .condition-name {
       font-size: 0.8rem;
       font-weight: 600;
-      color: #a8d8e8;
+      color: var(--c-head);
       margin-bottom: 3px;
     }
     .condition-effect {
       font-size: 0.72rem;
-      color: #6a9aaa;
+      color: var(--c-mid);
       line-height: 1.45;
     }
 
@@ -1620,7 +1637,7 @@
     html.cb-trit .prof-pip.prof { background: #c82060; border-color: #c82060; }
     html.cb-trit .prof-pip.expertise {
       background: #c82060; border-color: #c82060;
-      box-shadow: 0 0 0 2px #050d14, 0 0 0 4px #c82060;
+      box-shadow: 0 0 0 2px var(--c-base), 0 0 0 4px #c82060;
     }
 
     /* === SETTINGS MODAL === */
@@ -1630,66 +1647,79 @@
       font-size: 0.68rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: #4a7a8a;
+      color: var(--c-dim);
       margin-bottom: 14px;
       padding-bottom: 6px;
-      border-bottom: 1px solid #0f2535;
+      border-bottom: 1px solid var(--c-bd-dark);
     }
-    .settings-field-label { font-size: 0.75rem; color: #7aabb8; margin-bottom: 10px; }
+    .settings-field-label { font-size: 0.75rem; color: var(--c-mid); margin-bottom: 10px; }
     .cb-option {
       display: flex;
       align-items: flex-start;
       gap: 10px;
       padding: 10px 12px;
-      border: 1px solid #0f2535;
+      border: 1px solid var(--c-bd-dark);
       border-radius: 6px;
       margin-bottom: 6px;
       cursor: pointer;
       transition: border-color 0.15s;
     }
-    .cb-option:hover { border-color: #1a4a5a; }
-    .cb-option input[type="radio"] { margin-top: 3px; flex-shrink: 0; accent-color: #2ab8d0; cursor: pointer; }
+    .cb-option:hover { border-color: var(--c-bd); }
+    .cb-option input[type="radio"] { margin-top: 3px; flex-shrink: 0; accent-color: var(--c-vivid); cursor: pointer; }
     .cb-option-text { display: flex; flex-direction: column; gap: 3px; }
-    .cb-option-name { font-size: 0.82rem; color: #c8dde8; font-weight: 500; }
-    .cb-option-desc { font-size: 0.7rem; color: #4a7a8a; line-height: 1.4; }
+    .cb-option-name { font-size: 0.82rem; color: var(--c-text); font-weight: 500; }
+    .cb-option-desc { font-size: 0.7rem; color: var(--c-dim); line-height: 1.4; }
     /* Skill flat-bonus pip — class replaces inline style so colorblind CSS can override it */
     .prof-pip.skill-bonus-active { background: #a03030; border-color: #c04040; }
     /* Skill flat-bonus value label (the +N next to the total) */
     .skill-bonus-val { font-size: 0.65rem; color: #c8904a; margin-left: 2px; }
     html.cb-trit .skill-bonus-val { color: #d060c0; } /* amber→magenta for trit */
     /* === CLASS FEATURES (Settings) === */
-    .cf-class-header { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #2a6a7a; padding: 10px 0 4px; border-bottom: 1px solid #1a3a4a; margin-bottom: 2px; }
+    .cf-class-header { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-dim); padding: 10px 0 4px; border-bottom: 1px solid var(--c-bd); margin-bottom: 2px; }
     .cf-class-header:first-child { padding-top: 2px; }
     .cf-section { display: flex; flex-direction: column; }
-    .cf-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #0a1e2a; }
+    .cf-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--c-well); }
     .cf-row:last-child { border-bottom: none; }
     .cf-toggle { position: relative; display: inline-block; width: 34px; height: 18px; flex-shrink: 0; }
     .cf-toggle input { opacity: 0; width: 0; height: 0; }
-    .cf-toggle-slider { position: absolute; inset: 0; background: #0a1e2a; border: 1px solid #1a3a4a; border-radius: 18px; cursor: pointer; transition: 0.2s; }
-    .cf-toggle-slider::before { content: ''; position: absolute; width: 12px; height: 12px; left: 2px; top: 2px; border-radius: 50%; background: #2a4a5a; transition: 0.2s; }
-    .cf-toggle input:checked + .cf-toggle-slider { background: #0d2535; border-color: #2ab8d0; }
-    .cf-toggle input:checked + .cf-toggle-slider::before { background: #2ab8d0; transform: translateX(16px); }
+    .cf-toggle-slider { position: absolute; inset: 0; background: var(--c-well); border: 1px solid var(--c-bd); border-radius: 18px; cursor: pointer; transition: 0.2s; }
+    .cf-toggle-slider::before { content: ''; position: absolute; width: 12px; height: 12px; left: 2px; top: 2px; border-radius: 50%; background: var(--c-dim); transition: 0.2s; }
+    .cf-toggle input:checked + .cf-toggle-slider { background: var(--c-well); border-color: var(--c-vivid); }
+    .cf-toggle input:checked + .cf-toggle-slider::before { background: var(--c-vivid); transform: translateX(16px); }
     .cf-label { flex: 1; min-width: 0; }
-    .cf-label-name { font-size: 0.82rem; color: #c8dde8; font-weight: 500; }
-    .cf-label-hint { font-size: 0.67rem; color: #4a7a8a; margin-top: 2px; }
-    .cf-config { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #4a7a8a; white-space: nowrap; }
-    .cf-config input[type="number"] { width: 42px; background: #0a1e2a; border: 1px solid #1a3a4a; color: #8ab8c8; padding: 2px 4px; border-radius: 3px; font-size: 0.75rem; text-align: center; }
+    .cf-label-name { font-size: 0.82rem; color: var(--c-text); font-weight: 500; }
+    .cf-label-hint { font-size: 0.67rem; color: var(--c-dim); margin-top: 2px; }
+    .cf-config { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--c-dim); white-space: nowrap; }
+    .cf-config input[type="number"] { width: 42px; background: var(--c-well); border: 1px solid var(--c-bd); color: var(--c-mid); padding: 2px 4px; border-radius: 3px; font-size: 0.75rem; text-align: center; }
     /* === CLASS RESOURCES (Panel) === */
     .cr-section-body { padding: 2px 0 4px; }
     .cr-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; }
-    .cr-label { font-size: 0.75rem; color: #6a9aaa; min-width: 108px; }
+    .cr-label { font-size: 0.75rem; color: var(--c-mid); min-width: 108px; }
     .cr-pips { display: flex; gap: 3px; flex-wrap: wrap; }
     .cr-pool { display: flex; align-items: center; gap: 5px; }
-    .cr-pool-val { font-size: 0.92rem; font-weight: 600; color: #a8d8e8; min-width: 22px; text-align: center; }
-    .cr-pool-max { font-size: 0.72rem; color: #3a6a7a; }
-    .cr-pool-btn { background: #0a1e2a; border: 1px solid #1a3a4a; color: #6a9aaa; width: 22px; height: 22px; border-radius: 3px; cursor: pointer; font-size: 0.9rem; line-height: 1; }
-    .cr-pool-btn:hover { border-color: #2ab8d0; color: #a8d8e8; }
-    .cr-rest-tag { font-size: 0.62rem; color: #2a5a6a; border: 1px solid #112a36; border-radius: 3px; padding: 1px 4px; }
+    .cr-pool-val { font-size: 0.92rem; font-weight: 600; color: var(--c-head); min-width: 22px; text-align: center; }
+    .cr-pool-max { font-size: 0.72rem; color: var(--c-dim); }
+    .cr-pool-btn { background: var(--c-well); border: 1px solid var(--c-bd); color: var(--c-mid); width: 22px; height: 22px; border-radius: 3px; cursor: pointer; font-size: 0.9rem; line-height: 1; }
+    .cr-pool-btn:hover { border-color: var(--c-vivid); color: var(--c-head); }
+    .cr-rest-tag { font-size: 0.62rem; color: var(--c-dim); border: 1px solid var(--c-bd); border-radius: 3px; padding: 1px 4px; }
     .cr-arcane-btn { font-size: 0.73rem; padding: 2px 10px; border-radius: 3px; cursor: pointer; border: 1px solid; }
-    .cr-arcane-btn.fresh { background: #0a1e2a; color: #2ab8d0; border-color: #1a5a6a; }
-    .cr-arcane-btn.fresh:hover { background: #0d2535; }
+    .cr-arcane-btn.fresh { background: var(--c-well); color: var(--c-vivid); border-color: var(--c-bd); }
+    .cr-arcane-btn.fresh:hover { background: var(--c-well); }
     .cr-arcane-btn.spent { background: #1a0a0a; color: #5a3a3a; border-color: #3a1a1a; }
     .cr-arcane-btn.spent:hover { background: #200f0f; }
+
+    /* === COMPACT MODE === */
+    body.compact .panel         { padding: 8px; }
+    body.compact .panel-title   { margin-bottom: 6px; }
+    body.compact .divider       { margin: 8px 0; }
+    body.compact .card          { padding: 5px 8px; }
+    body.compact .btn-sm        { padding: 1px 6px; font-size: 0.72rem; }
+    body.compact .pip           { width: 13px; height: 13px; }
+    body.compact .prof-pip      { width: 9px; height: 9px; }
+    body.compact .section-header { margin-bottom: 4px; }
+
+    /* === FONT SIZE BUTTON ACTIVE STATE === */
+    .btn-sm.active { background: var(--c-well); border-color: var(--c-vivid); color: var(--c-vivid); }
   </style>
 </head>
 <body>
@@ -1746,7 +1776,7 @@
     <p>Drag a PDF or image onto the page to load a stat block. Drag the viewer panel to reposition it.</p>
     <h3>Saving</h3>
     <p>Everything saves automatically to this browser. Use Export / Import (in the Rests menu) to back up or transfer your character.</p>
-    <p style="margin-top:16px;font-size:0.72rem;color:#2a4a5a;border-top:1px solid #0f2535;padding-top:12px;">Built for D&D 5e (2016 legacy rules). Game rules and conditions sourced from the SRD 5.1, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" style="color:#4a7a8a;">CC-BY 4.0</a> — Wizards of the Coast.</p>
+    <p style="margin-top:16px;font-size:0.72rem;color:var(--c-dim);border-top:1px solid var(--c-bd-dark);padding-top:12px;">Built for D&D 5e (2016 legacy rules). Game rules and conditions sourced from the SRD 5.1, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" style="color:var(--c-dim);">CC-BY 4.0</a> — Wizards of the Coast.</p>
   </div>
 </div>
 <div id="settings-overlay" class="help-overlay hidden" onclick="closeSettingsOnBackdrop(event)">
@@ -1778,10 +1808,61 @@
         </span>
       </label>
     </div>
+
+    <!-- APPEARANCE -->
+    <div class="settings-section">
+      <div class="settings-section-title">Appearance</div>
+
+      <div class="settings-field-label">Accent Color</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <input type="range" id="accent-hue-slider" min="0" max="360" step="1"
+          oninput="applyAccentHue(this.value)"
+          style="flex:1;accent-color:var(--c-vivid);cursor:pointer;">
+        <div id="accent-swatch"
+          style="width:28px;height:28px;border-radius:50%;border:2px solid var(--c-bd);flex-shrink:0;"></div>
+      </div>
+
+      <div class="settings-field-label">Font Size</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn-sm" id="fs-sm" onclick="setFontSize('sm')">Small</button>
+        <button class="btn-sm" id="fs-md" onclick="setFontSize('md')">Medium</button>
+        <button class="btn-sm" id="fs-lg" onclick="setFontSize('lg')">Large</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div class="settings-field-label" style="margin:0;">Compact Mode</div>
+        <label class="cr-toggle" style="margin:0;">
+          <input type="checkbox" id="compact-toggle" onchange="applyCompact(this.checked)">
+          <span class="cr-toggle-slider"></span>
+        </label>
+      </div>
+      <div style="font-size:0.72rem;color:var(--c-dim);margin-bottom:4px;">Tightens spacing throughout — good for smaller screens.</div>
+    </div>
+
+    <!-- BEHAVIOR -->
+    <div class="settings-section">
+      <div class="settings-section-title">Behavior</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div class="settings-field-label" style="margin:0;">Confirm before Long Rest</div>
+        <label class="cr-toggle" style="margin:0;">
+          <input type="checkbox" id="confirm-lr-toggle" onchange="setConfirmLongRest(this.checked)">
+          <span class="cr-toggle-slider"></span>
+        </label>
+      </div>
+      <div style="font-size:0.72rem;color:var(--c-dim);margin-bottom:4px;">Shows a prompt before Long Resting to prevent accidental clicks.</div>
+    </div>
+
+    <!-- PANEL VISIBILITY -->
+    <div class="settings-section">
+      <div class="settings-section-title">Panel Visibility</div>
+      <div class="settings-field-label">Hide sections you don't use. Re-enable here any time.</div>
+      <div id="visibility-toggles"></div>
+    </div>
+
     <div class="settings-section">
       <div class="settings-section-title" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="toggleCFSectionOpen()">
         Class Features
-        <span id="cf-chevron" style="font-size:0.85rem;color:#4a7a8a;">▸</span>
+        <span id="cf-chevron" style="font-size:0.85rem;color:var(--c-dim);">▸</span>
       </div>
       <div id="cf-section-wrap" style="display:none;">
         <div class="settings-field-label">Enable resource blocks for class abilities. Set max values here; current uses are tracked live in your character panel.</div>
@@ -1793,7 +1874,7 @@
 <div id="short-rest-overlay" class="help-overlay hidden" onclick="srCloseOnBackdrop(event)">
   <div class="sr-modal">
     <button class="help-close" onclick="closeShortRest()">✕</button>
-    <h2 style="font-family:'Cinzel',serif;font-size:1rem;color:#a8d8e8;margin-bottom:16px;">Short Rest</h2>
+    <h2 style="font-family:'Cinzel',serif;font-size:1rem;color:var(--c-head);margin-bottom:16px;">Short Rest</h2>
     <div id="sr-body"></div>
   </div>
 </div>
@@ -2039,6 +2120,11 @@
   const SETTINGS_KEY = '5e_tracker_settings_v1';
   const SETTINGS_DEFAULTS = {
     colorMode: 'normal',
+    accentHue: 195,
+    fontSize: 'md',
+    compact: false,
+    confirmLongRest: true,
+    hiddenSections: [],
     classFeatures: {
       bardicInspiration: { enabled: false, maxUses: 3,  dieType: 'd6'  },
       channelDivinity:   { enabled: false, maxUses: 1                   },
@@ -2076,7 +2162,120 @@
     saveSettings();
   }
   function setColorMode(mode) { applyColorMode(mode); render(); }
+
+  function applyAccentHue(hue) {
+    document.documentElement.style.setProperty('--h', hue);
+    settings.accentHue = Number(hue);
+    saveSettings();
+    updateAccentSwatch();
+  }
+  function applyFontSize(size) {
+    const zoomMap = { sm: 0.8, md: 0.9, lg: 1.05 };
+    document.documentElement.style.zoom = zoomMap[size] ?? 0.9;
+    settings.fontSize = size;
+    saveSettings();
+  }
+  function applyCompact(bool) {
+    document.body.classList.toggle('compact', !!bool);
+    settings.compact = !!bool;
+    saveSettings();
+  }
+  function applyVisibility() {
+    const sectionMap = {
+      status:    'status-section',
+      attacks:   'attacks-section-wrap',
+      spells:    'slots-section',
+      inventory: 'inventory-wrap',
+      feats:     'feats-wrap',
+      skills:    'skills-wrap',
+    };
+    Object.values(sectionMap).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    });
+    (settings.hiddenSections || []).forEach(key => {
+      const el = document.getElementById(sectionMap[key]);
+      if (el) el.style.display = 'none';
+    });
+    // Smart dividers: hide <hr class="divider"> with no visible content on one side
+    ['panel-resources', 'panel-right'].forEach(panelId => {
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      const children = [...panel.children];
+      children.forEach((child, i) => {
+        if (!child.classList.contains('divider')) return;
+        const prevVis = children.slice(0, i).reverse()
+          .find(c => !c.classList.contains('divider') && c.style.display !== 'none');
+        const nextVis = children.slice(i + 1)
+          .find(c => !c.classList.contains('divider') && c.style.display !== 'none');
+        child.style.display = (prevVis && nextVis) ? '' : 'none';
+      });
+    });
+  }
+  function toggleSectionVisibility(key) {
+    const arr = settings.hiddenSections || [];
+    const idx = arr.indexOf(key);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+    settings.hiddenSections = arr;
+    saveSettings();
+    applyVisibility();
+  }
+
+  function syncSettingsUI() {
+    const slider = document.getElementById('accent-hue-slider');
+    if (slider) slider.value = settings.accentHue ?? 195;
+    updateAccentSwatch();
+    ['sm', 'md', 'lg'].forEach(s => {
+      const btn = document.getElementById(`fs-${s}`);
+      if (btn) btn.classList.toggle('active', settings.fontSize === s);
+    });
+    const ct = document.getElementById('compact-toggle');
+    if (ct) ct.checked = !!settings.compact;
+    const lt = document.getElementById('confirm-lr-toggle');
+    if (lt) lt.checked = settings.confirmLongRest !== false;
+    renderVisibilityToggles();
+  }
+  function updateAccentSwatch() {
+    const swatch = document.getElementById('accent-swatch');
+    if (swatch) swatch.style.background = `hsl(${settings.accentHue ?? 195}, 66%, 49%)`;
+  }
+  function setFontSize(size) {
+    applyFontSize(size);
+    syncSettingsUI();
+  }
+  function setConfirmLongRest(val) {
+    settings.confirmLongRest = val;
+    saveSettings();
+  }
+  function renderVisibilityToggles() {
+    const wrap = document.getElementById('visibility-toggles');
+    if (!wrap) return;
+    const sections = [
+      { key: 'status',    label: 'Status & Conditions' },
+      { key: 'attacks',   label: 'Attacks' },
+      { key: 'spells',    label: 'Spell Slots' },
+      { key: 'inventory', label: 'Inventory' },
+      { key: 'feats',     label: 'Feats' },
+      { key: 'skills',    label: 'Skills' },
+    ];
+    const hidden = settings.hiddenSections || [];
+    wrap.innerHTML = sections.map(({ key, label }) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:0.8rem;color:var(--c-mid);">${label}</span>
+        <label class="cr-toggle" style="margin:0;">
+          <input type="checkbox" ${!hidden.includes(key) ? 'checked' : ''}
+            onchange="toggleSectionVisibility('${key}')">
+          <span class="cr-toggle-slider"></span>
+        </label>
+      </div>
+    `).join('');
+  }
+
   let settings = loadSettings();
+  // Apply persisted settings immediately on load
+  applyAccentHue(settings.accentHue ?? 195);
+  applyFontSize(settings.fontSize ?? 'md');
+  applyCompact(settings.compact ?? false);
 
   function loadState() {
     try {
@@ -2400,31 +2599,31 @@
 
       ${state.charOpen ? `<div style="margin-top:4px;padding:2px 0;">
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:3px 0;" onclick="toggleHitDice()">
-          <span style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#4a7a8a;">Hit Dice</span>
+          <span style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--c-dim);">Hit Dice</span>
           <span style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:0.7rem;color:#5a8a9a;">${state.hitDice.current}/${state.hitDice.max} ${state.hitDice.dieType}</span>
-            <span style="font-size:0.65rem;color:#3a6a7a;">${state.hitDice.open ? '▲' : '▼'}</span>
+            <span style="font-size:0.7rem;color:var(--c-mid);">${state.hitDice.current}/${state.hitDice.max} ${state.hitDice.dieType}</span>
+            <span style="font-size:0.65rem;color:var(--c-dim);">${state.hitDice.open ? '▲' : '▼'}</span>
           </span>
         </div>
         ${state.hitDice.open ? `
           <div style="padding:4px 0 2px;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <span style="font-size:0.72rem;color:#5a8a9a;">Max</span>
+              <span style="font-size:0.72rem;color:var(--c-mid);">Max</span>
               <input type="number" min="0" max="30" value="${state.hitDice.max}"
                 onchange="setHitDiceMax(this.value)"
-                style="width:36px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;">
+                style="width:36px;background:var(--c-bd-dark);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;">
               <select onchange="setHitDieType(this.value)"
-                style="background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;">
+                style="background:var(--c-bd-dark);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.72rem;">
                 ${['d6','d8','d10','d12'].map(d => `<option value="${d}" ${state.hitDice.dieType === d ? 'selected' : ''}>${d}</option>`).join('')}
               </select>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:2px;">
               ${state.hitDice.max === 0
-                ? '<span style="font-size:0.72rem;color:#2a4a5a;">Set a max to track hit dice</span>'
+                ? '<span style="font-size:0.72rem;color:var(--c-dim);">Set a max to track hit dice</span>'
                 : Array.from({length: state.hitDice.max}, (_, idx) => `
                     <span onclick="clickHitDie(${idx})"
                       title="${idx < state.hitDice.current ? 'Click to spend' : 'Click to restore'}"
-                      style="cursor:pointer;font-size:1.1rem;line-height:1;color:${idx < state.hitDice.current ? '#e05070' : '#2a4a5a'};">
+                      style="cursor:pointer;font-size:1.1rem;line-height:1;color:${idx < state.hitDice.current ? '#e05070' : 'var(--c-dim)'};">
                       ${idx < state.hitDice.current ? '♥' : '♡'}
                     </span>
                   `).join('')
@@ -2456,13 +2655,13 @@
         </div>
         ${speedExpanded ? `
           <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
-            <span class="stat-label" style="color:#5a8a9a;">Swim</span><span class="stat-value editable-stat" onclick="editStat('speedSwim')" title="Click to edit">${st.speedSwim} ft.</span>
+            <span class="stat-label" style="color:var(--c-mid);">Swim</span><span class="stat-value editable-stat" onclick="editStat('speedSwim')" title="Click to edit">${st.speedSwim} ft.</span>
           </div>
           <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
-            <span class="stat-label" style="color:#5a8a9a;">Climb</span><span class="stat-value editable-stat" onclick="editStat('speedClimb')" title="Click to edit">${st.speedClimb} ft.</span>
+            <span class="stat-label" style="color:var(--c-mid);">Climb</span><span class="stat-value editable-stat" onclick="editStat('speedClimb')" title="Click to edit">${st.speedClimb} ft.</span>
           </div>
           <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
-            <span class="stat-label" style="color:#5a8a9a;">Fly</span><span class="stat-value editable-stat" onclick="editStat('speedFly')" title="Click to edit">${st.speedFly} ft.</span>
+            <span class="stat-label" style="color:var(--c-mid);">Fly</span><span class="stat-value editable-stat" onclick="editStat('speedFly')" title="Click to edit">${st.speedFly} ft.</span>
           </div>
         ` : ''}
         <div class="stat-row"><span class="stat-label">Proficiency</span><span class="stat-value editable-stat" onclick="editProfBonus()" title="Click to edit">+${state.profBonus}</span></div>
@@ -2478,7 +2677,7 @@
           const sign = mod >= 0 ? '+' : '';
           return isScores
             ? `<div class="save-row"><span class="save-name">${name}</span><input class="edit-input-sm" id="edit-${key}" type="number" min="1" max="30" value="${score}"></div>`
-            : `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">${score} <span style="color:#5a8a9a;font-weight:400">(${sign}${mod})</span></span></div>`;
+            : `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">${score} <span style="color:var(--c-mid);font-weight:400">(${sign}${mod})</span></span></div>`;
         }).join('')}
       </div>` : ''}
 
@@ -2753,7 +2952,7 @@
           <button class="btn-cond-add" onclick="addCondition()">Add</button>
         </div>
         <div class="cond-custom-row" id="cond-custom-row">
-          <input id="cond-custom-input" type="text" placeholder="Custom condition name…" style="flex:1;background:#0a1e2a;border:1px solid #1a3a4a;color:#c8dde8;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-family:'Inter',sans-serif;width:100%;">
+          <input id="cond-custom-input" type="text" placeholder="Custom condition name…" style="flex:1;background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-text);padding:4px 8px;border-radius:4px;font-size:0.75rem;font-family:'Inter',sans-serif;width:100%;">
         </div>
         <div class="cond-list">${condListHTML}</div>
         ${conds.length > 0 ? `<button class="btn-next-turn" onclick="tickConditions()">⟳ Next Turn — Tick Durations</button>` : ''}
@@ -2815,7 +3014,7 @@
     ).join('');
     return `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-        <span style="font-size:0.75rem;color:#6a9aaa;font-weight:500;">Pact Magic · ${lvl}</span>
+        <span style="font-size:0.75rem;color:var(--c-mid);font-weight:500;">Pact Magic · ${lvl}</span>
         <span class="cr-rest-tag">S</span>
       </div>
       <div class="slot-pips" style="margin-bottom:10px;">${pips}</div>
@@ -2863,7 +3062,7 @@
         ${isSpells ? `
           <div class="stat-row" style="margin-bottom:4px;">
             <span class="stat-label">Spell Ability</span>
-            <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+            <select onchange="setSpellcastingAbility(this.value)" style="background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.8rem;">
               ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
             </select>
           </div>
@@ -2874,7 +3073,7 @@
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px;">
             ${['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'].map((lbl, i) => `
               <div style="display:flex;align-items:center;gap:4px;">
-                <span style="font-size:0.62rem;color:#2a5a6a;width:24px;">${lbl}</span>
+                <span style="font-size:0.62rem;color:var(--c-dim);width:24px;">${lbl}</span>
                 <input type="number" min="0" max="9" class="edit-input-sm" id="edit-slotmax-${i}" value="${state.slotMax[i]}" style="width:32px;text-align:center;">
               </div>
             `).join('')}
@@ -2883,24 +3082,24 @@
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
             <div class="stat-row" style="flex:1;min-width:80px;">
               <span class="stat-label">Ability</span>
-              <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+              <select onchange="setSpellcastingAbility(this.value)" style="background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.8rem;">
                 ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
               </select>
             </div>
             <div class="stat-row" style="flex:1;min-width:60px;">
               <span class="stat-label">DC</span>
-              <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+              <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:var(--c-dim);">✎</span>' : ''}</span>
             </div>
             <div class="stat-row" style="flex:1;min-width:60px;">
               <span class="stat-label">Atk</span>
-              <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+              <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:var(--c-dim);">✎</span>' : ''}</span>
             </div>
           </div>
           <hr class="divider">
         `}
         ${renderPactMagicBlock()}
         ${renderSlotsBody()}
-        <hr style="border:none;border-top:1px solid #0c2535;margin:8px 0;">
+        <hr style="border:none;border-top:1px solid var(--c-bd-dark);margin:8px 0;">
         ${renderPreparedSpells()}
       ` : ''}
     `;
@@ -3258,12 +3457,12 @@
             '<input id="spell-form-components" class="spell-form-input" value="' + escHtml(fd.components) + '" placeholder="V, S, M (...)" style="width:100%;">',
           '</div>',
           '<div class="spell-form-field" style="flex:0 0 auto;flex-direction:row;gap:12px;align-items:center;padding-bottom:1px;">',
-            '<label style="font-size:0.72rem;color:#8ab8c8;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="spell-form-conc"' + (fd.concentration ? ' checked' : '') + '> Conc.</label>',
-            '<label style="font-size:0.72rem;color:#8ab8c8;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="spell-form-ritual"' + (fd.ritual ? ' checked' : '') + '> Ritual</label>',
+            '<label style="font-size:0.72rem;color:var(--c-mid);display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="spell-form-conc"' + (fd.concentration ? ' checked' : '') + '> Conc.</label>',
+            '<label style="font-size:0.72rem;color:var(--c-mid);display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="spell-form-ritual"' + (fd.ritual ? ' checked' : '') + '> Ritual</label>',
           '</div>',
         '</div>',
         '<div style="margin-bottom:6px;">',
-          '<div class="spell-form-label" style="margin-bottom:3px;">Description <span style="color:#2a4a5a;font-style:italic;font-size:0.6rem;">(SRD text or your own)</span></div>',
+          '<div class="spell-form-label" style="margin-bottom:3px;">Description <span style="color:var(--c-dim);font-style:italic;font-size:0.6rem;">(SRD text or your own)</span></div>',
           '<textarea id="spell-form-desc" class="spell-form-textarea" placeholder="Spell rules and effects…">' + escHtml(fd.description) + '</textarea>',
         '</div>',
         '<div style="margin-bottom:8px;">',
@@ -3282,7 +3481,7 @@
     const sortedLevels = Object.keys(byLevel).map(Number).sort((a, b) => a - b);
 
     const spellListHtml = sortedLevels.length === 0
-      ? '<div style="font-size:0.75rem;color:#2a4a5a;font-style:italic;">No spells prepared yet.</div>'
+      ? '<div style="font-size:0.75rem;color:var(--c-dim);font-style:italic;">No spells prepared yet.</div>'
       : sortedLevels.map(lv =>
           '<div class="spell-list-level-hdr">' + SPELL_LEVEL_LABELS[lv] + '</div>' +
           byLevel[lv].map(sp =>
@@ -3368,15 +3567,15 @@
       bodyHtml =
         form +
         (preparedSpells.length > 0
-          ? '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#4a7a8a;margin:10px 0 4px;padding-top:10px;border-top:1px solid #0c2535;">Your Spells (' + preparedSpells.length + ')</div>' + spellListHtml
+          ? '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-dim);margin:10px 0 4px;padding-top:10px;border-top:1px solid var(--c-bd-dark);">Your Spells (' + preparedSpells.length + ')</div>' + spellListHtml
           : '') +
-        '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#4a7a8a;margin:12px 0 2px;padding-top:10px;border-top:1px solid #0c2535;">SRD Spell Database</div>' +
+        '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-dim);margin:12px 0 2px;padding-top:10px;border-top:1px solid var(--c-bd-dark);">SRD Spell Database</div>' +
         '<div class="spell-browse-count">' + bSpells.length + ' spell' + (bSpells.length !== 1 ? 's' : '') + '</div>' +
         bItems;
     } else {
       bodyHtml = form +
         (preparedSpells.length > 0
-          ? '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#4a7a8a;margin-bottom:4px;">Your Spells (' + preparedSpells.length + ')</div>' + spellListHtml
+          ? '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-dim);margin-bottom:4px;">Your Spells (' + preparedSpells.length + ')</div>' + spellListHtml
           : '');
     }
 
@@ -3387,7 +3586,7 @@
       '<div class="manage-spells-header">' +
         '<span>' + (spellBrowseOpen ? '📖 Browse SRD' : 'Manage Prepared Spells') + '</span>' +
         '<div style="display:flex;gap:6px;align-items:center;">' +
-          '<span style="font-size:0.6rem;color:#2a4a5a;">SRD 5.1 • CC BY 4.0 • WotC</span>' +
+          '<span style="font-size:0.6rem;color:var(--c-dim);">SRD 5.1 • CC BY 4.0 • WotC</span>' +
           (spellBrowseOpen
             ? '<button class="btn-sm" onclick="closeSpellBrowse()" style="padding:3px 8px;">← My Spells</button>'
             : '<button class="btn-sm" onclick="openSpellBrowse()" style="padding:3px 8px;">📖 Browse</button>') +
@@ -3424,7 +3623,7 @@
         </div>
         ${preparedSpellsOpen ? `
           ${preparedSpells.length === 0
-            ? `<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:6px;">No spells — <button class="btn-sm" onclick="openManageSpells()">+ Add</button></div>`
+            ? `<div style="font-size:0.75rem;color:var(--c-dim);margin-bottom:6px;">No spells — <button class="btn-sm" onclick="openManageSpells()">+ Add</button></div>`
             : levels.map(lvl => `
               <div class="prep-level-group">
                 <div class="prep-level-label">${SPELL_LEVEL_LABELS[lvl]}</div>
@@ -3451,7 +3650,7 @@
                           ${sp.duration ? `<span class="prep-spell-meta-item"><span>Duration</span> ${escHtml(sp.duration)}</span>` : ''}
                         </div>
                       ` : ''}
-                      ${sp.components ? `<div style="font-size:0.65rem;color:#4a7a8a;margin-bottom:5px;"><span style="color:#2a5a6a;">Components</span> ${escHtml(sp.components)}</div>` : ''}
+                      ${sp.components ? `<div style="font-size:0.65rem;color:var(--c-dim);margin-bottom:5px;"><span style="color:var(--c-dim);">Components</span> ${escHtml(sp.components)}</div>` : ''}
                       ${sp.notes ? `<div class="prep-spell-notes-label">Notes</div>` : ''}
                       ${(sp.notes || !sp.description) ? `
                         <div class="prep-spell-notes${sp.notes ? '' : ' empty'}"
@@ -3541,7 +3740,7 @@
           <button class="btn-sm" onclick="srAdjust(-1)">−</button>
           <span class="sr-picker-val">${srDiceToSpend}</span>
           <button class="btn-sm" onclick="srAdjust(1)">+</button>
-          <span style="font-size:0.8rem;color:#6a9aaa;">dice to spend</span>
+          <span style="font-size:0.8rem;color:var(--c-mid);">dice to spend</span>
         </div>
         <div class="sr-actions">
           <button class="btn-sm" onclick="srRoll()">Roll</button>
@@ -3556,7 +3755,7 @@
           ${srRolls.map(r =>
             `<div class="sr-roll-row">
               <span>♥ ${dieType} → ${r.roll} ${sign}${r.conMod} CON</span>
-              <span style="color:#a8d8e8;font-weight:600;">${r.total}</span>
+              <span style="color:var(--c-head);font-weight:600;">${r.total}</span>
             </div>`
           ).join('')}
         </div>
@@ -3570,7 +3769,7 @@
   }
 
   function longRest() {
-    if (confirm('Long rest? This restores all spell slots and HP.')) {
+    if (!settings.confirmLongRest || confirm('Long rest? This restores all spell slots and HP.')) {
       update(s => {
         s.slots = [...s.slotMax];
         s.hp.current = s.hp.max;
@@ -4017,13 +4216,13 @@
   function renderHeader() {
     document.getElementById('app-header').innerHTML = `
       <h1 onclick="editCharacterName()" title="Click to rename" style="cursor:pointer">${state.characterName}</h1>
-      <span onclick="editStat('levelLabel')" title="Click to edit level &amp; class" style="cursor:pointer;font-size:0.8rem;color:#5a8a9a;margin-left:2px;margin-right:8px;white-space:nowrap;">${state.stats.levelLabel}</span>
+      <span onclick="editStat('levelLabel')" title="Click to edit level &amp; class" style="cursor:pointer;font-size:0.8rem;color:var(--c-mid);margin-left:2px;margin-right:8px;white-space:nowrap;">${state.stats.levelLabel}</span>
       <div class="rest-dropdown-wrap">
         <button class="rest-menu-btn" onclick="toggleRestMenu()">⚡ Rests ▾</button>
         <div id="rest-menu" class="rest-menu${restMenuOpen ? '' : ' hidden'}">
           <button onclick="shortRest()">Short Rest</button>
           <button onclick="longRest()">Long Rest</button>
-          <hr style="border:none;border-top:1px solid #0f2535;margin:2px 0;">
+          <hr style="border:none;border-top:1px solid var(--c-bd-dark);margin:2px 0;">
           <button onclick="exportCharacter()">Export…</button>
           <button onclick="importCharacter()">Import…</button>
         </div>
@@ -4249,6 +4448,7 @@
     document.getElementById('cf-section-wrap').style.display = cfSectionOpen ? '' : 'none';
     document.getElementById('cf-chevron').textContent = cfSectionOpen ? '▾' : '▸';
     renderCFSection();
+    syncSettingsUI();
   }
   function closeSettings() {
     settingsOpen = false;
@@ -4361,12 +4561,12 @@
         </div>
       </div>
       <div class="feat-modal-body">
-        ${rows || '<div style="color:#2a5a6a;text-align:center;padding:20px;">No feats match</div>'}
+        ${rows || '<div style="color:var(--c-dim);text-align:center;padding:20px;">No feats match</div>'}
       </div>
       <div class="feat-modal-footer">
         <div class="feat-custom-row">
           <input id="custom-feat-name" placeholder="Custom feat name..."
-            style="flex:1;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px 8px;border-radius:4px;font-size:0.78rem;"
+            style="flex:1;background:var(--c-bd-dark);border:1px solid var(--c-bd);color:var(--c-mid);padding:4px 8px;border-radius:4px;font-size:0.78rem;"
             onkeydown="if(event.key==='Enter')addCustomFeat()">
           <button class="btn-sm" onclick="addCustomFeat()" style="white-space:nowrap;">+ Add Custom</button>
         </div>
@@ -4421,14 +4621,14 @@
       </div>
       ${featsOpen ? `
         ${feats.length === 0
-          ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No feats added</div>'
+          ? '<div style="font-size:0.75rem;color:var(--c-dim);padding:4px 0;">No feats added</div>'
           : feats.map(f => {
               const open    = featDescOpen[f.id];
               const editing = featDescEdit === f.id;
               return `
-                <div style="padding:4px 0;border-bottom:1px solid #0f2535;">
+                <div style="padding:4px 0;border-bottom:1px solid var(--c-bd-dark);">
                   <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:0.8rem;color:#8ab8c8;cursor:pointer;"
+                    <span style="font-size:0.8rem;color:var(--c-mid);cursor:pointer;"
                       ondblclick="editFeatName('${f.id}')"
                       title="Double-click to rename">${f.name}</span>
                     <span style="display:flex;gap:4px;">
@@ -4440,15 +4640,15 @@
                     <div style="padding:4px 0 2px 0;">
                       ${editing ? `
                         <textarea id="feat-desc-${f.id}"
-                          style="width:100%;min-height:60px;background:#0a1a24;color:#c8dde8;border:1px solid #1a3a4a;border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;">${f.description}</textarea>
+                          style="width:100%;min-height:60px;background:var(--c-well);color:var(--c-text);border:1px solid var(--c-bd);border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;">${f.description}</textarea>
                         <div style="display:flex;gap:4px;margin-top:4px;">
                           <button class="edit-save-btn" onclick="saveFeatDesc('${f.id}')">Save</button>
                           <button class="edit-cancel-btn" onclick="cancelEditFeatDesc()">✕</button>
                         </div>
                       ` : `
-                        <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                        <div style="font-size:0.75rem;color:var(--c-mid);white-space:pre-wrap;min-height:16px;cursor:text;"
                           ondblclick="startEditFeatDesc('${f.id}')"
-                          title="Double-click to edit">${f.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
+                          title="Double-click to edit">${f.description || '<em style="color:var(--c-dim);">No description</em>'}</div>
                       `}
                     </div>
                   ` : ''}
@@ -4477,7 +4677,7 @@
         <div>
           <div class="inventory-item">
             <button class="btn-sm" onclick="adjustItemQty('${i.id}',-1)" style="padding:0 5px;">−</button>
-            <span style="font-size:0.75rem;color:#5a8a9a;min-width:24px;text-align:center;">×${qty}</span>
+            <span style="font-size:0.75rem;color:var(--c-mid);min-width:24px;text-align:center;">×${qty}</span>
             <button class="btn-sm" onclick="adjustItemQty('${i.id}',1)" style="padding:0 5px;">+</button>
             <span class="${isMagic ? 'magic-item-name' : 'inv-name'}"
               onclick="toggleItemDesc('${i.id}')"
@@ -4500,44 +4700,44 @@
                 <span onclick="clickChargePip('${i.id}',${idx})" title="${idx < i.chargeCurrent ? 'Click to spend' : 'Click to restore'}"
                   style="cursor:pointer;display:inline-block;width:9px;height:9px;border-radius:50%;
                          background:${idx < i.chargeCurrent ? '#c8904a' : 'transparent'};
-                         border:1px solid ${idx < i.chargeCurrent ? '#c8904a' : '#3a5a6a'};"></span>
+                         border:1px solid ${idx < i.chargeCurrent ? '#c8904a' : 'var(--c-dim)'};"></span>
               `).join('')}
-              <span style="font-size:0.65rem;color:#6a9aaa;margin-left:3px;">${i.chargeCurrent}/${i.chargeMax}</span>
+              <span style="font-size:0.65rem;color:var(--c-mid);margin-left:3px;">${i.chargeCurrent}/${i.chargeMax}</span>
             </div>
           ` : ''}
           ${descOpen ? `
-            <div style="padding:4px 6px 4px 10px;background:#0a1825;border-left:2px solid #1a3a4a;margin-bottom:4px;">
+            <div style="padding:4px 6px 4px 10px;background:var(--c-well);border-left:2px solid var(--c-bd);margin-bottom:4px;">
               <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;">
                 ${['none','common','uncommon','rare','very-rare','legendary','artifact'].map(r => {
                   const col = getRarityColor(r);
                   const sel = i.rarity === r;
                   return `<button class="btn-rarity${sel ? ' selected' : ''}"
                     onclick="setItemRarity('${i.id}','${r}')"
-                    style="${col ? `color:${col};border-color:${sel ? col : '#1a3a4a'};${sel ? `box-shadow:0 0 5px ${col}50;` : ''}` : sel ? 'border-color:#8ab8c8;color:#8ab8c8;' : ''}"
+                    style="${col ? `color:${col};border-color:${sel ? col : 'var(--c-bd)'};${sel ? `box-shadow:0 0 5px ${col}50;` : ''}` : sel ? 'border-color:var(--c-mid);color:var(--c-mid);' : ''}"
                   >${RARITY_LABELS[r]}</button>`;
                 }).join('')}
               </div>
               ${isMagic ? `
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
                   <span style="font-size:0.65rem;color:#c8904a;">⚡</span>
-                  <span style="font-size:0.72rem;color:#5a8a9a;">Charges:</span>
+                  <span style="font-size:0.72rem;color:var(--c-mid);">Charges:</span>
                   <input type="number" min="0" max="20" value="${i.chargeMax}"
                     onchange="setItemChargeMax('${i.id}',this.value)"
-                    style="width:40px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;"
+                    style="width:40px;background:var(--c-bd-dark);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;"
                     title="Max charges (0 = disabled)">
-                  <span style="font-size:0.65rem;color:#2a4a5a;">max (0 = off)</span>
+                  <span style="font-size:0.65rem;color:var(--c-dim);">max (0 = off)</span>
                 </div>
               ` : ''}
               ${editing ? `
-                <textarea id="edit-desc-${i.id}" style="width:100%;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px;border-radius:3px;font-size:0.75rem;resize:vertical;min-height:48px;">${i.description}</textarea>
+                <textarea id="edit-desc-${i.id}" style="width:100%;background:var(--c-bd-dark);border:1px solid var(--c-bd);color:var(--c-mid);padding:4px;border-radius:3px;font-size:0.75rem;resize:vertical;min-height:48px;">${i.description}</textarea>
                 <div style="display:flex;gap:4px;margin-top:4px;">
                   <button class="btn-sm" onclick="saveItemDesc('${i.id}')">Save</button>
                   <button class="btn-sm" onclick="cancelEditDesc()">Cancel</button>
                 </div>
               ` : `
-                <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                <div style="font-size:0.75rem;color:var(--c-mid);white-space:pre-wrap;min-height:16px;cursor:text;"
                   ondblclick="startEditDesc('${i.id}')"
-                  title="Double-click to edit">${i.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
+                  title="Double-click to edit">${i.description || '<em style="color:var(--c-dim);">No description</em>'}</div>
               `}
             </div>
           ` : ''}
@@ -4551,12 +4751,12 @@
     ).join('');
 
     const currencyRow = `
-      <div style="border-top:1px solid #0f2535;margin-top:8px;padding-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <div style="border-top:1px solid var(--c-bd-dark);margin-top:8px;padding-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         ${['pp','gp','sp','cp'].map(c => `
-          <span style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:#8ab8c8;">
-            <span style="color:#5a8a9a;text-transform:uppercase;">${c}</span>
+          <span style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--c-mid);">
+            <span style="color:var(--c-mid);text-transform:uppercase;">${c}</span>
             <input type="number" min="0" value="${currency[c]}" onchange="setCurrency('${c}',this.value)"
-              style="width:44px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.75rem;text-align:right;">
+              style="width:44px;background:var(--c-bd-dark);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.75rem;text-align:right;">
           </span>
         `).join('')}
       </div>
@@ -4572,9 +4772,9 @@
           </span>
         </div>
         ${inventoryOpen ? `
-          ${items.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">Empty</div>' : items.map(i => itemRow(i)).join('')}
+          ${items.length === 0 ? '<div style="font-size:0.75rem;color:var(--c-dim);padding:4px 0;">Empty</div>' : items.map(i => itemRow(i)).join('')}
 
-          <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:#2a5a6a;margin:8px 0 4px;border-bottom:1px solid #0f2535;padding-bottom:2px;">Attuned</div>
+          <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--c-dim);margin:8px 0 4px;border-bottom:1px solid var(--c-bd-dark);padding-bottom:2px;">Attuned</div>
           <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px;">
             <div style="display:flex;gap:4px;flex-wrap:wrap;">${pips}</div>
             <div style="display:flex;align-items:center;gap:6px;">
@@ -4584,7 +4784,7 @@
             </div>
           </div>
           ${attunedItems.length === 0
-            ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No attuned items</div>'
+            ? '<div style="font-size:0.75rem;color:var(--c-dim);padding:4px 0;">No attuned items</div>'
             : attunedItems.map(i => `
               <div class="attuned-item-row">
                 <div class="attuned-dot"></div>
@@ -4723,7 +4923,7 @@
           <button class="btn-sm" onclick="toggleAttacksOpen()" style="padding:0 6px;">${attacksOpen ? '▲' : '▼'}</button>
         </div>
         ${attacksOpen ? `
-        ${attacks.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:8px;">None defined</div>' : ''}
+        ${attacks.length === 0 ? '<div style="font-size:0.75rem;color:var(--c-dim);margin-bottom:8px;">None defined</div>' : ''}
         ${attacks.map(a => {
           const r = attackRolls[a.id] || {};
           const dmgParsed = parseDiceExpr(a.dmg);
@@ -4751,18 +4951,18 @@
                   ${r.dmg ? `<span class="atk-result-dmg">Dmg: ${r.dmg}</span>` : ''}
                 </div>` : ''}
               ${attackDescOpen[a.id] ? `
-                <div style="padding:4px 0 2px 0;margin-top:4px;border-top:1px solid #0f2535;">
+                <div style="padding:4px 0 2px 0;margin-top:4px;border-top:1px solid var(--c-bd-dark);">
                   ${attackDescEdit === a.id ? `
                     <textarea id="atk-desc-${a.id}"
-                      style="width:100%;min-height:60px;background:#0a1a24;color:#c8dde8;border:1px solid #1a3a4a;border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;">${a.description}</textarea>
+                      style="width:100%;min-height:60px;background:var(--c-well);color:var(--c-text);border:1px solid var(--c-bd);border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;">${a.description}</textarea>
                     <div style="display:flex;gap:4px;margin-top:4px;">
                       <button class="edit-save-btn" onclick="saveAttackDesc('${a.id}')">Save</button>
                       <button class="edit-cancel-btn" onclick="cancelEditAttackDesc()">✕</button>
                     </div>
                   ` : `
-                    <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                    <div style="font-size:0.75rem;color:var(--c-mid);white-space:pre-wrap;min-height:16px;cursor:text;"
                       ondblclick="startEditAttackDesc('${a.id}')"
-                      title="Double-click to edit">${a.description || '<em style="color:#2a4a5a;">No description — double-click to add</em>'}</div>
+                      title="Double-click to edit">${a.description || '<em style="color:var(--c-dim);">No description — double-click to add</em>'}</div>
                   `}
                 </div>` : ''}
             </div>
@@ -4844,11 +5044,11 @@
         <span style="display:flex;align-items:center;gap:5px;">
           <span class="prof-pip ${pipCls}${bonusActiveCls}" onclick="${onPipClick}" title="${pipTitle}"></span>
           <span class="save-name" style="font-size:0.7rem;">${label}</span>
-          ${onRemove ? `<span style="font-size:0.58rem;color:#2a5a6a;text-transform:uppercase;">${abilityKey}</span>` : ''}
+          ${onRemove ? `<span style="font-size:0.58rem;color:var(--c-dim);text-transform:uppercase;">${abilityKey}</span>` : ''}
         </span>
         <span style="display:flex;align-items:center;gap:4px;">
           <span class="stat-value" style="font-size:0.78rem;font-weight:500;${bonusKey ? 'cursor:pointer;' : ''}" ${bonusOnClick ? `onclick="${bonusOnClick}" title="Click to set flat bonus${flatBonus !== 0 ? ' (current: ' + (flatBonus >= 0 ? '+' : '') + flatBonus + ')' : ''}"` : ''}>${sign}${total}${flatBonus !== 0 ? `<span class="skill-bonus-val">${flatBonus >= 0 ? '+' : ''}${flatBonus}</span>` : ''}</span>
-          ${onRemove ? `<button onclick="${onRemove}" style="background:none;border:none;color:#2a4a5a;cursor:pointer;font-size:0.75rem;padding:0 2px;" title="Remove">✕</button>` : ''}
+          ${onRemove ? `<button onclick="${onRemove}" style="background:none;border:none;color:var(--c-dim);cursor:pointer;font-size:0.75rem;padding:0 2px;" title="Remove">✕</button>` : ''}
         </span>
       </div>
     `;
@@ -4925,7 +5125,7 @@
 
     const spellsBody = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${spellsOpen ? '6px' : '0'};">
-        <span style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;">Active Spells</span>
+        <span style="font-size:0.65rem;color:var(--c-dim);text-transform:uppercase;letter-spacing:0.1em;">Active Spells</span>
         <span style="display:flex;gap:4px;align-items:center;">
           ${spellsOpen ? `<button class="btn-sm" onclick="addActiveSpell()">+</button>` : ''}
           <button class="btn-sm" onclick="toggleSpellsSection()" style="padding:0 5px;">${spellsOpen ? '▲' : '▼'}</button>
@@ -4955,18 +5155,18 @@
                 `}
               </div>
               ${descOpen ? `
-                <div style="padding:4px 0 2px;margin-top:4px;border-top:1px solid #0f2535;">
+                <div style="padding:4px 0 2px;margin-top:4px;border-top:1px solid var(--c-bd-dark);">
                   ${editing ? `
                     <textarea id="spell-desc-${sp.id}"
-                      style="width:100%;min-height:60px;background:#0a1a24;color:#c8dde8;border:1px solid #1a3a4a;border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;">${sp.description}</textarea>
+                      style="width:100%;min-height:60px;background:var(--c-well);color:var(--c-text);border:1px solid var(--c-bd);border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;">${sp.description}</textarea>
                     <div style="display:flex;gap:4px;margin-top:4px;">
                       <button class="edit-save-btn" onclick="saveSpellDesc('${sp.id}')">Save</button>
                       <button class="edit-cancel-btn" onclick="cancelEditSpellDesc()">✕</button>
                     </div>
                   ` : `
-                    <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                    <div style="font-size:0.75rem;color:var(--c-mid);white-space:pre-wrap;min-height:16px;cursor:text;"
                       ondblclick="startEditSpellDesc('${sp.id}')"
-                      title="Double-click to edit">${sp.description || '<em style="color:#2a4a5a;">No description — double-click to add</em>'}</div>
+                      title="Double-click to edit">${sp.description || '<em style="color:var(--c-dim);">No description — double-click to add</em>'}</div>
                   `}
                 </div>` : ''}
             </div>`;
@@ -4977,9 +5177,9 @@
     const fx = state.hpEffects;
     const hpFxOpen = state.hpFxOpen;
     const hpFxBody = `
-      <div style="border-top:1px solid #0f2535;margin:10px 0 8px;"></div>
+      <div style="border-top:1px solid var(--c-bd-dark);margin:10px 0 8px;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${hpFxOpen ? '6px' : '0'};">
-        <span style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;">HP Effects</span>
+        <span style="font-size:0.65rem;color:var(--c-dim);text-transform:uppercase;letter-spacing:0.1em;">HP Effects</span>
         <button class="btn-sm" onclick="toggleHpFxSection()" style="padding:0 5px;">${hpFxOpen ? '▲' : '▼'}</button>
       </div>
       ${hpFxOpen ? `
@@ -4991,11 +5191,11 @@
           const ef = fx[key];
           return `
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-              <span style="flex:1;font-size:0.8rem;color:#8ab8c8;">${label}</span>
+              <span style="flex:1;font-size:0.8rem;color:var(--c-mid);">${label}</span>
               <input type="number" min="0" value="${ef.value}"
                 onchange="setHpEffectValue('${key}', this.value)"
                 ${ef.active ? 'disabled' : ''}
-                style="width:42px;background:${ef.active ? '#0a1e2a' : '#0f2535'};border:1px solid #1a3a4a;color:${ef.active ? '#4a7a8a' : '#8ab8c8'};padding:2px 4px;border-radius:3px;font-size:0.8rem;text-align:right;">
+                style="width:42px;background:${ef.active ? 'var(--c-well)' : 'var(--c-bd-dark)'};border:1px solid var(--c-bd);color:${ef.active ? 'var(--c-dim)' : 'var(--c-mid)'};padding:2px 4px;border-radius:3px;font-size:0.8rem;text-align:right;">
               <button class="btn-sm" onclick="toggleHpEffect('${key}')"
                 style="padding:2px 8px;background:${ef.active ? color : 'transparent'};border:1px solid ${color};color:${ef.active ? '#fff' : color};border-radius:3px;font-size:0.75rem;cursor:pointer;">
                 ${ef.active ? 'ON' : 'OFF'}
@@ -5007,7 +5207,7 @@
     `;
 
     const condsBody = `
-      <div style="border-top:1px solid #0f2535;margin:10px 0 8px;"></div>
+      <div style="border-top:1px solid var(--c-bd-dark);margin:10px 0 8px;"></div>
       ${renderConditions()}
     `;
 
@@ -5398,7 +5598,7 @@
         `<span class="cf-config">${cl}:&nbsp;<input type="number" min="1" max="99" value="${feat[ck] ?? 1}" onchange="setCFConfig('${f.key}','${ck}',this.value)" ${enabled ? '' : 'disabled'}></span>`
       ).join('');
       const dieHtml = Object.entries(f.dieCfg).map(([ck, cl]) =>
-        `<span class="cf-config">${cl}:&nbsp;<select onchange="setCFConfig('${f.key}','${ck}',this.value)" ${enabled ? '' : 'disabled'} style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:1px 2px;border-radius:3px;font-size:0.75rem;">
+        `<span class="cf-config">${cl}:&nbsp;<select onchange="setCFConfig('${f.key}','${ck}',this.value)" ${enabled ? '' : 'disabled'} style="background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-mid);padding:1px 2px;border-radius:3px;font-size:0.75rem;">
           ${DIE_OPTS.map(d => `<option value="${d}" ${(feat[ck] || 'd6') === d ? 'selected' : ''}>${d}</option>`).join('')}
         </select></span>`
       ).join('');
@@ -5452,7 +5652,7 @@
     const pips = Array.from({ length: Math.max(1, max) }, (_, i) =>
       `<span class="pip ${i < current ? 'full' : 'empty'}" onclick="spendCRPip('${key}',${i},${max})"></span>`
     ).join('');
-    const dieTag = dieLabel ? `<span style="font-size:0.7rem;color:#4a7a8a;margin-left:2px;">${dieLabel}</span>` : '';
+    const dieTag = dieLabel ? `<span style="font-size:0.7rem;color:var(--c-dim);margin-left:2px;">${dieLabel}</span>` : '';
     return `
       <div class="cr-row">
         <span class="cr-label">${label}</span>
@@ -5495,8 +5695,8 @@
     return `
       <div class="cr-row">
         <span class="cr-label">${label}</span>
-        <span style="font-size:0.88rem;font-weight:600;color:#a8d8e8;">${valueHtml}</span>
-        <span class="cr-rest-tag" style="color:#3a6a7a;border-color:transparent;">${note}</span>
+        <span style="font-size:0.88rem;font-weight:600;color:var(--c-head);">${valueHtml}</span>
+        <span class="cr-rest-tag" style="color:var(--c-dim);border-color:transparent;">${note}</span>
       </div>
     `;
   }
@@ -5512,12 +5712,12 @@
       <div class="cr-row" style="flex-wrap:wrap;gap:6px;">
         <span class="cr-label">Divine Smite</span>
         <div style="display:flex;align-items:center;gap:6px;">
-          <select onchange="setDivineSmiteSlot(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.75rem;">${opts}</select>
-          <span style="font-size:0.72rem;color:#4a7a8a;">slot →</span>
-          <span style="font-size:0.9rem;font-weight:600;color:#a8d8e8;">${dmgDice}d8</span>
-          <span style="font-size:0.68rem;color:#4a7a8a;">(+1d8 UA/Fiend)</span>
+          <select onchange="setDivineSmiteSlot(this.value)" style="background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-mid);padding:2px 4px;border-radius:3px;font-size:0.75rem;">${opts}</select>
+          <span style="font-size:0.72rem;color:var(--c-dim);">slot →</span>
+          <span style="font-size:0.9rem;font-weight:600;color:var(--c-head);">${dmgDice}d8</span>
+          <span style="font-size:0.68rem;color:var(--c-dim);">(+1d8 UA/Fiend)</span>
         </div>
-        <span class="cr-rest-tag" style="color:#3a6a7a;border-color:transparent;">calc</span>
+        <span class="cr-rest-tag" style="color:var(--c-dim);border-color:transparent;">calc</span>
       </div>
     `;
   }
@@ -5613,6 +5813,7 @@
     document.getElementById('skills-wrap').innerHTML = renderSkills();
     applyColWidths();
     renderLorePanel();
+    applyVisibility();
   }
 
   applyColorMode(settings.colorMode);
