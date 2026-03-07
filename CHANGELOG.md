@@ -1,5 +1,42 @@
 # Changelog
 
+## v1.7.0 — 2026-03-06
+
+### Class Resources System
+- New **Class Features** section in ⚙ Settings — enable resource blocks for class-specific abilities; set max values per feature; toggles and config inputs update live
+- **Class Resources** panel block renders between Attacks and Spell Slots when any feature is enabled; returns nothing if all features are off (no orphan divider)
+- Settings section is **collapsible** (▸/▾ toggle) so it doesn't crowd future settings additions
+- Three display types: **pip rows** (click to spend/restore), **pool rows** (+/− buttons), **toggle rows** (Available/Spent)
+- **Pact Magic** integrates inside the Spell Slots section with its own pip row and slot-level label rather than appearing in the Class Resources panel
+- **Short Rest** restores: Channel Divinity, Action Surge, Second Wind, Superiority Dice, Ki Points, Wild Shape, Pact Magic
+- **Long Rest** restores all features to their configured max
+
+### Features shipped (all base classes + key subclasses)
+| Class | Feature | Type |
+|---|---|---|
+| Bard | Bardic Inspiration | Pips + die label |
+| Cleric / Paladin | Channel Divinity | Pips |
+| Cleric / Paladin | Lay on Hands | Pool (HP) |
+| Cleric / Paladin | Divine Smite | Slot-level calculator |
+| War Domain | War Priest | Pool |
+| Fighter | Action Surge | Pips |
+| Fighter | Second Wind | Pip + die label |
+| Battle Master | Superiority Dice | Pips + die label |
+| Fighter 9+ | Indomitable | Pips |
+| Barbarian | Rage | Pips |
+| Rogue | Sneak Attack | Reference (dice count display) |
+| Monk | Ki Points | Pool |
+| Druid | Wild Shape | Pips |
+| Wizard | Arcane Recovery | Toggle (Available/Spent) |
+| Divination Wizard | Portent | Pips |
+| Sorcerer | Sorcery Points | Pool |
+| Wild Magic Sorcerer | Tides of Chaos | Toggle |
+| Warlock | Pact Magic | Pips (in Spellcasting section) |
+| Warlock | Mystic Arcanum | Pips |
+| Artificer | Flash of Genius | Pool |
+
+---
+
 ## v1.6.0 — 2026-02-28
 
 ### Active Effects — Full Overhaul (both trackers)
