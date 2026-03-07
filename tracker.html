@@ -2182,12 +2182,13 @@
   }
   function applyVisibility() {
     const sectionMap = {
-      status:    'status-section',
-      attacks:   'attacks-section-wrap',
-      spells:    'slots-section',
-      inventory: 'inventory-wrap',
-      feats:     'feats-wrap',
-      skills:    'skills-wrap',
+      status:         'status-section',
+      attacks:        'attacks-section-wrap',
+      spells:         'slots-section',
+      preparedSpells: 'prepared-spells-wrap',
+      inventory:      'inventory-wrap',
+      feats:          'feats-wrap',
+      skills:         'skills-wrap',
     };
     Object.values(sectionMap).forEach(id => {
       const el = document.getElementById(id);
@@ -2251,12 +2252,13 @@
     const wrap = document.getElementById('visibility-toggles');
     if (!wrap) return;
     const sections = [
-      { key: 'status',    label: 'Status & Conditions' },
-      { key: 'attacks',   label: 'Attacks' },
-      { key: 'spells',    label: 'Spell Slots' },
-      { key: 'inventory', label: 'Inventory' },
-      { key: 'feats',     label: 'Feats' },
-      { key: 'skills',    label: 'Skills' },
+      { key: 'status',         label: 'Status & Conditions' },
+      { key: 'attacks',        label: 'Attacks' },
+      { key: 'spells',         label: 'Spellcasting' },
+      { key: 'preparedSpells', label: '↳ Prepared Spell List' },
+      { key: 'inventory',      label: 'Inventory' },
+      { key: 'feats',          label: 'Feats' },
+      { key: 'skills',         label: 'Skills' },
     ];
     const hidden = settings.hiddenSections || [];
     wrap.innerHTML = sections.map(({ key, label }) => `
@@ -3099,8 +3101,10 @@
         `}
         ${renderPactMagicBlock()}
         ${renderSlotsBody()}
-        <hr style="border:none;border-top:1px solid var(--c-bd-dark);margin:8px 0;">
-        ${renderPreparedSpells()}
+        <div id="prepared-spells-wrap">
+          <hr style="border:none;border-top:1px solid var(--c-bd-dark);margin:8px 0;">
+          ${renderPreparedSpells()}
+        </div>
       ` : ''}
     `;
   }
