@@ -1125,14 +1125,21 @@
     .cond-list { margin-bottom: 6px; }
     .cond-item {
       display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 6px;
+      flex-direction: column;
+      gap: 0;
+      padding: 3px 6px 4px 9px;
       border-radius: 4px;
       background: var(--c-well);
       border: 1px solid var(--c-bd-dark);
       margin-bottom: 3px;
       font-size: 0.72rem;
+    }
+    .cond-item-header {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
     }
     .cond-name {
       flex: 1;
@@ -1180,6 +1187,42 @@
       margin-top: 2px;
     }
     .btn-next-turn:hover { background: var(--c-well); border-color: var(--c-vivid); color: var(--c-vivid); }
+    .cond-expand-btn {
+      background: none;
+      border: none;
+      color: var(--c-dim);
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 0 2px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .cond-expand-btn:hover { color: var(--c-text); }
+    .cond-desc {
+      font-size: 0.73rem;
+      color: #7ab8c8;
+      line-height: 1.55;
+      padding: 7px 4px 5px 0;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      margin-top: 4px;
+    }
+    .cond-preview {
+      font-size: 0.73rem;
+      line-height: 1.55;
+      padding: 0;
+      margin-bottom: 0;
+      border-left: 3px solid transparent;
+      border-radius: 0 4px 4px 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease, padding 0.2s ease, margin-bottom 0.2s ease;
+    }
+    .cond-preview.active {
+      padding: 7px 8px 7px 10px;
+      margin-bottom: 8px;
+      max-height: 80px;
+      background: var(--c-well);
+    }
 
     /* === COLUMN DRAG HANDLES === */
     .col-handle {
@@ -2935,6 +2978,54 @@
     'Custom...'
   ];
 
+  const CONDITION_COLORS = {
+    'Blinded':       '#4ab0ff',
+    'Charmed':       '#9B59FF',
+    'Deafened':      '#4ab0ff',
+    'Exhaustion 1':  '#c0a030',
+    'Exhaustion 2':  '#c0a030',
+    'Exhaustion 3':  '#c0a030',
+    'Exhaustion 4':  '#c0a030',
+    'Exhaustion 5':  '#c0a030',
+    'Exhaustion 6':  '#c0a030',
+    'Frightened':    '#9B59FF',
+    'Grappled':      '#ff8c00',
+    'Incapacitated': '#9B59FF',
+    'Invisible':     '#4ab0ff',
+    'Paralyzed':     '#d04040',
+    'Petrified':     '#8899aa',
+    'Poisoned':      '#3ecf8e',
+    'Prone':         '#ff8c00',
+    'Restrained':    '#ff8c00',
+    'Stunned':       '#d04040',
+    'Unconscious':   '#d04040',
+  };
+
+  const CONDITION_DESCRIPTIONS = {
+    'Blinded':       "Can't see; auto-fails checks requiring sight. Attacks against have advantage; own attacks have disadvantage.",
+    'Charmed':       "Can't attack the charmer or target them with harmful effects. Charmer has advantage on social checks with this creature.",
+    'Deafened':      "Can't hear; auto-fails checks requiring hearing.",
+    'Exhaustion 1':  "Disadvantage on ability checks.",
+    'Exhaustion 2':  "Speed halved.",
+    'Exhaustion 3':  "Disadvantage on attack rolls and saving throws.",
+    'Exhaustion 4':  "Hit point maximum halved.",
+    'Exhaustion 5':  "Speed reduced to 0.",
+    'Exhaustion 6':  "Death.",
+    'Frightened':    "Disadvantage on ability checks and attack rolls while the source of fear is in line of sight. Can't willingly move closer to the source.",
+    'Grappled':      "Speed becomes 0. Ends if the grappler is incapacitated or creature is moved out of reach.",
+    'Incapacitated': "Can't take actions or reactions.",
+    'Invisible':     "Impossible to see without magic or special senses. Attacks against have disadvantage; own attacks have advantage.",
+    'Paralyzed':     "Incapacitated; can't move or speak. Auto-fails Str/Dex saves. Attacks against have advantage and are critical hits within 5 ft.",
+    'Petrified':     "Turned to stone: incapacitated, can't move, speak, or perceive. Auto-fails Str/Dex saves. Resistance to all damage; immune to poison and disease.",
+    'Poisoned':      "Disadvantage on attack rolls and ability checks.",
+    'Prone':         "Can only crawl until it stands up. Disadvantage on attacks. Attacks within 5 ft have advantage; all others have disadvantage.",
+    'Restrained':    "Speed becomes 0. Attacks against have advantage; own attacks have disadvantage. Disadvantage on Dex saves.",
+    'Stunned':       "Incapacitated, can't move, can speak only falteringly. Auto-fails Str/Dex saves. Attacks against have advantage.",
+    'Unconscious':   "Incapacitated; can't move, speak, or perceive. Drops items and falls prone. Auto-fails Str/Dex saves. Attacks against have advantage and are critical hits within 5 ft.",
+  };
+
+  let condOpen = {};
+
   function renderConditions() {
     const conds = state.conditions;
     const condListHTML = conds.length === 0
@@ -2943,11 +3034,24 @@
           const durLabel = c.duration === null
             ? '<span class="cond-dur permanent">∞</span>'
             : `<span class="cond-dur">${c.duration}r</span>`;
+          const color = CONDITION_COLORS[c.name] || 'var(--c-bd)';
+          const desc = CONDITION_DESCRIPTIONS[c.name] || '';
+          const isOpen = !!condOpen[i];
+          const expandBtn = desc
+            ? `<button class="cond-expand-btn" onclick="toggleCondOpen(${i})" title="${isOpen ? 'Collapse' : 'Show description'}">${isOpen ? '▾' : '▸'}</button>`
+            : '';
+          const descBlock = (isOpen && desc)
+            ? `<div class="cond-desc">${desc}</div>`
+            : '';
           return `
-            <div class="cond-item">
-              <span class="cond-name">${c.name}</span>
-              ${durLabel}
-              <button class="cond-remove" onclick="removeCondition(${i})" title="Remove">✕</button>
+            <div class="cond-item" style="border-left:3px solid ${color};">
+              <div class="cond-item-header" ${desc ? `onclick="toggleCondOpen(${i})"` : ''}>
+                <span class="cond-name" style="color:${color}">${c.name}</span>
+                ${durLabel}
+                ${expandBtn}
+                <button class="cond-remove" onclick="event.stopPropagation();removeCondition(${i})" title="Remove">✕</button>
+              </div>
+              ${descBlock}
             </div>`;
         }).join('');
 
@@ -2963,14 +3067,15 @@
       <div class="cond-section">
         <div class="cond-add-row">
           <select id="cond-select" onchange="onCondSelectChange(this)">
-            <option value="" disabled selected>Add condition…</option>
+            <option value="" disabled selected>Select a condition…</option>
             ${optionsHTML}
           </select>
-          <input class="cond-dur-input" id="cond-dur" type="text" value="∞" title="Rounds (number) or ∞ for permanent" maxlength="4">
-          <button class="btn-cond-add" onclick="addCondition()">Add</button>
         </div>
         <div class="cond-custom-row" id="cond-custom-row">
-          <input id="cond-custom-input" type="text" placeholder="Custom condition name…" style="flex:1;background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-text);padding:4px 8px;border-radius:4px;font-size:0.75rem;font-family:'Inter',sans-serif;width:100%;">
+          <input id="cond-custom-input" type="text" placeholder="Custom condition name…"
+            onkeydown="if(event.key==='Enter')addCondition()"
+            style="flex:1;background:var(--c-well);border:1px solid var(--c-bd);color:var(--c-text);padding:4px 8px;border-radius:4px;font-size:0.75rem;font-family:'Inter',sans-serif;width:100%;">
+          <button class="btn-cond-add" onclick="addCondition()">+</button>
         </div>
         <div class="cond-list">${condListHTML}</div>
         ${conds.length > 0 ? `<button class="btn-next-turn" onclick="tickConditions()">⟳ Next Turn — Tick Durations</button>` : ''}
@@ -2980,28 +3085,46 @@
 
   function onCondSelectChange(sel) {
     const customRow = document.getElementById('cond-custom-row');
-    if (customRow) customRow.classList.toggle('visible', sel.value === 'Custom...');
+    if (sel.value === 'Custom...') {
+      if (customRow) customRow.classList.add('visible');
+      const input = document.getElementById('cond-custom-input');
+      if (input) { input.value = ''; setTimeout(() => input.focus(), 0); }
+    } else {
+      if (customRow) customRow.classList.remove('visible');
+      addCondition();
+    }
   }
 
   function addCondition() {
     const sel = document.getElementById('cond-select');
-    const durInput = document.getElementById('cond-dur');
     const customInput = document.getElementById('cond-custom-input');
     if (!sel || !sel.value) return;
     const isCustom = sel.value === 'Custom...';
     const name = isCustom ? (customInput ? customInput.value.trim() : '') : sel.value;
     if (!name) return;
-    const rawDur = durInput ? durInput.value.trim() : '∞';
-    const duration = (rawDur === '∞' || rawDur === '' || isNaN(+rawDur))
-      ? null
-      : Math.max(1, Math.round(+rawDur));
+    sel.value = '';
+    const customRow = document.getElementById('cond-custom-row');
+    if (customRow) customRow.classList.remove('visible');
     update(s => {
       if (!s.conditions) s.conditions = [];
-      s.conditions.push({ name, duration });
+      condOpen[s.conditions.length] = true;
+      s.conditions.push({ name, duration: null });
     });
   }
 
+  function toggleCondOpen(i) {
+    condOpen[i] = !condOpen[i];
+    render();
+  }
+
   function removeCondition(idx) {
+    const newCondOpen = {};
+    Object.keys(condOpen).forEach(k => {
+      const ki = +k;
+      if (ki < idx) newCondOpen[ki] = condOpen[ki];
+      else if (ki > idx) newCondOpen[ki - 1] = condOpen[ki];
+    });
+    condOpen = newCondOpen;
     update(s => s.conditions.splice(idx, 1));
   }
 
@@ -5364,7 +5487,7 @@
     }
     if (!colDragState) return;
     const cols = document.querySelector('.columns');
-    const totalW = cols.offsetWidth;
+    const totalW = window.innerWidth;
     const dx = e.clientX - colDragState.startX;
     if (colDragState.side === 'left') {
       colDragState.currentLeftW = Math.max(180, Math.min(
@@ -5418,6 +5541,10 @@
     rightW = rightW ?? state.layout.rightW;
     const cols = document.querySelector('.columns');
     if (!cols) return;
+    // Screen lock: clamp so handles never go off-screen
+    const vw = window.innerWidth;
+    leftW  = Math.max(180, Math.min(leftW,  vw - 220 - 200));
+    rightW = Math.max(220, Math.min(rightW, vw - leftW - 200));
     cols.style.gridTemplateColumns = `${leftW}px 1fr ${rightW}px`;
     const h1 = document.getElementById('col-handle-1');
     const h2 = document.getElementById('col-handle-2');
